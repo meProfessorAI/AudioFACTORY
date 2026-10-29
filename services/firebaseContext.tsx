@@ -4,8 +4,8 @@
  * AudioFACTORY Firebase Authentication & Data Context
  */
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { User } from 'firebase/auth';
 import { 
+  User,
   auth,
   linkOrSignInWithGoogle, 
   signInAnonymously, 
@@ -279,7 +279,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           try { await deleteMonologue(m.id); } catch (e) {}
         }
         try {
-          await user.delete();
+          if (user.delete) {
+            await user.delete();
+          } else {
+            await signOutUser();
+          }
         } catch (authErr) {
           // If requires recent login, sign out
           await signOutUser();

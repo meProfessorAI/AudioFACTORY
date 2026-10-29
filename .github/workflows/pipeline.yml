@@ -173,57 +173,6 @@ jobs:
         if: always()
         run: rm -f /tmp/gcp-sa.json
 
-  deploy-firebase:
-    name: 🔥 Deploy Firebase Infrastructure
-    needs: verify-and-test
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: 📥 Checkout Codebase
-        uses: actions/checkout@v4
-
-      - name: ⚙️ Setup Node.js 22.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📦 Install Firebase CLI Tools
-        run: npm install -g firebase-tools
-
-      - name: 🔍 Validate Firestore Rules Syntax
-        run: |
-          test -f firestore.rules || { echo "❌ Missing firestore.rules"; exit 1; }
-          test -f firestore.indexes.json || { echo "❌ Missing firestore.indexes.json"; exit 1; }
-          grep -q "service cloud.firestore" firestore.rules || { echo "❌ Invalid firestore.rules"; exit 1; }
-          echo "✅ Rules validated."
-
-      - name: 🔐 Authenticate with Firebase
-        id: firebase_auth
-        run: |
-          if [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" ]; then
-            echo "ℹ️ Missing FIREBASE_SERVICE_ACCOUNT secret. Skipping rule deployment."
-            echo "SKIPPED_FIREBASE=true" >> $GITHUB_ENV
-          else
-            echo "Firebase service account credentials verified."
-            echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
-            echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json" >> $GITHUB_ENV
-            echo "SKIPPED_FIREBASE=false" >> $GITHUB_ENV
-          fi
-
-      - name: 🚀 Deploy Firestore Rules & Indexes
-        if: env.SKIPPED_FIREBASE != 'true'
-        run: |
-          firebase deploy --only firestore --non-interactive
-
-      - name: 🧹 Cleanup Firebase Secrets
-        if: always()
-        run: rm -f /tmp/firebase-sa.json
-
   build-android:
     name: 🤖 Android Package Compilation
     needs: verify-and-test

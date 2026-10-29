@@ -43,7 +43,7 @@ apiRouter.get('/health', (_req, res) => {
     service: 'AudioFACTORY Trusted Studio API',
     timestamp: new Date().toISOString(),
     version: '3.0.0',
-    security: 'Server-Only AI Integrations & Firebase Admin Active',
+    security: 'Server-Only AI Integrations Active',
   });
 });
 
@@ -51,7 +51,7 @@ apiRouter.get('/health', (_req, res) => {
 apiRouter.get('/health/dependencies', (_req, res) => {
   res.json({
     status: 'ok',
-    firebaseAdmin: 'initialized',
+    storageEngine: 'initialized',
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
     elevenLabsConfigured: Boolean(process.env.ELEVENLABS_API_KEY),
     timestamp: new Date().toISOString(),

@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { db, auth } from '../config/firebaseConfig';
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { collection, query, orderBy, getDocs, setDoc, doc } from 'firebase/firestore';
+import { 
+  db, 
+  auth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut, 
+  collection, 
+  query, 
+  orderBy, 
+  getDocs, 
+  setDoc, 
+  doc 
+} from '../config/firebaseConfig';
 import { UserCircle, LogOut, Clock, Play, History, Loader2, Sparkles, Wand2 } from 'lucide-react';
 import { Toast } from '../../components/Toast';
 

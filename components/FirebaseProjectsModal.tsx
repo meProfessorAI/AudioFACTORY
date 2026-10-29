@@ -54,7 +54,7 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
 
   const handleDeleteProject = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this scene from Firebase?")) {
+    if (confirm("Are you sure you want to delete this scene from your library?")) {
       setDeletingId(id);
       try {
         await removeProjectFromCloud(id);
@@ -66,7 +66,7 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
 
   const handleDeleteMonologue = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this monologue from Firebase?")) {
+    if (confirm("Are you sure you want to delete this monologue from your library?")) {
       setDeletingId(id);
       try {
         await removeMonologueFromCloud(id);
@@ -103,7 +103,7 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
                 <h2 className={`text-base sm:text-lg font-bold ${
                   isTerminalMode ? 'font-mono text-[#E6EDF3]' : 'text-zinc-900'
                 }`}>
-                  {isTerminalMode ? 'FIREBASE_CLOUD_VAULT' : 'Firebase Cloud Projects Vault'}
+                  {isTerminalMode ? 'STUDIO_PROJECTS_VAULT' : 'Projects & Script Vault'}
                 </h2>
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded-full border ${
                   isOnline 
@@ -113,11 +113,11 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
                     : 'bg-rose-50 text-rose-800 border-rose-200'
                 }`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-[#34A853]' : 'bg-rose-500'}`} />
-                  {isOnline ? 'Firestore Live' : 'Offline'}
+                  {isOnline ? 'Library Live' : 'Offline'}
                 </span>
               </div>
               <p className={`text-xs font-mono ${isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'}`}>
-                Persistent storage powered by Google Cloud Firestore
+                Persistent studio storage & scene manager
               </p>
             </div>
           </div>
@@ -143,7 +143,7 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
           <div className="flex items-center gap-2">
             <UserIcon className="w-3.5 h-3.5 text-[#4285F4]" />
             {authLoading ? (
-              <span className="text-[#8B949E] animate-pulse">Connecting to Firebase Auth...</span>
+              <span className="text-[#8B949E] animate-pulse">Loading user profile...</span>
             ) : user ? (
               <div className="flex items-center gap-1.5">
                 <span className={`font-bold ${isTerminalMode ? 'text-[#E6EDF3]' : 'text-zinc-900'}`}>

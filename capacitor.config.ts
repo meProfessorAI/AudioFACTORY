@@ -10,7 +10,6 @@ const config: CapacitorConfig = {
     allowNavigation: [
       'https://ais-pre-4lk7vsyto7ebm4s37qyp36-245532296245.asia-southeast1.run.app',
       'https://*.run.app',
-      'https://*.firebaseapp.com',
       'https://*.googleapis.com',
     ],
   },

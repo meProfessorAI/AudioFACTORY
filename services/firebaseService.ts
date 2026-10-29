@@ -3,17 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  * AudioFACTORY Client-Side Firebase Service
  */
-import { auth, db } from '../src/config/firebaseConfig';
 import { 
+  auth, 
+  db,
   signInWithPopup, 
   linkWithPopup,
   GoogleAuthProvider, 
   signInAnonymously as firebaseSignInAnonymously, 
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User 
-} from 'firebase/auth';
-import { 
+  User,
   collection, 
   doc, 
   setDoc, 
@@ -22,10 +21,11 @@ import {
   getDocFromServer,
   query,
   orderBy 
-} from 'firebase/firestore';
+} from '../src/config/firebaseConfig';
 import { SavedAudioProject, SavedMonologue, ProjectInput, MonologueInput, UsageRecord } from '../types';
 
 export { auth, db };
+export type { User };
 
 export enum OperationType {
   CREATE = 'create',
@@ -223,7 +223,7 @@ export function subscribeToUserProjects(callback: (projects: SavedAudioProject[]
     q,
     (snapshot) => {
       const items: SavedAudioProject[] = [];
-      snapshot.forEach(docSnap => {
+      snapshot.forEach((docSnap: any) => {
         items.push(docSnap.data() as SavedAudioProject);
       });
       callback(items);
@@ -298,7 +298,7 @@ export function subscribeToUserMonologues(callback: (monologues: SavedMonologue[
     q,
     (snapshot) => {
       const items: SavedMonologue[] = [];
-      snapshot.forEach(docSnap => {
+      snapshot.forEach((docSnap: any) => {
         items.push(docSnap.data() as SavedMonologue);
       });
       callback(items);

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { adminDb, adminAuth } from '../firebaseAdmin';
+import { adminDb } from '../database';
 
 export const handleAdminLogin = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body;
@@ -9,9 +9,15 @@ export const handleAdminLogin = async (req: Request, res: Response): Promise<voi
   
   if (username === envUsername && password === envPassword) {
     try {
-      // Create a specific custom token for the admin
       const adminUid = 'admin_user_' + envUsername;
-      const customToken = await adminAuth.createCustomToken(adminUid, { admin: true });
+      const payload = {
+        uid: adminUid,
+        email: 'connectedtorajib@gmail.com',
+        admin: true,
+        isAnonymous: false,
+        iat: Date.now(),
+      };
+      const customToken = Buffer.from(JSON.stringify(payload)).toString('base64');
       
       // Ensure the admin exists in the admins collection
       try {
@@ -20,9 +26,7 @@ export const handleAdminLogin = async (req: Request, res: Response): Promise<voi
           createdAt: new Date().toISOString()
         }, { merge: true });
       } catch (dbError: any) {
-        if (dbError.code !== 7 && dbError.code !== 'permission-denied') {
-          console.warn('[ADMIN] Failed to persist admin record in Firestore:', dbError);
-        }
+        console.warn('[ADMIN] Failed to persist admin record in local DB:', dbError);
       }
       
       res.json({ token: customToken, adminUid });

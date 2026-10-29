@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { db, auth } from '../config/firebaseConfig';
-import { signInWithCustomToken, signOut } from 'firebase/auth';
-import { collection, getDocs, doc, updateDoc, query, orderBy, getDoc } from 'firebase/firestore';
+import { 
+  db, 
+  auth, 
+  signInWithCustomToken, 
+  signOut, 
+  collection, 
+  getDocs, 
+  doc, 
+  updateDoc, 
+  query, 
+  orderBy, 
+  getDoc 
+} from '../config/firebaseConfig';
 import { 
   Users, 
   Database, 

@@ -18,8 +18,6 @@ export const config = {
   googlePlayServiceAccountKey: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY || '',
   googlePlayPackageName: 'com.audiofactory.app',
   
-  // Firebase Configuration
-  firebaseProjectId: process.env.FIREBASE_PROJECT_ID || 'ai-studio-socialnot-845fd311-8b26-4908-9a36-b5f4f288bed7',
 };
 
 export function getGeminiKey(): string {

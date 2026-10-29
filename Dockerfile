@@ -18,7 +18,6 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/website ./website
-COPY --from=builder /app/firebase-applet-config.json ./firebase-applet-config.json
 
 EXPOSE 3000
 

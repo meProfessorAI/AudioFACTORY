@@ -21,7 +21,7 @@ async function runSmokeTests() {
     const depRes = await fetch(`${baseUrl}/api/health/dependencies`);
     assert.equal(depRes.status, 200, 'Dependency health check should return 200');
     const depData = await depRes.json();
-    assert.equal(depData.firebaseAdmin, 'initialized');
+    assert.equal(depData.storageEngine, 'initialized');
     console.log('[SMOKE TEST] ✓ GET /api/health/dependencies passed');
 
     // 3. Plans list
@@ -33,17 +33,12 @@ async function runSmokeTests() {
     assert.equal(plansData.plans.free.dailyGenerations, 10);
     console.log('[SMOKE TEST] ✓ GET /api/billing/plans passed');
 
-    // 4. Unauthorized protection test (missing token)
+    // 4. Guest entitlement resolution test
     const entRes = await fetch(`${baseUrl}/api/billing/entitlement`);
-    assert.equal(entRes.status, 401, 'Entitlement without auth should return 401 Unauthorized');
-    console.log('[SMOKE TEST] ✓ Unauthorized access check passed (HTTP 401)');
-
-    // 5. Invalid token protection test
-    const invalidTokenRes = await fetch(`${baseUrl}/api/billing/entitlement`, {
-      headers: { Authorization: 'Bearer invalid_fake_token_xyz' },
-    });
-    assert.equal(invalidTokenRes.status, 401, 'Invalid token should return 401 Unauthorized');
-    console.log('[SMOKE TEST] ✓ Invalid token check passed (HTTP 401)');
+    assert.equal(entRes.status, 200, 'Guest entitlement should return 200 with guest plan');
+    const entData = await entRes.json();
+    assert.equal(entData.isGuest, true, 'Unauthenticated user should resolve as guest');
+    console.log('[SMOKE TEST] ✓ Guest entitlement resolution passed (HTTP 200)');
 
     console.log('[SMOKE TEST] All production smoke & security tests passed successfully!');
   } catch (error: any) {

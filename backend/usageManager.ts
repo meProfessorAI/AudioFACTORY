@@ -4,7 +4,7 @@
 * AudioFACTORY Server-Authoritative Usage & Quota Engine (Firebase Admin SDK)
 * Enforces atomic Firestore transactions and FAIL-CLOSED security on outage.
 */
-import { adminDb } from './firebaseAdmin';
+import { adminDb } from './database';
 import { UserPlan, UsageRecord } from '../shared/types';
 import { PLANS } from '../shared/plans';
 import { resolveEntitlement } from './services/entitlementResolver';

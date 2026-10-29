@@ -36,6 +36,7 @@ interface TerminalMonologueViewProps {
   audioError: string | null;
   onDismissError: () => void;
   onSynthesizeOrPlay: () => void;
+  onRegenerate?: () => void;
   onDramatize: () => void;
   onSaveToCloud: () => void;
   isSaving: boolean;
