@@ -5,11 +5,9 @@ import {
   ChevronDown, 
   Trash2, 
   Send, 
-  Radio, 
   Activity, 
   Cpu, 
-  Wifi, 
-  ShieldCheck, 
+  Database, 
   Check, 
   Sparkles,
   Eye,
@@ -36,13 +34,13 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
     addLog, 
     scanlinesEnabled, 
     toggleScanlines,
-    toggleTerminalMode
+    activeSkin
   } = useTerminal();
 
   const [activeTab, setActiveTab] = useState<'logs' | 'shell' | 'telemetry'>('logs');
   const [commandInput, setCommandInput] = useState<string>('');
   const [shellHistory, setShellHistory] = useState<{ cmd: string; res: string; color?: string }[]>([
-    { cmd: 'sys.init', res: 'G-TERM Workstation v2.4 online. All subsystems nominal.', color: '#34A853' }
+    { cmd: 'sys.init', res: `AudioFACTORY Studio Engine online. ${activeSkin.themeName} skin active.`, color: '#16A34A' }
   ]);
 
   const logEndRef = useRef<HTMLDivElement | null>(null);
@@ -61,47 +59,44 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
     if (!cmd) return;
 
     let res = '';
-    let color = '#4285F4';
+    let color = 'var(--skin-accent, #0284C7)';
 
     if (cmd === 'help') {
-      res = 'Available commands: help, status, synth, play, export, scanlines, theme, clear, ping, version';
+      res = 'Available commands: help, status, synth, play, export, scanlines, clear, ping, version';
     } else if (cmd === 'status') {
-      res = 'CORE: ACTIVE | GEMINI TTS: ONLINE (24kHz) | FIREBASE: CONNECTED | LIVEBLOCKS: 4 PEERS';
-      color = '#34A853';
+      res = `CORE: ACTIVE | NEURAL TTS: ONLINE (24kHz) | THEME: ${activeSkin.themeName} (${activeSkin.dayName}) | CACHE: INDEXED_DB`;
+      color = '#16A34A';
     } else if (cmd === 'ping') {
-      res = 'PING ais-dev-cluster-southeast1: 14.2ms (0% packet loss)';
-      color = '#34A853';
+      res = 'AUDIO ENGINE LATENCY: 12.4ms (Buffer health: 100%)';
+      color = '#16A34A';
     } else if (cmd === 'version') {
-      res = 'Google AI Studio Audio Factory G-Term Build v2.4 (Model: Gemini 2.5 Flash / ElevenLabs Multilingual v2)';
+      res = 'AudioFACTORY Production Studio v2.4 (Model: Gemini 2.5 Flash / Algorithmic Soundscape Synthesizer)';
     } else if (cmd === 'synth') {
       res = 'Dispatched neural synthesis event to audio queue...';
-      color = '#FBBC04';
-      addLog('SYNTH', 'CLI', 'Triggered synthesis from G-TERM CLI.');
+      color = '#D97706';
+      addLog('SYNTH', 'CLI', 'Triggered synthesis from studio CLI.');
       onTriggerSynth?.();
     } else if (cmd === 'play') {
       res = 'Broadcasting audio output buffer...';
-      color = '#34A853';
+      color = '#16A34A';
       addLog('AUDIO', 'CLI', 'Audio playback triggered via CLI.');
       onTriggerPlay?.();
     } else if (cmd === 'export') {
       res = 'Building 24kHz 16-bit PCM WAV container...';
-      color = '#4285F4';
+      color = 'var(--skin-accent, #0284C7)';
       addLog('SYS', 'CLI', 'Master WAV export invoked.');
       onTriggerExport?.();
     } else if (cmd === 'scanlines') {
       toggleScanlines();
-      res = `CRT Scanlines set to ${!scanlinesEnabled ? 'ENABLED' : 'DISABLED'}`;
-      color = '#FBBC04';
-    } else if (cmd === 'theme') {
-      toggleTerminalMode();
-      res = 'Toggling studio visual theme...';
+      res = `Subtle CRT FX set to ${!scanlinesEnabled ? 'ENABLED' : 'DISABLED'}`;
+      color = '#D97706';
     } else if (cmd === 'clear') {
       setShellHistory([]);
       setCommandInput('');
       return;
     } else {
       res = `Unknown command "${cmd}". Type "help" for a list of available commands.`;
-      color = '#EA4335';
+      color = '#DC2626';
     }
 
     setShellHistory(prev => [...prev, { cmd: commandInput, res, color }]);
@@ -109,40 +104,60 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col transition-all duration-300 pointer-events-auto">
+    <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col transition-all duration-300 pointer-events-auto select-none">
       
       {/* Retractable Header Bar / Persistent Ticker Ribbon */}
       <div 
         onClick={toggleDrawer}
-        className="h-9 px-3 sm:px-4 bg-[#0D1117]/95 border-t border-[#30363D] hover:border-[#4285F4] backdrop-blur-md flex items-center justify-between cursor-pointer select-none transition-colors shadow-2xl"
+        className="h-9 px-3 sm:px-4 border-t backdrop-blur-md flex items-center justify-between cursor-pointer select-none transition-colors shadow-lg"
+        style={{
+          backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+          borderColor: 'var(--skin-border, #E2E8F0)',
+          color: 'var(--skin-text-primary, #0F172A)'
+        }}
       >
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span className="w-2 h-2 rounded-full bg-[#34A853] animate-ping" />
-            <TerminalIcon className="w-3.5 h-3.5 text-[#4285F4]" />
-            <span className="text-[11px] font-mono font-bold text-[#E6EDF3] tracking-wider hidden xs:inline">
-              G-TERM // DIAGNOSTICS
+            <span 
+              className="w-2 h-2 rounded-full animate-ping"
+              style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }} 
+            />
+            <TerminalIcon 
+              className="w-3.5 h-3.5" 
+              style={{ color: 'var(--skin-accent, #0284C7)' }}
+            />
+            <span className="text-[11px] font-mono font-bold tracking-wider hidden xs:inline" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+              STUDIO // DIAGNOSTICS
             </span>
           </div>
 
-          <div className="h-3 w-[1px] bg-[#30363D] hidden sm:block flex-shrink-0" />
+          <div className="h-3 w-[1px] hidden sm:block flex-shrink-0" style={{ backgroundColor: 'var(--skin-border, #E2E8F0)' }} />
 
           {/* Scrolling Ticker Text */}
-          <div className="flex items-center gap-2 sm:gap-3 text-[10px] font-mono text-[#8B949E] truncate">
-            <span className="text-[#34A853] font-bold flex-shrink-0">● ONLINE</span>
-            <span className="hidden md:inline flex-shrink-0">PING: 14ms</span>
-            <span className="hidden sm:inline flex-shrink-0">24kHz PCM</span>
-            <span className="text-[#FBBC04] truncate">
+          <div className="flex items-center gap-2 sm:gap-3 text-[10px] font-mono truncate" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
+            <span className="font-bold flex-shrink-0" style={{ color: '#16A34A' }}>● READY</span>
+            <span className="hidden md:inline flex-shrink-0">24kHz PCM</span>
+            <span className="hidden sm:inline flex-shrink-0" style={{ color: 'var(--skin-accent, #0284C7)' }}>
+              {activeSkin.dayShort}: {activeSkin.themeName}
+            </span>
+            <span className="truncate" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
               {logs[logs.length - 1]?.message || 'Awaiting command input...'}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[10px] font-mono text-[#8B949E] hidden lg:inline">
-            [PRESS {isDrawerOpen ? 'COLLAPSE' : 'EXPAND'}]
+          <span className="text-[10px] font-mono hidden lg:inline" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+            [CLICK TO {isDrawerOpen ? 'COLLAPSE' : 'EXPAND'}]
           </span>
-          <div className="w-5 h-5 rounded flex items-center justify-center text-[#8B949E] hover:text-white bg-[#21262D]">
+          <div 
+            className="w-5 h-5 rounded flex items-center justify-center transition-colors border"
+            style={{
+              backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+              borderColor: 'var(--skin-border, #E2E8F0)',
+              color: 'var(--skin-text-secondary, #475569)'
+            }}
+          >
             {isDrawerOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
           </div>
         </div>
@@ -150,38 +165,65 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
 
       {/* Expanded Console Window */}
       {isDrawerOpen && (
-        <div className="h-72 sm:h-80 bg-[#0D1117]/98 border-t border-[#30363D] flex flex-col shadow-2xl overflow-hidden backdrop-blur-lg">
+        <div 
+          className="h-72 sm:h-80 border-t flex flex-col shadow-2xl overflow-hidden backdrop-blur-lg"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            borderColor: 'var(--skin-border, #E2E8F0)'
+          }}
+        >
           
           {/* Subheader / Tabs & Tools */}
-          <div className="px-3 sm:px-4 py-2 bg-[#161B22] border-b border-[#30363D] flex items-center justify-between gap-2 sm:gap-3 flex-shrink-0 overflow-x-auto custom-scrollbar">
-            <div className="flex items-center gap-1 flex-shrink-0">
+          <div 
+            className="px-3 sm:px-4 py-2 border-b flex items-center justify-between gap-2 sm:gap-3 flex-shrink-0 overflow-x-auto custom-scrollbar"
+            style={{
+              backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+              borderColor: 'var(--skin-border, #E2E8F0)'
+            }}
+          >
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <button
                 onClick={() => setActiveTab('logs')}
-                className={`px-2.5 sm:px-3 py-1 rounded text-xs font-mono font-bold uppercase transition-all whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-1 rounded-md text-xs font-mono font-bold uppercase transition-all whitespace-nowrap border ${
                   activeTab === 'logs'
-                    ? 'bg-[#4285F4] text-white shadow-xs'
-                    : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#21262D]'
+                    ? 'shadow-xs font-extrabold text-white'
+                    : 'hover:opacity-100 opacity-70 border-transparent'
                 }`}
+                style={{
+                  backgroundColor: activeTab === 'logs' ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                  borderColor: activeTab === 'logs' ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                  color: activeTab === 'logs' ? 'var(--skin-accent-text, #FFFFFF)' : 'var(--skin-text-primary, #0F172A)'
+                }}
               >
                 System Logs ({logs.length})
               </button>
               <button
                 onClick={() => setActiveTab('shell')}
-                className={`px-2.5 sm:px-3 py-1 rounded text-xs font-mono font-bold uppercase transition-all whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-1 rounded-md text-xs font-mono font-bold uppercase transition-all whitespace-nowrap border ${
                   activeTab === 'shell'
-                    ? 'bg-[#34A853] text-white shadow-xs'
-                    : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#21262D]'
+                    ? 'shadow-xs font-extrabold text-white'
+                    : 'hover:opacity-100 opacity-70 border-transparent'
                 }`}
+                style={{
+                  backgroundColor: activeTab === 'shell' ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                  borderColor: activeTab === 'shell' ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                  color: activeTab === 'shell' ? 'var(--skin-accent-text, #FFFFFF)' : 'var(--skin-text-primary, #0F172A)'
+                }}
               >
                 Interactive Shell
               </button>
               <button
                 onClick={() => setActiveTab('telemetry')}
-                className={`px-2.5 sm:px-3 py-1 rounded text-xs font-mono font-bold uppercase transition-all whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-1 rounded-md text-xs font-mono font-bold uppercase transition-all whitespace-nowrap border ${
                   activeTab === 'telemetry'
-                    ? 'bg-[#FBBC04] text-black shadow-xs'
-                    : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#21262D]'
+                    ? 'shadow-xs font-extrabold text-white'
+                    : 'hover:opacity-100 opacity-70 border-transparent'
                 }`}
+                style={{
+                  backgroundColor: activeTab === 'telemetry' ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                  borderColor: activeTab === 'telemetry' ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                  color: activeTab === 'telemetry' ? 'var(--skin-accent-text, #FFFFFF)' : 'var(--skin-text-primary, #0F172A)'
+                }}
               >
                 Subsystems
               </button>
@@ -191,11 +233,12 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
               {/* Scanlines Toggle */}
               <button
                 onClick={toggleScanlines}
-                className={`px-2 py-1 rounded text-[10px] font-mono border flex items-center gap-1.5 transition-colors ${
-                  scanlinesEnabled
-                    ? 'border-[#34A853]/50 text-[#34A853] bg-[#34A853]/10'
-                    : 'border-[#30363D] text-[#8B949E] hover:bg-[#21262D]'
-                }`}
+                className="px-2 py-1 rounded-md text-[10px] font-mono border flex items-center gap-1.5 transition-colors"
+                style={{
+                  backgroundColor: scanlinesEnabled ? 'var(--skin-accent-muted, #E0F2FE)' : 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: scanlinesEnabled ? 'var(--skin-accent, #0284C7)' : 'var(--skin-border, #E2E8F0)',
+                  color: scanlinesEnabled ? 'var(--skin-accent, #0284C7)' : 'var(--skin-text-secondary, #475569)'
+                }}
                 title="Toggle CRT Scanline Overlay"
               >
                 {scanlinesEnabled ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
@@ -205,7 +248,12 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
               {/* Clear Logs */}
               <button
                 onClick={clearLogs}
-                className="p-1 rounded text-[#8B949E] hover:text-[#EA4335] hover:bg-[#21262D] transition-colors"
+                className="p-1 rounded-md border hover:opacity-80 transition-colors"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E2E8F0)',
+                  color: 'var(--skin-text-secondary, #475569)'
+                }}
                 title="Clear Logs"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -215,24 +263,35 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
 
           {/* TAB 1: SYSTEM LOGS STREAM */}
           {activeTab === 'logs' && (
-            <div className="flex-1 overflow-y-auto p-3 font-mono text-xs space-y-1.5 custom-scrollbar bg-[#090D12]">
+            <div 
+              className="flex-1 overflow-y-auto p-3 font-mono text-xs space-y-1.5 custom-scrollbar"
+              style={{ backgroundColor: 'var(--skin-bg-app, #F8FAFC)' }}
+            >
               {logs.map((log) => (
-                <div key={log.id} className="flex items-start gap-2 leading-relaxed hover:bg-[#161B22]/50 px-1.5 py-0.5 rounded">
-                  <span className="text-[#8B949E] text-[10px] select-none flex-shrink-0">
+                <div 
+                  key={log.id} 
+                  className="flex items-start gap-2 leading-relaxed px-1.5 py-0.5 rounded transition-colors"
+                  style={{
+                    color: 'var(--skin-text-primary, #0F172A)'
+                  }}
+                >
+                  <span className="text-[10px] select-none flex-shrink-0" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
                     [{log.timestamp}]
                   </span>
-                  <span className={`px-1 rounded text-[9px] font-bold flex-shrink-0 ${
-                    log.color === 'red' ? 'bg-[#EA4335]/20 text-[#EA4335]' :
-                    log.color === 'yellow' ? 'bg-[#FBBC04]/20 text-[#FBBC04]' :
-                    log.color === 'green' ? 'bg-[#34A853]/20 text-[#34A853]' :
-                    'bg-[#4285F4]/20 text-[#4285F4]'
-                  }`}>
+                  <span 
+                    className="px-1 rounded text-[9px] font-bold flex-shrink-0 border"
+                    style={{
+                      backgroundColor: log.color === 'red' ? '#FEE2E2' : log.color === 'yellow' ? '#FEF3C7' : log.color === 'green' ? '#DCFCE7' : 'var(--skin-accent-muted, #E0F2FE)',
+                      borderColor: log.color === 'red' ? '#FCA5A5' : log.color === 'yellow' ? '#FDE68A' : log.color === 'green' ? '#86EFAC' : 'var(--skin-border, #BAE6FD)',
+                      color: log.color === 'red' ? '#B91C1C' : log.color === 'yellow' ? '#B45309' : log.color === 'green' ? '#15803D' : 'var(--skin-accent, #0284C7)'
+                    }}
+                  >
                     {log.level}
                   </span>
-                  <span className="text-[#8B949E] text-[10px] flex-shrink-0">
+                  <span className="text-[10px] font-semibold flex-shrink-0" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
                     [{log.module}]:
                   </span>
-                  <span className="text-[#C9D1D9] break-words">
+                  <span className="break-words font-medium" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
                     {log.message}
                   </span>
                 </div>
@@ -243,20 +302,29 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
 
           {/* TAB 2: INTERACTIVE SHELL */}
           {activeTab === 'shell' && (
-            <div className="flex-1 flex flex-col min-h-0 bg-[#090D12]">
+            <div 
+              className="flex-1 flex flex-col min-h-0"
+              style={{ backgroundColor: 'var(--skin-bg-app, #F8FAFC)' }}
+            >
               <div className="flex-1 overflow-y-auto p-3 font-mono text-xs space-y-2 custom-scrollbar">
-                <div className="text-[#8B949E] text-[11px] pb-1 border-b border-[#30363D]">
-                  Type <span className="text-[#34A853] font-bold">help</span> to view available studio commands. 
-                  Try: <span className="text-[#4285F4]">status</span>, <span className="text-[#FBBC04]">synth</span>, <span className="text-[#34A853]">play</span>, <span className="text-[#EA4335]">scanlines</span>
+                <div 
+                  className="text-[11px] pb-1 border-b"
+                  style={{ 
+                    borderColor: 'var(--skin-border, #E2E8F0)',
+                    color: 'var(--skin-text-secondary, #475569)' 
+                  }}
+                >
+                  Type <span className="font-bold" style={{ color: '#16A34A' }}>help</span> to view available studio commands. 
+                  Try: <span style={{ color: 'var(--skin-accent, #0284C7)' }}>status</span>, <span style={{ color: '#D97706' }}>synth</span>, <span style={{ color: '#16A34A' }}>play</span>, <span style={{ color: '#DC2626' }}>scanlines</span>
                 </div>
 
                 {shellHistory.map((item, idx) => (
                   <div key={idx} className="space-y-0.5">
-                    <div className="flex items-center gap-1.5 text-[#8B949E]">
-                      <span className="text-[#4285F4]">❯</span>
-                      <span className="text-[#E6EDF3] font-bold">{item.cmd}</span>
+                    <div className="flex items-center gap-1.5" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
+                      <span style={{ color: 'var(--skin-accent, #0284C7)' }}>❯</span>
+                      <span className="font-bold" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>{item.cmd}</span>
                     </div>
-                    <div className="pl-4 text-xs font-mono" style={{ color: item.color || '#C9D1D9' }}>
+                    <div className="pl-4 text-xs font-mono" style={{ color: item.color || 'var(--skin-text-primary, #0F172A)' }}>
                       {item.res}
                     </div>
                   </div>
@@ -265,18 +333,34 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
               </div>
 
               {/* Shell Input Field */}
-              <form onSubmit={handleCommandSubmit} className="p-2 bg-[#161B22] border-t border-[#30363D] flex items-center gap-2">
-                <span className="text-[#34A853] font-mono text-xs font-bold pl-2">g-term $</span>
+              <form 
+                onSubmit={handleCommandSubmit} 
+                className="p-2 border-t flex items-center gap-2"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E2E8F0)'
+                }}
+              >
+                <span className="font-mono text-xs font-bold pl-2" style={{ color: 'var(--skin-accent, #0284C7)' }}>
+                  studio $
+                </span>
                 <input
                   type="text"
                   value={commandInput}
                   onChange={(e) => setCommandInput(e.target.value)}
                   placeholder="Enter command (e.g. status, synth, help)..."
-                  className="flex-1 bg-transparent text-[#E6EDF3] font-mono text-xs focus:outline-none placeholder:text-[#8B949E]"
+                  className="flex-1 bg-transparent font-mono text-xs focus:outline-none"
+                  style={{
+                    color: 'var(--skin-text-primary, #0F172A)'
+                  }}
                 />
                 <button
                   type="submit"
-                  className="px-3 py-1 rounded bg-[#4285F4] hover:bg-[#3367D6] text-white font-mono text-xs font-bold uppercase transition-colors"
+                  className="px-3 py-1 rounded-md font-mono text-xs font-bold uppercase transition-all shadow-xs"
+                  style={{
+                    backgroundColor: 'var(--skin-accent, #0284C7)',
+                    color: 'var(--skin-accent-text, #FFFFFF)'
+                  }}
                 >
                   <Send className="w-3 h-3" />
                 </button>
@@ -286,50 +370,71 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
 
           {/* TAB 3: SUBSYSTEM TELEMETRY */}
           {activeTab === 'telemetry' && (
-            <div className="flex-1 overflow-y-auto p-4 font-mono text-xs bg-[#090D12] grid grid-cols-1 sm:grid-cols-3 gap-3 custom-scrollbar">
+            <div 
+              className="flex-1 overflow-y-auto p-4 font-mono text-xs grid grid-cols-1 sm:grid-cols-3 gap-3 custom-scrollbar"
+              style={{ backgroundColor: 'var(--skin-bg-app, #F8FAFC)' }}
+            >
               
-              <div className="p-3 bg-[#161B22] border border-[#30363D] rounded-lg space-y-2">
-                <div className="flex items-center justify-between text-[#4285F4] font-bold">
+              <div 
+                className="p-3 border rounded-lg space-y-2 shadow-2xs"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E2E8F0)'
+                }}
+              >
+                <div className="flex items-center justify-between font-bold" style={{ color: 'var(--skin-accent, #0284C7)' }}>
                   <span className="flex items-center gap-1.5">
                     <Cpu className="w-4 h-4" /> AUDIO_DSP_ENGINE
                   </span>
-                  <span className="text-[#34A853] text-[10px]">99.8% READY</span>
+                  <span className="text-[10px]" style={{ color: '#16A34A' }}>99.8% READY</span>
                 </div>
-                <div className="space-y-1 text-[11px] text-[#8B949E]">
+                <div className="space-y-1 text-[11px]" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
                   <div>MODEL: Gemini 2.5 Flash</div>
                   <div>SAMPLE RATE: 24,000 Hz</div>
                   <div>CHANNELS: 2 (Stereo Linear PCM)</div>
-                  <div>LATENCY: 420ms TTFB</div>
+                  <div>ACTIVE SKIN: {activeSkin.dayName}</div>
                 </div>
               </div>
 
-              <div className="p-3 bg-[#161B22] border border-[#30363D] rounded-lg space-y-2">
-                <div className="flex items-center justify-between text-[#FBBC04] font-bold">
+              <div 
+                className="p-3 border rounded-lg space-y-2 shadow-2xs"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E2E8F0)'
+                }}
+              >
+                <div className="flex items-center justify-between font-bold" style={{ color: '#D97706' }}>
                   <span className="flex items-center gap-1.5">
-                    <Wifi className="w-4 h-4" /> CLOUD_SYNC_VAULT
+                    <Database className="w-4 h-4" /> LOCAL_VAULT
                   </span>
-                  <span className="text-[#34A853] text-[10px]">CONNECTED</span>
+                  <span className="text-[10px]" style={{ color: '#16A34A' }}>PERSISTENT</span>
                 </div>
-                <div className="space-y-1 text-[11px] text-[#8B949E]">
-                  <div>SERVICE: Google Cloud Firestore</div>
-                  <div>PROJECT: ai-studio-socialnot</div>
-                  <div>SECURITY: Client-isolated Auth</div>
-                  <div>OFFLINE CACHE: Active</div>
+                <div className="space-y-1 text-[11px]" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
+                  <div>STORAGE: IndexedDB / LocalStorage</div>
+                  <div>AUDIO BLOBS: Cached Locally</div>
+                  <div>SECURITY: Client-Isolated</div>
+                  <div>PRIVACY: Zero Remote Leak</div>
                 </div>
               </div>
 
-              <div className="p-3 bg-[#161B22] border border-[#30363D] rounded-lg space-y-2">
-                <div className="flex items-center justify-between text-[#EA4335] font-bold">
+              <div 
+                className="p-3 border rounded-lg space-y-2 shadow-2xs"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E2E8F0)'
+                }}
+              >
+                <div className="flex items-center justify-between font-bold" style={{ color: '#16A34A' }}>
                   <span className="flex items-center gap-1.5">
-                    <Activity className="w-4 h-4" /> LIVEBLOCKS_PRESENCE
+                    <Activity className="w-4 h-4" /> AUDIO_OUTPUT_BUS
                   </span>
-                  <span className="text-[#34A853] text-[10px]">4 PEERS</span>
+                  <span className="text-[10px]" style={{ color: '#16A34A' }}>ONLINE</span>
                 </div>
-                <div className="space-y-1 text-[11px] text-[#8B949E]">
-                  <div>ROOM: gemini-audio-station</div>
-                  <div>CRDT PROTOCOL: WebSocket TLS</div>
-                  <div>PEER CURSORS: Synchronized</div>
-                  <div>BROADCAST: Audio Playhead</div>
+                <div className="space-y-1 text-[11px]" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
+                  <div>WEB AUDIO: AudioContext Active</div>
+                  <div>FFT ANALYZER: 64 Bins</div>
+                  <div>DSP LATENCY: ~12ms</div>
+                  <div>BGM SYNTH: Algorithmic WebAudio</div>
                 </div>
               </div>
 
@@ -342,3 +447,4 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
     </div>
   );
 };
+

@@ -110,7 +110,7 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
   onRequireAuth
 }) => {
   const { savedProjects, saveProjectToCloud, isSaving, user } = useFirebase();
-  const { isTerminalMode, terminalTheme } = useTerminal();
+  const { isTerminalMode, activeSkin } = useTerminal();
   const { collaborators, broadcastAudioPlay, setActiveEditingLine } = useLiveblocks();
   const [justSaved, setJustSaved] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | undefined>(undefined);

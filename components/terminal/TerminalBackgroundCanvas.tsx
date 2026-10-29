@@ -7,20 +7,12 @@ interface Particle {
   vx: number;
   vy: number;
   radius: number;
-  color: string;
   alpha: number;
 }
 
-const GOOGLE_COLORS = [
-  '#4285F4', // Google Blue
-  '#EA4335', // Google Red
-  '#FBBC04', // Google Yellow
-  '#34A853'  // Google Green
-];
-
 export const TerminalBackgroundCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { isAudioActive, scanlinesEnabled, terminalTheme } = useTerminal();
+  const { isAudioActive, activeSkin } = useTerminal();
   const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: -1000, y: -1000, active: false });
 
   useEffect(() => {
@@ -51,74 +43,31 @@ export const TerminalBackgroundCanvas: React.FC = () => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseleave', handleMouseLeave);
 
-    // Initialize Google particles
-    const particleCount = Math.min(terminalTheme === 'googly' ? 48 : 32, Math.floor((width * height) / 25000));
+    // Initialize subtle ambient motes matching the active day skin
+    const particleCount = Math.min(24, Math.floor((width * height) / 35000));
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
-      const isGoogly = terminalTheme === 'googly';
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * (isGoogly ? 0.7 : 0.4),
-        vy: (Math.random() - 0.5) * (isGoogly ? 0.7 : 0.4),
-        radius: Math.random() * (isGoogly ? 2.5 : 2) + 1.2,
-        color: GOOGLE_COLORS[i % GOOGLE_COLORS.length],
-        alpha: Math.random() * 0.4 + (isGoogly ? 0.45 : 0.3)
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: Math.random() * 2 + 1,
+        alpha: Math.random() * 0.25 + 0.1,
       });
     }
 
-    let scanlineY = 0;
     let wavePhase = 0;
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Deep OLED Terminal Gradient
-      const grad = ctx.createRadialGradient(
-        width / 2, height / 2, 100,
-        width / 2, height / 2, Math.max(width, height)
-      );
-      grad.addColorStop(0, '#0D1117');
-      grad.addColorStop(0.7, '#080B10');
-      grad.addColorStop(1, '#040608');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
-
-      // Googly theme corner color wash ambient light
-      if (terminalTheme === 'googly') {
-        // Top Left - Blue Glow
-        const gBlue = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(width, height) * 0.65);
-        gBlue.addColorStop(0, 'rgba(66, 133, 244, 0.15)');
-        gBlue.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gBlue;
-        ctx.fillRect(0, 0, width, height);
-
-        // Top Right - Red Glow
-        const gRed = ctx.createRadialGradient(width, 0, 0, width, 0, Math.max(width, height) * 0.65);
-        gRed.addColorStop(0, 'rgba(234, 67, 53, 0.11)');
-        gRed.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gRed;
-        ctx.fillRect(0, 0, width, height);
-
-        // Bottom Left - Yellow Glow
-        const gYellow = ctx.createRadialGradient(0, height, 0, 0, height, Math.max(width, height) * 0.65);
-        gYellow.addColorStop(0, 'rgba(251, 188, 4, 0.11)');
-        gYellow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gYellow;
-        ctx.fillRect(0, 0, width, height);
-
-        // Bottom Right - Green Glow
-        const gGreen = ctx.createRadialGradient(width, height, 0, width, height, Math.max(width, height) * 0.65);
-        gGreen.addColorStop(0, 'rgba(52, 168, 83, 0.14)');
-        gGreen.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gGreen;
-        ctx.fillRect(0, 0, width, height);
-      }
-
-      // 2. High-Tech Matrix Grid with Subtle Google Color Accents
-      const gridSize = 36;
-      ctx.strokeStyle = terminalTheme === 'googly' ? 'rgba(66, 133, 244, 0.15)' : 'rgba(48, 54, 61, 0.25)';
+      // 1. Clean Architectural Day Grid
+      const gridSize = 40;
+      ctx.strokeStyle = activeSkin.palette.border;
+      ctx.globalAlpha = 0.45;
       ctx.lineWidth = 0.5;
+
       ctx.beginPath();
       for (let x = 0; x < width; x += gridSize) {
         ctx.moveTo(x, 0);
@@ -130,115 +79,59 @@ export const TerminalBackgroundCanvas: React.FC = () => {
       }
       ctx.stroke();
 
-      // Grid Intersection Crosshairs (Selected Nodes in Google Colors)
+      // Subtle grid intersection markers in day skin accent
       const step = gridSize * 3;
+      ctx.fillStyle = activeSkin.palette.accent;
+      ctx.globalAlpha = 0.25;
       for (let x = step; x < width; x += step) {
         for (let y = step; y < height; y += step) {
-          const colorIdx = ((x + y) / step) % 4;
-          ctx.fillStyle = GOOGLE_COLORS[colorIdx] + (terminalTheme === 'googly' ? '45' : '25'); // higher opacity in googly
-          ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+          ctx.fillRect(x - 1, y - 1, 2, 2);
         }
       }
 
-      // 3. Mouse Radial Beacon
-      if (mouseRef.current.active) {
-        const radGlow = ctx.createRadialGradient(
-          mouseRef.current.x, mouseRef.current.y, 0,
-          mouseRef.current.x, mouseRef.current.y, 220
-        );
-        radGlow.addColorStop(0, 'rgba(66, 133, 244, 0.08)');
-        radGlow.addColorStop(0.5, 'rgba(52, 168, 83, 0.03)');
-        radGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = radGlow;
-        ctx.fillRect(0, 0, width, height);
-      }
+      // 2. Interactive Audio Wave Ribbon (Reacts when audio is active)
+      wavePhase += isAudioActive ? 0.05 : 0.015;
+      const waveAmplitude = isAudioActive ? 28 : 10;
+      const waveY = height * 0.88;
 
-      // 4. Audio-Reactive Oscilloscope Beam (Active during speech playback)
-      wavePhase += 0.04;
-      if (isAudioActive) {
-        ctx.save();
-        ctx.lineWidth = 2;
-        ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.strokeStyle = activeSkin.palette.accent;
+      ctx.globalAlpha = isAudioActive ? 0.4 : 0.18;
+      ctx.lineWidth = isAudioActive ? 2 : 1;
 
-        // Wave 1: Google Green Live Beam
-        ctx.strokeStyle = '#34A853';
-        ctx.shadowColor = '#34A853';
-        ctx.beginPath();
-        const midY = height * 0.88;
-        for (let x = 0; x < width; x += 4) {
-          const freq1 = Math.sin(x * 0.015 + wavePhase * 2);
-          const freq2 = Math.cos(x * 0.03 - wavePhase);
-          const y = midY + (freq1 * 22 + freq2 * 14);
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+      for (let x = 0; x <= width; x += 10) {
+        const dx = (x - mouseRef.current.x);
+        const dist = Math.sqrt(dx * dx);
+        const mouseLift = mouseRef.current.active && dist < 200 ? (1 - dist / 200) * 15 : 0;
+
+        const y = waveY + Math.sin(x * 0.008 + wavePhase) * waveAmplitude + Math.cos(x * 0.02 - wavePhase * 1.5) * (waveAmplitude * 0.4) - mouseLift;
+
+        if (x === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
         }
-        ctx.stroke();
-
-        // Wave 2: Google Blue Harmonics
-        ctx.strokeStyle = '#4285F4';
-        ctx.shadowColor = '#4285F4';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        for (let x = 0; x < width; x += 4) {
-          const freq = Math.sin(x * 0.025 + wavePhase * 3);
-          const y = midY + freq * 12;
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-        ctx.restore();
       }
+      ctx.stroke();
 
-      // 5. Google Constellation Particle Mesh
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
+      // 3. Floating Ambient Particles (Day Accent Tints)
+      particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
 
-        // Screen wrap
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
-        // Draw particle node
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 8;
+        ctx.fillStyle = activeSkin.palette.accent;
+        ctx.globalAlpha = p.alpha;
         ctx.fill();
-        ctx.shadowBlur = 0;
+      });
 
-        // Connect nearby particles with subtle color lines
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 110) {
-            ctx.strokeStyle = p.color;
-            ctx.globalAlpha = (1 - dist / 110) * 0.18;
-            ctx.lineWidth = 0.75;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-            ctx.globalAlpha = 1.0;
-          }
-        }
-      }
-
-      // 6. Electron Beam CRT Scan Sweep Line
-      scanlineY = (scanlineY + 1.2) % (height + 200);
-      const beamGrad = ctx.createLinearGradient(0, scanlineY - 40, 0, scanlineY);
-      beamGrad.addColorStop(0, 'rgba(66, 133, 244, 0)');
-      beamGrad.addColorStop(0.5, 'rgba(66, 133, 244, 0.03)');
-      beamGrad.addColorStop(1, 'rgba(66, 133, 244, 0.08)');
-      ctx.fillStyle = beamGrad;
-      ctx.fillRect(0, scanlineY - 40, width, 40);
-
+      ctx.globalAlpha = 1.0;
       animationFrameId = requestAnimationFrame(render);
     };
 
@@ -250,15 +143,13 @@ export const TerminalBackgroundCanvas: React.FC = () => {
       window.removeEventListener('mouseleave', handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isAudioActive, scanlinesEnabled, terminalTheme]);
+  }, [isAudioActive, activeSkin]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      <canvas ref={canvasRef} className="w-full h-full block" />
-      {/* Optional CRT Scanlines Layer */}
-      {scanlinesEnabled && (
-        <div className="absolute inset-0 crt-scanlines opacity-40 pointer-events-none" />
-      )}
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0"
+      style={{ opacity: 0.9 }}
+    />
   );
 };

@@ -174,20 +174,20 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden p-3 sm:p-5 md:p-6 space-y-4 font-mono text-[#E1E4E8]">
       {/* 1. HEADER CONTROL STRIP */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#30363D] pb-3 mb-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[var(--skin-border,#E8D5C2)] pb-3 mb-1">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EA4335]/20 text-[#F28B82] border border-[#EA4335]/40 uppercase tracking-wider">
               G-TERM // MULTI_SPEAKER
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-[#30363D] text-[#8B949E] uppercase">
+            <span className="text-[10px] px-2 py-0.5 rounded bg-[#30363D] text-[var(--skin-text-secondary,#7C2D12)] uppercase">
               {format}
             </span>
-            <span className="text-[10px] text-[#8B949E] hidden lg:inline">
+            <span className="text-[10px] text-[var(--skin-text-secondary,#7C2D12)] hidden lg:inline">
               • {styleTone}
             </span>
           </div>
-          <h1 className="text-base font-bold text-[#E6EDF3] mt-1 uppercase tracking-tight">
+          <h1 className="text-base font-bold text-[var(--skin-text-primary,#431407)] mt-1 uppercase tracking-tight">
             {projectTitle}
           </h1>
         </div>
@@ -209,10 +209,10 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
           accentColor="blue"
           onMinimizeChange={() => setActiveTool(null)}
         >
-          <div className="p-4 space-y-4 bg-[#0D1117]">
+          <div className="p-4 space-y-4 bg-[var(--skin-bg-subtle,#F6EDE2)]">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
               <div className="sm:col-span-2">
-                <label className="block text-[10px] uppercase text-[#8B949E] mb-1.5 font-bold tracking-wider">
+                <label className="block text-[10px] uppercase text-[var(--skin-text-secondary,#7C2D12)] mb-1.5 font-bold tracking-wider">
                   Scene Prompt / Topic
                 </label>
                 <input
@@ -220,18 +220,18 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                   value={topic}
                   onChange={e => setTopic(e.target.value)}
                   placeholder="e.g. A founder pitching a skeptical venture capitalist..."
-                  className="w-full px-3 py-2 border border-[#30363D] rounded-lg text-xs font-mono bg-[#161B22] text-[#E6EDF3] placeholder:text-[#8B949E] focus:border-[#4285F4] focus:outline-none"
+                  className="w-full px-3 py-2 border border-[var(--skin-border,#E8D5C2)] rounded-lg text-xs font-mono bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-primary,#431407)] placeholder:text-[var(--skin-text-secondary,#7C2D12)] focus:border-[#4285F4] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-[#8B949E] mb-1.5 font-bold tracking-wider">
+                <label className="block text-[10px] uppercase text-[var(--skin-text-secondary,#7C2D12)] mb-1.5 font-bold tracking-wider">
                   Format
                 </label>
                 <select
                   value={format}
                   onChange={e => setFormat(e.target.value)}
-                  className="w-full px-2.5 py-2 border border-[#30363D] rounded-lg text-xs font-mono bg-[#161B22] text-[#E6EDF3] focus:border-[#4285F4] focus:outline-none cursor-pointer"
+                  className="w-full px-2.5 py-2 border border-[var(--skin-border,#E8D5C2)] rounded-lg text-xs font-mono bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-primary,#431407)] focus:border-[#4285F4] focus:outline-none cursor-pointer"
                 >
                   <option value="Podcast Dialogue">Podcast Dialogue</option>
                   <option value="All-Hands Kickoff">All-Hands Kickoff</option>
@@ -243,13 +243,13 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-[#8B949E] mb-1.5 font-bold tracking-wider">
+                <label className="block text-[10px] uppercase text-[var(--skin-text-secondary,#7C2D12)] mb-1.5 font-bold tracking-wider">
                   Style Tone
                 </label>
                 <select
                   value={styleTone}
                   onChange={e => setStyleTone(e.target.value)}
-                  className="w-full px-2.5 py-2 border border-[#30363D] rounded-lg text-xs font-mono bg-[#161B22] text-[#E6EDF3] focus:border-[#4285F4] focus:outline-none cursor-pointer"
+                  className="w-full px-2.5 py-2 border border-[var(--skin-border,#E8D5C2)] rounded-lg text-xs font-mono bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-primary,#431407)] focus:border-[#4285F4] focus:outline-none cursor-pointer"
                 >
                   <option value="High Stakes & Dramatic">High Stakes & Dramatic</option>
                   <option value="Casual & Conversational">Casual & Conversational</option>
@@ -262,7 +262,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
 
             <div className="flex items-center justify-between pt-1 flex-wrap gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[#8B949E]">Speakers:</span>
+                <span className="text-xs text-[var(--skin-text-secondary,#7C2D12)]">Speakers:</span>
                 {[2, 3, 4].map(num => (
                   <button
                     key={num}
@@ -271,7 +271,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                     className={`w-7 h-7 rounded border text-xs font-bold transition-all ${
                       speakerCount === num 
                         ? 'bg-[#E6EDF3] text-[#0D1117] border-[#E6EDF3]' 
-                        : 'bg-[#161B22] text-[#8B949E] border-[#30363D] hover:bg-[#21262D]'
+                        : 'bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-secondary,#7C2D12)] border-[var(--skin-border,#E8D5C2)] hover:bg-[#21262D]'
                     }`}
                   >
                     {num}
@@ -308,20 +308,20 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
           accentColor="yellow"
           onMinimizeChange={() => setActiveTool(null)}
         >
-          <div className="p-4 space-y-3.5 bg-[#0D1117]">
-            <p className="text-xs text-[#8B949E] leading-relaxed">
+          <div className="p-4 space-y-3.5 bg-[var(--skin-bg-subtle,#F6EDE2)]">
+            <p className="text-xs text-[var(--skin-text-secondary,#7C2D12)] leading-relaxed">
               Paste any article excerpt, screenplay dialogue, or meeting transcript below. Gemini will automatically decompose the text into distinct speakers, emotions, and structured dialogue scenes.
             </p>
             <textarea
               value={rawTextToAnalyze}
               onChange={e => setRawTextToAnalyze(e.target.value)}
               placeholder="Paste your dialogue script here (e.g. 'Sarah: Did you review the numbers?\nMark: Not yet.')"
-              className="w-full h-32 p-3 border border-[#30363D] rounded-lg text-xs font-mono bg-[#161B22] text-[#E6EDF3] placeholder:text-[#8B949E] focus:border-[#FBBC04] focus:outline-none resize-y"
+              className="w-full h-32 p-3 border border-[var(--skin-border,#E8D5C2)] rounded-lg text-xs font-mono bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-primary,#431407)] placeholder:text-[var(--skin-text-secondary,#7C2D12)] focus:border-[#FBBC04] focus:outline-none resize-y"
             />
             <div className="flex justify-end gap-2.5">
               <button
                 onClick={() => setActiveTool(null)}
-                className="px-3.5 py-1.5 rounded-lg border border-[#30363D] bg-[#161B22] text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#21262D] text-xs uppercase font-bold tracking-wider"
+                className="px-3.5 py-1.5 rounded-lg border border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)] hover:bg-[#21262D] text-xs uppercase font-bold tracking-wider"
               >
                 Cancel
               </button>
@@ -356,11 +356,11 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
             badge={`Speakers: ${speakers.length}`}
             accentColor="yellow"
           >
-            <div className="flex-1 flex flex-col min-h-0 bg-[#0D1117] text-xs">
-              <div className="p-3 border-b border-[#30363D] flex items-center justify-between bg-[#161B22]/40">
+            <div className="flex-1 flex flex-col min-h-0 bg-[var(--skin-bg-subtle,#F6EDE2)] text-xs">
+              <div className="p-3 border-b border-[var(--skin-border,#E8D5C2)] flex items-center justify-between bg-[var(--skin-bg-card,#FFFFFF)]/40">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#FBBC04]" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E6EDF3]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--skin-text-primary,#431407)]">
                     Cast & Voice Roster
                   </span>
                 </div>
@@ -379,29 +379,29 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                   return (
                     <div 
                       key={idx} 
-                      className="p-3 rounded-lg border border-[#30363D] bg-[#161B22] hover:border-[#8B949E]/40 transition-all space-y-3 shadow-xs"
+                      className="p-3 rounded-lg border border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)] hover:border-[#8B949E]/40 transition-all space-y-3 shadow-xs"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 min-w-0">
                           <span className={`w-2.5 h-2.5 rounded-full ${theme.dot} flex-shrink-0 shadow-[0_0_8px_currentColor]`} />
-                          <span className="font-bold text-[#E6EDF3] truncate">
+                          <span className="font-bold text-[var(--skin-text-primary,#431407)] truncate">
                             {sp.name}
                           </span>
                         </div>
-                        <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-[#30363D] text-[#8B949E] border border-[#30363D]">
+                        <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-[#30363D] text-[var(--skin-text-secondary,#7C2D12)] border border-[var(--skin-border,#E8D5C2)]">
                           {sp.gender || 'MALE'}
                         </span>
                       </div>
 
                       {/* Provider selects */}
-                      <div className="flex rounded-lg border border-[#30363D] p-0.5 bg-[#0D1117] text-[10px]">
+                      <div className="flex rounded-lg border border-[var(--skin-border,#E8D5C2)] p-0.5 bg-[var(--skin-bg-subtle,#F6EDE2)] text-[10px]">
                         <button
                           type="button"
                           onClick={() => handleSpeakerVoiceChange(sp.name, 'Algieba', 'gemini')}
                           className={`flex-1 py-1 rounded-md text-center font-bold uppercase tracking-wider transition-all ${
                             sp.provider === 'gemini' 
-                              ? 'bg-[#30363D] text-[#E6EDF3] shadow-xs' 
-                              : 'text-[#8B949E] hover:text-[#E6EDF3]'
+                              ? 'bg-[#30363D] text-[var(--skin-text-primary,#431407)] shadow-xs' 
+                              : 'text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)]'
                           }`}
                         >
                           Gemini
@@ -412,7 +412,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                           className={`flex-1 py-1 rounded-md text-center font-bold uppercase tracking-wider transition-all ${
                             sp.provider === 'elevenlabs' 
                               ? 'bg-[#4285F4]/20 text-[#8AB4F8] border border-[#4285F4]/30 shadow-xs' 
-                              : 'text-[#8B949E] hover:text-[#E6EDF3]'
+                              : 'text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)]'
                           }`}
                         >
                           ElevenLabs
@@ -425,10 +425,10 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                           <select
                             value={sp.voice}
                             onChange={e => handleSpeakerVoiceChange(sp.name, e.target.value, 'gemini')}
-                            className="w-full p-1.5 border border-[#30363D] rounded-lg text-xs font-mono bg-[#0D1117] text-[#E6EDF3] focus:border-[#4285F4] focus:ring-0 cursor-pointer"
+                            className="w-full p-1.5 border border-[var(--skin-border,#E8D5C2)] rounded-lg text-xs font-mono bg-[var(--skin-bg-subtle,#F6EDE2)] text-[var(--skin-text-primary,#431407)] focus:border-[#4285F4] focus:ring-0 cursor-pointer"
                           >
                             {ALL_VOICES.map(v => (
-                              <option key={v.name} value={v.name} className="bg-[#161B22] text-[#E6EDF3]">
+                              <option key={v.name} value={v.name} className="bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-primary,#431407)]">
                                 {v.name} ({v.style})
                               </option>
                             ))}
@@ -437,10 +437,10 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                           <select
                             value={sp.voice}
                             onChange={e => handleSpeakerVoiceChange(sp.name, e.target.value, 'elevenlabs')}
-                            className="w-full p-1.5 border border-[#30363D] rounded-lg text-xs font-mono bg-[#0D1117] text-[#E6EDF3] focus:border-[#4285F4] focus:ring-0 cursor-pointer"
+                            className="w-full p-1.5 border border-[var(--skin-border,#E8D5C2)] rounded-lg text-xs font-mono bg-[var(--skin-bg-subtle,#F6EDE2)] text-[var(--skin-text-primary,#431407)] focus:border-[#4285F4] focus:ring-0 cursor-pointer"
                           >
                             {elevenLabsVoices.map(v => (
-                              <option key={v.id} value={v.id} className="bg-[#161B22] text-[#E6EDF3]">
+                              <option key={v.id} value={v.id} className="bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-primary,#431407)]">
                                 {v.name} ({v.gender})
                               </option>
                             ))}
@@ -452,13 +452,13 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                 })}
 
                 {/* Session diagnostics block */}
-                <div className="p-3 rounded-lg border border-[#30363D] bg-[#161B22]/40 space-y-2 text-[11px] text-[#8B949E]">
-                  <div className="text-[10px] uppercase font-bold text-[#E6EDF3] tracking-wider mb-1">
+                <div className="p-3 rounded-lg border border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)]/40 space-y-2 text-[11px] text-[var(--skin-text-secondary,#7C2D12)]">
+                  <div className="text-[10px] uppercase font-bold text-[var(--skin-text-primary,#431407)] tracking-wider mb-1">
                     Session Diagnostics
                   </div>
                   <div className="flex justify-between">
                     <span>Dialogue Turns:</span>
-                    <span className="font-bold text-[#E6EDF3]">{lines.length}</span>
+                    <span className="font-bold text-[var(--skin-text-primary,#431407)]">{lines.length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Synthesized:</span>
@@ -486,7 +486,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
               <div className="flex items-center gap-2">
                 <button
                   onClick={toggleCollapseAll}
-                  className="px-2 py-0.5 rounded border border-[#30363D] bg-[#161B22] text-[#8B949E] hover:text-[#E6EDF3] text-[10px] font-bold uppercase tracking-wider"
+                  className="px-2 py-0.5 rounded border border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)] text-[10px] font-bold uppercase tracking-wider"
                 >
                   Collapse All
                 </button>
@@ -499,7 +499,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
               </div>
             }
           >
-            <div className="flex-1 flex flex-col min-h-0 bg-[#0D1117] p-3.5 space-y-3.5 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 flex flex-col min-h-0 bg-[var(--skin-bg-subtle,#F6EDE2)] p-3.5 space-y-3.5 overflow-y-auto custom-scrollbar">
               {lines.map((line, idx) => {
                 const sp = speakers.find(s => s.name === line.speaker) || speakers[0];
                 const theme = SPEAKER_COLOR_MAP[sp?.color || 'yellow'] || SPEAKER_COLOR_MAP.yellow;
@@ -513,36 +513,36 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                     className={`rounded-lg border transition-all duration-150 overflow-hidden ${
                       isPlayingThis
                         ? 'border-[#FBBC04] bg-[#FBBC04]/5 shadow-[0_0_15px_rgba(251,188,4,0.15)]'
-                        : 'border-[#30363D] bg-[#161B22] hover:border-[#8B949E]/40'
+                        : 'border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)] hover:border-[#8B949E]/40'
                     }`}
                   >
                     {/* TURN HEADER */}
-                    <div className="px-3 py-2 border-b border-[#30363D] flex items-center justify-between gap-2 bg-[#161B22]/50 flex-wrap">
+                    <div className="px-3 py-2 border-b border-[var(--skin-border,#E8D5C2)] flex items-center justify-between gap-2 bg-[var(--skin-bg-card,#FFFFFF)]/50 flex-wrap">
                       <div className="flex items-center gap-2 min-w-0">
                         {/* Ordering controls */}
-                        <div className="flex items-center text-[#8B949E]">
+                        <div className="flex items-center text-[var(--skin-text-secondary,#7C2D12)]">
                           <button
                             onClick={() => handleMoveLine(idx, 'up')}
                             disabled={idx === 0}
-                            className="p-0.5 hover:text-[#E6EDF3] disabled:opacity-20"
+                            className="p-0.5 hover:text-[var(--skin-text-primary,#431407)] disabled:opacity-20"
                           >
                             <ChevronUp className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleMoveLine(idx, 'down')}
                             disabled={idx === lines.length - 1}
-                            className="p-0.5 hover:text-[#E6EDF3] disabled:opacity-20"
+                            className="p-0.5 hover:text-[var(--skin-text-primary,#431407)] disabled:opacity-20"
                           >
                             <ChevronDown className="w-3.5 h-3.5" />
                           </button>
                         </div>
 
-                        <span className="text-[10px] font-bold text-[#8B949E]">
+                        <span className="text-[10px] font-bold text-[var(--skin-text-secondary,#7C2D12)]">
                           #{idx + 1}
                         </span>
 
                         {/* Assign Speaker */}
-                        <div className="flex items-center gap-1.5 bg-[#0D1117] border border-[#30363D] rounded-full px-2 py-0.5">
+                        <div className="flex items-center gap-1.5 bg-[var(--skin-bg-subtle,#F6EDE2)] border border-[var(--skin-border,#E8D5C2)] rounded-full px-2 py-0.5">
                           <span className={`w-2 h-2 rounded-full ${theme.dot} shadow-[0_0_6px_currentColor]`} />
                           <select
                             value={line.speaker}
@@ -550,10 +550,10 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                               const newSp = e.target.value;
                               setLines(prev => prev.map(l => l.id === line.id ? { ...l, speaker: newSp } : l));
                             }}
-                            className="text-[10px] font-bold text-[#E6EDF3] bg-transparent outline-none cursor-pointer pr-1"
+                            className="text-[10px] font-bold text-[var(--skin-text-primary,#431407)] bg-transparent outline-none cursor-pointer pr-1"
                           >
                             {speakers.map(s => (
-                              <option key={s.name} value={s.name} className="bg-[#161B22] text-[#E6EDF3]">
+                              <option key={s.name} value={s.name} className="bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-primary,#431407)]">
                                 {s.name} ({s.provider === 'gemini' ? s.voice : '11Labs'})
                               </option>
                             ))}
@@ -569,7 +569,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                             setLines(prev => prev.map(l => l.id === line.id ? { ...l, emotion: newEm } : l));
                           }}
                           placeholder="Emotion..."
-                          className="hidden sm:inline-block text-[10px] border border-[#30363D] rounded px-1.5 py-0.5 bg-[#0D1117] text-[#8B949E] max-w-[120px] focus:border-[#4285F4] outline-none font-mono"
+                          className="hidden sm:inline-block text-[10px] border border-[var(--skin-border,#E8D5C2)] rounded px-1.5 py-0.5 bg-[var(--skin-bg-subtle,#F6EDE2)] text-[var(--skin-text-secondary,#7C2D12)] max-w-[120px] focus:border-[#4285F4] outline-none font-mono"
                         />
                       </div>
 
@@ -600,7 +600,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                             className={`p-1 rounded border text-xs font-bold transition-all ${
                               isPlayingThis
                                 ? 'bg-[#EA4335] text-white border-[#EA4335]'
-                                : 'bg-[#161B22] text-[#8B949E] border-[#30363D] hover:bg-[#21262D] hover:text-[#E6EDF3]'
+                                : 'bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-secondary,#7C2D12)] border-[var(--skin-border,#E8D5C2)] hover:bg-[#21262D] hover:text-[var(--skin-text-primary,#431407)]'
                             }`}
                           >
                             {isPlayingThis ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current ml-0.5" />}
@@ -609,14 +609,14 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
 
                         <button
                           onClick={() => toggleLineCollapse(line.id)}
-                          className="p-1 text-[#8B949E] hover:text-[#E6EDF3]"
+                          className="p-1 text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)]"
                         >
                           {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
                         </button>
 
                         <button
                           onClick={() => handleRemoveLine(line.id)}
-                          className="p-1 text-[#8B949E] hover:text-[#F28B82]"
+                          className="p-1 text-[var(--skin-text-secondary,#7C2D12)] hover:text-[#F28B82]"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -625,7 +625,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
 
                     {/* TURN BODY (COLLAPSIBLE) */}
                     {!isCollapsed && (
-                      <div className="p-3.5 space-y-3 bg-[#0D1117]">
+                      <div className="p-3.5 space-y-3 bg-[var(--skin-bg-subtle,#F6EDE2)]">
                         <textarea
                           value={line.text}
                           onChange={e => {
@@ -639,13 +639,13 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                             } : l));
                           }}
                           rows={2}
-                          className="w-full p-2.5 rounded-lg border border-[#30363D] text-xs font-mono bg-[#161B22] text-[#E6EDF3] placeholder:text-[#8B949E] focus:border-[#4285F4] outline-none resize-y leading-relaxed"
+                          className="w-full p-2.5 rounded-lg border border-[var(--skin-border,#E8D5C2)] text-xs font-mono bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-primary,#431407)] placeholder:text-[var(--skin-text-secondary,#7C2D12)] focus:border-[#4285F4] outline-none resize-y leading-relaxed"
                           placeholder="Enter character dialogue..."
                         />
 
                         {/* Quick Emotion Preset click futtons */}
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] text-[#8B949E]">Tone:</span>
+                          <span className="text-[10px] text-[var(--skin-text-secondary,#7C2D12)]">Tone:</span>
                           {EMOTION_PRESETS.slice(0, 5).map(em => (
                             <button
                               key={em}
@@ -656,7 +656,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                               className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
                                 line.emotion === em
                                   ? 'bg-[#E6EDF3] text-[#0D1117] border-[#E6EDF3] font-bold'
-                                  : 'bg-[#161B22] text-[#8B949E] border-[#30363D] hover:bg-[#21262D]'
+                                  : 'bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-secondary,#7C2D12)] border-[var(--skin-border,#E8D5C2)] hover:bg-[#21262D]'
                               }`}
                             >
                               {em}
@@ -665,7 +665,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                         </div>
 
                         {/* Action Tools for individual line */}
-                        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[#30363D]">
+                        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[var(--skin-border,#E8D5C2)]">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleGenerateLine(line.id)}
@@ -680,7 +680,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                               <a
                                 href={line.audioUrl}
                                 download={`${line.speaker.toLowerCase().replace(/\s+/g, '_')}_line_${idx + 1}.wav`}
-                                className="px-2.5 py-1 rounded-lg border border-[#30363D] bg-[#161B22] hover:bg-[#21262D] text-[11px] text-[#E6EDF3] flex items-center gap-1"
+                                className="px-2.5 py-1 rounded-lg border border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)] hover:bg-[#21262D] text-[11px] text-[var(--skin-text-primary,#431407)] flex items-center gap-1"
                               >
                                 <Download className="w-3 h-3" />
                                 <span>WAV</span>
@@ -699,7 +699,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                                   />
                                 ))}
                               </div>
-                              <span className="text-[10px] text-[#8B949E]">
+                              <span className="text-[10px] text-[var(--skin-text-secondary,#7C2D12)]">
                                 {line.audioBuffer.duration.toFixed(1)}s
                               </span>
                             </div>
@@ -713,7 +713,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
 
               <button
                 onClick={handleAddLine}
-                className="w-full py-3 rounded-lg border border-dashed border-[#30363D] hover:border-[#8B949E]/40 text-[#8B949E] hover:text-[#E6EDF3] text-xs font-bold flex items-center justify-center gap-1.5 bg-[#161B22]/10 transition-colors"
+                className="w-full py-3 rounded-lg border border-dashed border-[var(--skin-border,#E8D5C2)] hover:border-[#8B949E]/40 text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)] text-xs font-bold flex items-center justify-center gap-1.5 bg-[var(--skin-bg-card,#FFFFFF)]/10 transition-colors"
               >
                 <Plus className="w-4 h-4" /> Add Next Dialogue Turn
               </button>
@@ -729,7 +729,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
           badge="Bus: Stereo Master"
           accentColor="blue"
         >
-          <div className="p-4 bg-[#0D1117] flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="p-4 bg-[var(--skin-bg-subtle,#F6EDE2)] flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => {
@@ -787,7 +787,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                 className={`px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
                   activeTool === 'generator'
                     ? 'border-[#4285F4] bg-[#4285F4]/20 text-[#8AB4F8]'
-                    : 'border-[#30363D] bg-[#161B22] text-[#8B949E] hover:text-[#E6EDF3]'
+                    : 'border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)]'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#4285F4]" />
@@ -799,7 +799,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
                 className={`px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
                   activeTool === 'analyzer'
                     ? 'border-[#FBBC04] bg-[#FBBC04]/20 text-[#FDD663]'
-                    : 'border-[#30363D] bg-[#161B22] text-[#8B949E] hover:text-[#E6EDF3]'
+                    : 'border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)] text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)]'
                 }`}
               >
                 <Wand2 className="w-3.5 h-3.5 text-[#FBBC04]" />
@@ -822,11 +822,11 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
               {onOpenCloudModal && (
                 <button
                   onClick={onOpenCloudModal}
-                  className="px-3 py-1.5 rounded-lg border border-[#30363D] bg-[#161B22] hover:bg-[#21262D] text-[#8B949E] hover:text-[#E6EDF3] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-lg border border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)] hover:bg-[#21262D] text-[var(--skin-text-secondary,#7C2D12)] hover:text-[var(--skin-text-primary,#431407)] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
                 >
                   <FolderOpen className="w-3.5 h-3.5 text-[#8AB4F8]" />
                   <span>Projects</span>
-                  <span className="text-[10px] px-1.5 py-0.2 bg-[#30363D] rounded-full text-[#E6EDF3]">
+                  <span className="text-[10px] px-1.5 py-0.2 bg-[#30363D] rounded-full text-[var(--skin-text-primary,#431407)]">
                     {savedProjects.length}
                   </span>
                 </button>
@@ -835,7 +835,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
           </div>
 
           {/* Collaborative playback & scrubber status bar */}
-          <div className="px-4 py-2 border-t border-[#30363D] bg-[#161B22]/20 flex items-center justify-between text-xs text-[#8B949E] rounded-b-lg">
+          <div className="px-4 py-2 border-t border-[var(--skin-border,#E8D5C2)] bg-[var(--skin-bg-card,#FFFFFF)]/20 flex items-center justify-between text-xs text-[var(--skin-text-secondary,#7C2D12)] rounded-b-lg">
             <div>
               {isPlayingFullSequence && lines.find(l => l.id === playingLineId) ? (
                 <span className="flex items-center gap-2 font-bold text-[#FDD663]">
@@ -853,7 +853,7 @@ export const TerminalMultiSpeakerView: React.FC<TerminalMultiSpeakerViewProps> =
             </div>
 
             <div className="flex items-center gap-1 w-48">
-              <div className="flex-1 h-2 bg-[#161B22] rounded overflow-hidden flex p-0.5 border border-[#30363D]">
+              <div className="flex-1 h-2 bg-[var(--skin-bg-card,#FFFFFF)] rounded overflow-hidden flex p-0.5 border border-[var(--skin-border,#E8D5C2)]">
                 {lines.map((line) => {
                   const isPlaying = playingLineId === line.id;
                   const isReady = line.status === 'ready';

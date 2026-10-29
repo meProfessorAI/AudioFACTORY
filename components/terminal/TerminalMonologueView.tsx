@@ -6,19 +6,14 @@ import {
   Download, 
   Cloud, 
   CheckCircle2, 
-  Settings, 
-  Radio, 
-  Sliders, 
-  RefreshCw, 
-  Layers,
-  Terminal,
-  Volume2
+  Settings
 } from 'lucide-react';
 import { TerminalWindow } from './TerminalWindow';
 import { IntroStyle } from '../../types';
 import { INTRO_STYLES } from '../../constants';
 import { LivePresenceBar } from '../LivePresenceBar';
 import { QuotaExhaustedBanner } from '../QuotaExhaustedBanner';
+import { useTerminal } from './TerminalContext';
 
 interface TerminalMonologueViewProps {
   text: string;
@@ -81,6 +76,7 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
   lyricalMode,
   onLyricalModeChange
 }) => {
+  const { activeSkin } = useTerminal();
   const [isCommandStationMinimized, setIsCommandStationMinimized] = useState(false);
   const [isScriptBufferMinimized, setIsScriptBufferMinimized] = useState(false);
   const [isTimbreRouterMinimized, setIsTimbreRouterMinimized] = useState(false);
@@ -92,25 +88,24 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
   return (
     <div className="flex-1 flex flex-col p-3 sm:p-5 md:p-6 space-y-4 max-w-7xl mx-auto w-full min-h-0 overflow-y-auto custom-scrollbar pb-16">
       
-      {/* Live Collaborative Presence Bar (G-Term Styled) */}
+      {/* Live Collaborative Presence Bar (Light Theme) */}
       <div className="flex-shrink-0">
-        <LivePresenceBar className="border border-[#30363D] bg-[#161B22]" />
+        <LivePresenceBar className="border shadow-2xs rounded-lg" />
       </div>
 
       {/* Quota Exhaustion & Upgrade Prompt */}
       <QuotaExhaustedBanner actionName="monologue generation" />
 
-      {/* TWO COLUMN BENTO TERMINAL GRID */}
+      {/* TWO COLUMN BENTO GRID */}
       <div className={`grid grid-cols-1 lg:grid-cols-12 gap-4 transition-all duration-200 ${isScriptBufferMinimized && isTimbreRouterMinimized ? 'flex-initial' : 'flex-1 min-h-0'}`}>
         
-        {/* LEFT COLUMN: SCRIPT EDITOR TERMINAL BUFFER (8 COLS) */}
+        {/* LEFT COLUMN: SCRIPT BUFFER (8 COLS) */}
         <div className={`lg:col-span-8 flex flex-col transition-all duration-200 ${isScriptBufferMinimized ? 'min-h-0' : 'min-h-[360px]'}`}>
           <TerminalWindow
             title="SCRIPT_STREAM_BUFFER.txt"
             subtitle="Spoken Speech Synthesis Pipeline"
             badge={`${text.length} CHARS`}
             badgeColor="blue"
-            accentColor="green"
             className="h-full"
             isMinimized={isScriptBufferMinimized}
             onMinimizeChange={setIsScriptBufferMinimized}
@@ -118,15 +113,15 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
               <div className="flex items-center gap-1.5 text-[11px] font-mono">
                 <button
                   onClick={() => onTextChange(selectedStyle.templateText)}
-                  className="text-[#8B949E] hover:text-[#E6EDF3] transition-colors"
+                  className="hover:opacity-100 opacity-70 transition-opacity"
                   title="Reset to persona default template"
                 >
                   [RESET]
                 </button>
-                <span className="text-[#30363D]">|</span>
+                <span className="opacity-30">|</span>
                 <button
                   onClick={() => onTextChange('')}
-                  className="text-[#EA4335] hover:text-[#FF6B6B] transition-colors"
+                  className="text-rose-600 hover:text-rose-700 transition-colors font-bold"
                   title="Clear all script buffer"
                 >
                   [CLEAR]
@@ -134,37 +129,68 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
               </div>
             }
           >
-            <div className="flex-1 p-3.5 bg-[#161B22] flex flex-col gap-3 min-h-0">
+            <div 
+              className="flex-1 p-3.5 flex flex-col gap-3 min-h-0"
+              style={{
+                backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                color: 'var(--skin-text-primary, #431407)',
+              }}
+            >
               
               {/* Cue Injectors Header */}
-              <div className="flex flex-wrap items-center gap-2 border-b border-[#21262D] pb-2.5 flex-shrink-0">
-                <span className="text-[10px] font-mono font-bold text-[#8B949E] uppercase tracking-wide">
+              <div 
+                className="flex flex-wrap items-center gap-2 border-b pb-2.5 flex-shrink-0"
+                style={{ borderColor: 'var(--skin-border, #E8D5C2)' }}
+              >
+                <span 
+                  className="text-[10px] font-mono font-bold uppercase tracking-wide"
+                  style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
+                >
                   Injection Hooks:
                 </span>
                 {DRAMA_CUES.map((cue) => (
                   <button
                     key={cue.label}
                     onClick={() => insertCue(cue.tag)}
-                    className="px-2 py-1 rounded bg-[#21262D] border border-[#30363D] hover:border-[#34A853] text-[#E6EDF3] hover:text-[#34A853] font-mono text-[10px] uppercase transition-all select-none active:scale-95"
+                    className="px-2 py-1 rounded border font-mono text-[10px] uppercase transition-all select-none hover:shadow-2xs active:scale-95"
+                    style={{
+                      backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+                      borderColor: 'var(--skin-border, #E8D5C2)',
+                      color: 'var(--skin-text-primary, #431407)',
+                    }}
                   >
                     {cue.label}
                   </button>
                 ))}
               </div>
 
-              {/* Lyrical / Emotional Fine-Tuning controls in G-TERM style */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2.5 rounded-lg border border-[#30363D] bg-[#0D1117]/60 flex-shrink-0">
+              {/* Lyrical / Emotional Fine-Tuning Controls */}
+              <div 
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2.5 rounded-lg border flex-shrink-0"
+                style={{
+                  backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+                  borderColor: 'var(--skin-border, #E8D5C2)',
+                }}
+              >
                 {/* Lyrical Mode Toggle */}
-                <div className="flex items-center justify-between border-r border-[#21262D]/60 pr-3 last:border-0 last:pr-0">
+                <div 
+                  className="flex items-center justify-between border-r pr-3 last:border-0 last:pr-0"
+                  style={{ borderColor: 'var(--skin-border, #E8D5C2)' }}
+                >
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-mono font-bold text-[#E6EDF3]">LYRICAL_MELODY_ENGINE</span>
-                    <span className="text-[9px] font-mono text-[#8B949E]">Improves voice note cadence</span>
+                    <span className="text-[11px] font-mono font-bold" style={{ color: 'var(--skin-text-primary, #431407)' }}>
+                      LYRICAL_MELODY_ENGINE
+                    </span>
+                    <span className="text-[9px] font-mono opacity-70" style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}>
+                      Improves voice cadence
+                    </span>
                   </div>
                   <button
                     onClick={() => onLyricalModeChange(!lyricalMode)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      lyricalMode ? 'bg-[#34A853]' : 'bg-[#30363D]'
-                    }`}
+                    className="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    style={{
+                      backgroundColor: lyricalMode ? 'var(--skin-accent, #C2410C)' : '#D1D5DB'
+                    }}
                   >
                     <span
                       className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -177,13 +203,22 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
                 {/* Emotional Pitch Level Preset Selector */}
                 <div className="flex items-center justify-between pl-0 sm:pl-3">
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-mono font-bold text-[#E6EDF3]">EMOTION_COEFFICIENT</span>
-                    <span className="text-[9px] font-mono text-[#8B949E]">Sets psychological coloring</span>
+                    <span className="text-[11px] font-mono font-bold" style={{ color: 'var(--skin-text-primary, #431407)' }}>
+                      EMOTION_COEFFICIENT
+                    </span>
+                    <span className="text-[9px] font-mono opacity-70" style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}>
+                      Psychological color
+                    </span>
                   </div>
                   <select
                     value={emotionalMode}
                     onChange={(e) => onEmotionalModeChange(e.target.value)}
-                    className="p-1 px-1.5 rounded bg-[#21262D] border border-[#30363D] text-[#E6EDF3] font-mono text-[10px] outline-none cursor-pointer hover:border-[#FBBC04]"
+                    className="p-1 px-2 rounded border font-mono text-[10px] outline-none cursor-pointer"
+                    style={{
+                      backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                      borderColor: 'var(--skin-border, #E8D5C2)',
+                      color: 'var(--skin-text-primary, #431407)',
+                    }}
                   >
                     <option value="none">00_FLAT_MONO</option>
                     <option value="whisper">01_WHISPER</option>
@@ -194,55 +229,71 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
                 </div>
               </div>
 
-              {/* Main Code-like Textarea */}
+              {/* Main Textarea */}
               <div className="flex-1 relative min-h-0">
                 <textarea
                   value={text}
                   onChange={(e) => onTextChange(e.target.value)}
-                  className="w-full h-full p-4 border border-[#30363D] hover:border-[#8B949E] focus:border-[#34A853] rounded-lg font-mono text-xs sm:text-sm bg-[#0D1117] text-[#C9D1D9] focus:outline-none focus:ring-1 focus:ring-[#34A853]/50 resize-none leading-relaxed selection:bg-[#34A853]/30 custom-scrollbar"
-                  placeholder="// ENTER VOICENOTE PROMPT SCRIPT HERE... //"
+                  className="w-full h-full p-4 border rounded-lg font-mono text-xs sm:text-sm focus:outline-none resize-none leading-relaxed custom-scrollbar shadow-inner"
+                  style={{
+                    backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+                    borderColor: 'var(--skin-border, #E8D5C2)',
+                    color: 'var(--skin-text-primary, #431407)',
+                  }}
+                  placeholder="// Enter voice script text here... //"
                 />
-                
-                {/* Decorative terminal watermark */}
-                <div className="absolute bottom-3 right-3 pointer-events-none text-[9px] font-mono text-[#30363D] select-none uppercase">
-                  pipeline.codec: PCM_24_RAW
-                </div>
               </div>
 
               {/* Bottom Telemetry Status bar */}
-              <div className="mt-3 pt-2 border-t border-[#21262D] flex items-center justify-between text-[10px] font-mono text-[#8B949E] flex-shrink-0">
-                <span>ENCODING: UTF-8 // 24kHz SAMPLING</span>
-                <span className="text-[#34A853]">STATUS: READY TO DISPATCH</span>
+              <div 
+                className="mt-2 pt-2 border-t flex items-center justify-between text-[10px] font-mono flex-shrink-0"
+                style={{ borderColor: 'var(--skin-border, #E8D5C2)' }}
+              >
+                <span style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}>
+                  ENCODING: UTF-8 // 24kHz PCM
+                </span>
+                <span className="font-bold" style={{ color: 'var(--skin-accent, #C2410C)' }}>
+                  STATUS: READY TO DISPATCH
+                </span>
               </div>
 
             </div>
           </TerminalWindow>
         </div>
 
-        {/* RIGHT COLUMN: VOCAL TIMBRE & PERSONA MATRIX (4 COLS) */}
+        {/* RIGHT COLUMN: TIMBRE MATRIX (4 COLS) */}
         <div className={`lg:col-span-4 flex flex-col transition-all duration-200 ${isTimbreRouterMinimized ? 'min-h-0' : 'min-h-[360px]'}`}>
           <TerminalWindow
             title="VOCAL_TIMBRE_ROUTER.conf"
             subtitle="Speaker Model Selection"
             badge={selectedStyle.name}
             badgeColor="yellow"
-            accentColor="yellow"
             className="h-full"
             isMinimized={isTimbreRouterMinimized}
             onMinimizeChange={setIsTimbreRouterMinimized}
             headerActions={
               <button
                 onClick={onOpenVoiceConfig}
-                className="p-1 rounded text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#21262D] transition-colors"
+                className="p-1 rounded hover:bg-black/5 transition-colors"
+                style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
                 title="Configure Voice Parameters"
               >
                 <Settings className="w-3.5 h-3.5" />
               </button>
             }
           >
-            <div className="flex-1 p-3 bg-[#161B22] flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+            <div 
+              className="flex-1 p-3 flex flex-col gap-2 overflow-y-auto custom-scrollbar"
+              style={{
+                backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                color: 'var(--skin-text-primary, #431407)',
+              }}
+            >
               
-              <div className="text-[10px] font-mono text-[#8B949E] pb-1 uppercase font-bold">
+              <div 
+                className="text-[10px] font-mono pb-1 uppercase font-bold"
+                style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
+              >
                 Timbre Profiles available:
               </div>
 
@@ -256,27 +307,41 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
                       onClick={() => onSelectStyle(style)}
                       className={`p-3 rounded-lg border font-mono text-xs cursor-pointer select-none transition-all ${
                         isSelected
-                          ? 'border-[#FBBC04] bg-[#FBBC04]/10 shadow-[0_0_12px_rgba(251,188,4,0.15)] text-white'
-                          : 'border-[#30363D] bg-[#0D1117]/60 text-[#8B949E] hover:border-[#8B949E] hover:bg-[#161B22]'
+                          ? 'shadow-xs font-bold'
+                          : 'hover:opacity-95'
                       }`}
+                      style={{
+                        backgroundColor: isSelected ? 'var(--skin-bg-subtle, #F6EDE2)' : 'var(--skin-bg-card, #FFFFFF)',
+                        borderColor: isSelected ? 'var(--skin-accent, #C2410C)' : 'var(--skin-border, #E8D5C2)',
+                      }}
                     >
                       <div className="flex items-center justify-between font-bold">
-                        <span className={isSelected ? 'text-[#FBBC04]' : 'text-[#E6EDF3]'}>
+                        <span style={{ color: isSelected ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-primary, #431407)' }}>
                           {style.name}
                         </span>
-                        <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#21262D]">
+                        <span 
+                          className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border"
+                          style={{
+                            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                            borderColor: 'var(--skin-border, #E8D5C2)',
+                            color: 'var(--skin-text-secondary, #7C2D12)',
+                          }}
+                        >
                           {style.id === 'custom' ? 'USER_DEF' : 'SYS_PRE'}
                         </span>
                       </div>
                       
-                      <div className="text-[10px] text-[#8B949E] mt-1 line-clamp-2 leading-relaxed">
+                      <div className="text-[10px] mt-1 line-clamp-2 leading-relaxed opacity-75" style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}>
                         {style.description}
                       </div>
 
-                      <div className="mt-2 flex items-center justify-between text-[10px] font-mono pt-1.5 border-t border-[#30363D]">
-                        <span className="text-[#8B949E]">DEFAULT: {style.defaultVoice}</span>
+                      <div 
+                        className="mt-2 flex items-center justify-between text-[10px] font-mono pt-1.5 border-t"
+                        style={{ borderColor: 'var(--skin-border, #E8D5C2)' }}
+                      >
+                        <span className="opacity-70">DEFAULT: {style.defaultVoice}</span>
                         {isSelected && (
-                          <span className="text-[#34A853] font-bold">● PATCHED</span>
+                          <span className="font-bold" style={{ color: 'var(--skin-accent, #C2410C)' }}>● PATCHED</span>
                         )}
                       </div>
                     </div>
@@ -290,17 +355,22 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
 
       </div>
 
-      {/* WINDOW 1: MASTER COMMAND STATION & AUDIO DECK (Placed at bottom) */}
+      {/* MASTER COMMAND STATION & AUDIO DECK */}
       <TerminalWindow
         title="MASTER_COMMAND_STATION.exec"
         subtitle="Linear PCM 24kHz / Neural Synthesis Core"
         badge={isLoading ? 'PROCESSING' : isPlaying ? 'ON AIR' : generatedAudio ? 'BUFFER READY' : 'STANDBY'}
         badgeColor={isLoading ? 'yellow' : isPlaying ? 'red' : generatedAudio ? 'green' : 'blue'}
-        accentColor="blue"
         isMinimized={isCommandStationMinimized}
         onMinimizeChange={setIsCommandStationMinimized}
       >
-        <div className="p-3.5 sm:p-4 bg-[#161B22] flex flex-col gap-3.5">
+        <div 
+          className="p-3.5 sm:p-4 flex flex-col gap-3.5"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            color: 'var(--skin-text-primary, #431407)',
+          }}
+        >
           
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             
@@ -309,19 +379,15 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
               <button
                 onClick={onSynthesizeOrPlay}
                 disabled={isLoading || !text.trim()}
-                className={`h-11 sm:h-12 px-5 sm:px-6 rounded-lg font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md active:scale-95 flex-shrink-0 ${
-                  isLoading
-                    ? 'bg-[#FBBC04] text-black border border-[#FBBC04]/50 cursor-wait'
-                    : isPlaying
-                    ? 'bg-[#EA4335] hover:bg-[#D93025] text-white border border-[#EA4335]/50 shadow-[0_0_15px_rgba(234,67,53,0.4)] animate-pulse'
-                    : generatedAudio
-                    ? 'bg-[#34A853] hover:bg-[#2D9247] text-white border border-[#34A853]/50 shadow-[0_0_15px_rgba(52,168,83,0.4)]'
-                    : 'bg-[#4285F4] hover:bg-[#3367D6] text-white border border-[#4285F4]/50 shadow-[0_0_15px_rgba(66,133,244,0.4)]'
-                }`}
+                className="h-11 sm:h-12 px-5 sm:px-6 rounded-lg font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-sm hover:shadow active:scale-95 flex-shrink-0"
+                style={{
+                  backgroundColor: 'var(--skin-accent, #C2410C)',
+                  color: 'var(--skin-accent-text, #FFFFFF)',
+                }}
               >
                 {isLoading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     <span>SYNTHESIZING...</span>
                   </>
                 ) : isPlaying ? (
@@ -344,33 +410,33 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
 
               {/* Status Telemetry */}
               <div className="flex flex-col justify-center font-mono min-w-0">
-                <div className="flex items-center gap-1.5 text-xs text-[#E6EDF3] font-bold truncate">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                    isLoading ? 'bg-[#FBBC04] animate-ping' :
-                    isPlaying ? 'bg-[#EA4335] animate-pulse' :
-                    generatedAudio ? 'bg-[#34A853]' : 'bg-[#8B949E]'
-                  }`} />
+                <div className="flex items-center gap-1.5 text-xs font-bold truncate" style={{ color: 'var(--skin-text-primary, #431407)' }}>
+                  <span 
+                    className={`w-2 h-2 rounded-full flex-shrink-0 ${isLoading ? 'animate-ping' : isPlaying ? 'animate-pulse' : ''}`}
+                    style={{ backgroundColor: 'var(--skin-accent, #C2410C)' }}
+                  />
                   <span className="truncate">
                     {isLoading ? 'NEURAL COMPILATION' : isPlaying ? 'STREAM ACTIVE' : generatedAudio ? '24kHz STEREO' : 'IDLE'}
                   </span>
                 </div>
-                <div className="text-[10px] text-[#8B949E] truncate">
+                <div className="text-[10px] truncate opacity-70" style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}>
                   {audioDuration > 0 ? `${audioDuration.toFixed(1)}s generated` : `${text.length} chars buffered`}
                 </div>
               </div>
             </div>
 
-            {/* Tactical Command Buttons */}
+            {/* Command Buttons */}
             <div className="flex items-center gap-2 flex-wrap justify-start md:justify-end">
               {/* AI Dramatize Button */}
               <button
                 onClick={onDramatize}
                 disabled={isDramatizing || !text.trim()}
-                className={`px-3 py-2 rounded-lg border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all ${
-                  isDramatizing
-                    ? 'bg-[#FBBC04]/20 text-[#FBBC04] border-[#FBBC04]/50'
-                    : 'bg-[#21262D] hover:bg-[#30363D] text-[#FBBC04] border-[#30363D] hover:border-[#FBBC04]/50'
-                }`}
+                className="px-3 py-2 rounded-lg border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-2xs hover:shadow-xs"
+                style={{
+                  backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+                  borderColor: 'var(--skin-border, #E8D5C2)',
+                  color: 'var(--skin-accent, #C2410C)',
+                }}
                 title="Dramatize script using Gemini AI"
               >
                 <Sparkles className={`w-3.5 h-3.5 ${isDramatizing ? 'animate-spin' : ''}`} />
@@ -381,14 +447,15 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
               <button
                 onClick={onSaveToCloud}
                 disabled={isSaving || !text.trim()}
-                className={`px-3 py-2 rounded-lg border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all ${
-                  justSaved
-                    ? 'bg-[#34A853] text-white border-[#34A853]'
-                    : 'bg-[#21262D] hover:bg-[#30363D] text-[#8AB4F8] border-[#30363D]'
-                }`}
-                title="Save script to Firebase Firestore"
+                className="px-3 py-2 rounded-lg border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-2xs hover:shadow-xs"
+                style={{
+                  backgroundColor: justSaved ? 'var(--skin-accent, #C2410C)' : 'var(--skin-bg-subtle, #F6EDE2)',
+                  borderColor: 'var(--skin-border, #E8D5C2)',
+                  color: justSaved ? '#FFFFFF' : 'var(--skin-text-primary, #431407)',
+                }}
+                title="Save script to Cloud Vault"
               >
-                {justSaved ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Cloud className="w-3.5 h-3.5 text-[#4285F4]" />}
+                {justSaved ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Cloud className="w-3.5 h-3.5" />}
                 <span>{justSaved ? 'SAVED' : 'SAVE_VAULT'}</span>
               </button>
 
@@ -396,7 +463,12 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
               <button
                 onClick={onDownloadWav}
                 disabled={!generatedAudio}
-                className="px-3.5 py-2 rounded-lg border border-[#4285F4] bg-[#4285F4] hover:bg-[#3367D6] disabled:opacity-40 disabled:hover:bg-[#4285F4] text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-[0_0_10px_rgba(66,133,244,0.3)]"
+                className="px-3.5 py-2 rounded-lg border disabled:opacity-40 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-2xs hover:shadow-xs"
+                style={{
+                  backgroundColor: 'var(--skin-accent, #C2410C)',
+                  borderColor: 'var(--skin-border-strong, #D7BCA3)',
+                  color: 'var(--skin-accent-text, #FFFFFF)',
+                }}
                 title="Download 24kHz Master WAV"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -407,25 +479,36 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
           </div>
 
           {/* Waveform Scrubber Strip */}
-          <div className="pt-2 border-t border-[#21262D] flex items-center gap-3">
-            <span className="text-[10px] font-mono text-[#8B949E] uppercase font-bold flex-shrink-0">
+          <div 
+            className="pt-2 border-t flex items-center gap-3"
+            style={{ borderColor: 'var(--skin-border, #E8D5C2)' }}
+          >
+            <span 
+              className="text-[10px] font-mono uppercase font-bold flex-shrink-0"
+              style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
+            >
               SPECTRUM: {(audioProgress * 100).toFixed(0)}%
             </span>
-            <div className="flex-1 flex items-end gap-1 h-6 bg-[#0D1117] border border-[#30363D] rounded px-2 py-1 overflow-hidden">
+            <div 
+              className="flex-1 flex items-end gap-1 h-6 border rounded px-2 py-1 overflow-hidden"
+              style={{
+                backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+                borderColor: 'var(--skin-border, #E8D5C2)',
+              }}
+            >
               {[15, 30, 22, 45, 60, 25, 38, 70, 48, 20, 35, 55, 65, 32, 40, 75, 50, 28, 36, 62, 44, 25, 35, 55, 40, 25].map((h, idx) => (
                 <div
                   key={idx}
-                  style={{ height: `${Math.min(100, Math.max(15, h * (isPlaying ? 1.2 : 0.6)))}%` }}
-                  className={`flex-1 rounded-2xs transition-all ${
-                    audioProgress > (idx / 26) 
-                      ? 'bg-[#34A853]' 
-                      : 'bg-[#21262D]'
-                  }`}
+                  style={{ 
+                    height: `${Math.min(100, Math.max(15, h * (isPlaying ? 1.2 : 0.6)))}%`,
+                    backgroundColor: audioProgress > (idx / 26) ? 'var(--skin-accent, #C2410C)' : 'var(--skin-border-strong, #D7BCA3)'
+                  }}
+                  className="flex-1 rounded-2xs transition-all"
                 />
               ))}
             </div>
             {audioDuration > 0 && (
-              <span className="text-[10px] font-mono text-[#8B949E] flex-shrink-0">
+              <span className="text-[10px] font-mono flex-shrink-0 opacity-70" style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}>
                 {(audioProgress * audioDuration).toFixed(1)}s / {audioDuration.toFixed(1)}s
               </span>
             )}
@@ -433,9 +516,9 @@ export const TerminalMonologueView: React.FC<TerminalMonologueViewProps> = ({
 
           {/* Error Banner */}
           {audioError && (
-            <div className="p-2.5 rounded border border-[#EA4335]/40 bg-[#EA4335]/10 text-[#EA4335] font-mono text-xs flex items-center justify-between">
+            <div className="p-2.5 rounded border border-rose-300 bg-rose-50 text-rose-800 font-mono text-xs flex items-center justify-between">
               <span>[ERR]: {audioError}</span>
-              <button onClick={onDismissError} className="font-bold text-white px-2 py-0.5 bg-[#EA4335] rounded">✕</button>
+              <button onClick={onDismissError} className="font-bold text-white px-2 py-0.5 bg-rose-600 rounded">✕</button>
             </div>
           )}
 

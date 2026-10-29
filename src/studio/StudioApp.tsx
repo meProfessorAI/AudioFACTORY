@@ -31,6 +31,7 @@ import { TerminalMonologueView } from '../../components/terminal/TerminalMonolog
 import { TerminalDiagnosticDrawer } from '../../components/terminal/TerminalDiagnosticDrawer';
 import { PlanUpgradeModal } from '../../components/PlanUpgradeModal';
 import { GenerationQuotaBadge } from '../../components/GenerationQuotaBadge';
+import { DaySkinSelector } from '../../components/theme/DaySkinSelector';
 import { AccountDrawer } from '../../components/AccountDrawer';
 import { DailyQuotaExhaustedModal } from '../../components/DailyQuotaExhaustedModal';
 import { LockdownOverlay } from '../../components/LockdownOverlay';
@@ -450,7 +451,13 @@ export const StudioApp: React.FC = () => {
 
   if (isTerminalMode) {
     return (
-      <div className="flex flex-col h-[100dvh] w-screen bg-[#0D1117] text-[#E6EDF3] overflow-hidden select-none font-mono relative">
+      <div 
+        className="flex flex-col h-[100dvh] w-screen overflow-hidden select-none font-mono relative transition-colors duration-200"
+        style={{
+          backgroundColor: 'var(--skin-bg-app, #FDF8F3)',
+          color: 'var(--skin-text-primary, #431407)',
+        }}
+      >
         {/* Terminal Scanline Background Effect */}
         <TerminalBackgroundCanvas />
 
@@ -513,7 +520,10 @@ export const StudioApp: React.FC = () => {
           )}
 
           {activeMode === 'multispeaker' && (
-            <div className="flex-1 flex flex-col h-full bg-[#0D1117] overflow-hidden">
+            <div 
+              className="flex-1 flex flex-col h-full overflow-hidden"
+              style={{ backgroundColor: 'var(--skin-bg-app, #FDF8F3)' }}
+            >
               <MultiSpeakerStudio 
                 onBgmOverlay={(buf) => setBgmBuffer(buf)} 
                 loadedProject={loadedMultiSpeakerProject}
@@ -524,7 +534,10 @@ export const StudioApp: React.FC = () => {
           )}
 
           {activeMode === 'suite' && (
-            <div className="flex-1 flex flex-col h-full bg-[#0D1117] overflow-hidden">
+            <div 
+              className="flex-1 flex flex-col h-full overflow-hidden"
+              style={{ backgroundColor: 'var(--skin-bg-app, #FDF8F3)' }}
+            >
               <AudioProductionSuite
                 onBgmBufferGenerated={(buf: AudioBuffer) => setBgmBuffer(buf)}
                 activeBgmBuffer={bgmBuffer}
@@ -629,7 +642,13 @@ export const StudioApp: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] w-screen bg-[#F4F4F0] text-[#1A1A1A] overflow-hidden select-none font-sans">
+    <div 
+      className="flex flex-col h-[100dvh] w-screen overflow-hidden select-none font-sans transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--skin-bg-app, #FDF8F3)',
+        color: 'var(--skin-text-primary, #431407)',
+      }}
+    >
       
       {/* Top Universal Header & Responsive Navigation Module */}
       <header className="border-b border-zinc-200 bg-white flex-shrink-0 z-30 shadow-sm">
@@ -709,6 +728,9 @@ export const StudioApp: React.FC = () => {
             
             {/* Unified Generation Quota Badge */}
             <GenerationQuotaBadge />
+
+            {/* 7-Day Light Theme Skin Selector */}
+            <DaySkinSelector />
 
             {/* Account & Monetization Center Trigger */}
             <button
@@ -814,7 +836,10 @@ export const StudioApp: React.FC = () => {
             </div>
 
             {/* Center Monologue Canvas */}
-            <div className="flex-1 flex flex-col h-full bg-[#F4F4F0] overflow-hidden">
+            <div 
+              className="flex-1 flex flex-col h-full overflow-hidden"
+              style={{ backgroundColor: 'var(--skin-bg-app, #FDF8F3)' }}
+            >
               <MonologueBentoStudio 
                 text={text}
                 onTextChange={setText}

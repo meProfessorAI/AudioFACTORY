@@ -1,4 +1,15 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { 
+  DAY_SKINS, 
+  DaySkin, 
+  DaySkinId, 
+  DAY_ORDER, 
+  getTodaySkinId, 
+  applyDaySkinVariables 
+} from '../../src/theme/daySkins';
+
+export type { DaySkin, DaySkinId };
+export { DAY_SKINS, DAY_ORDER };
 
 export interface TerminalLogEntry {
   id: string;
@@ -24,8 +35,12 @@ interface TerminalContextValue {
   clearLogs: () => void;
   isAudioActive: boolean;
   setIsAudioActive: (val: boolean) => void;
-  terminalTheme: 'classic' | 'googly';
-  setTerminalTheme: (val: 'classic' | 'googly') => void;
+  
+  // 7 Unique Light Day Theme Skins
+  selectedSkinId: DaySkinId | 'auto';
+  setSelectedSkinId: (val: DaySkinId | 'auto') => void;
+  activeSkin: DaySkin;
+  isAutoDaySkin: boolean;
 }
 
 const TerminalContext = createContext<TerminalContextValue | undefined>(undefined);
@@ -37,60 +52,64 @@ const INITIAL_LOGS: TerminalLogEntry[] = [
     level: 'SYS',
     color: 'blue',
     module: 'CORE',
-    message: 'G-TERM Workstation Kernel v2.4 initialized on Cloud Run.'
+    message: 'AudioFACTORY studio engine initialized. Light theme active.'
   },
   {
     id: 'log-2',
     timestamp: '00:00:02',
-    level: 'NET',
-    color: 'green',
-    module: 'FIREBASE',
-    message: 'Firestore security rules & real-time telemetry socket linked.'
+    level: 'SYNTH',
+    color: 'yellow',
+    module: 'GEMINI',
+    message: 'Neural TTS voice pipeline armed: 24kHz studio PCM.'
   },
   {
     id: 'log-3',
     timestamp: '00:00:03',
-    level: 'SYNTH',
-    color: 'yellow',
-    module: 'GEMINI',
-    message: 'Gemini 2.5 Flash TTS voice pipeline armed: 24kHz linear PCM.'
-  },
-  {
-    id: 'log-4',
-    timestamp: '00:00:04',
     level: 'AUDIO',
-    color: 'blue',
-    module: 'ELEVENLABS',
-    message: 'Audio stems & ElevenLabs soundscape engine synchronized.'
+    color: 'green',
+    module: 'BGM',
+    message: 'Algorithmic procedural soundscapes and audio stems ready.'
   }
 ];
 
 export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isTerminalMode, setIsTerminalMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('g_terminal_mode');
-    return saved !== null ? saved === 'true' : true; // Default to terminal mode per user request!
+    return saved !== null ? saved === 'true' : false; // Default to clean studio mode
   });
 
-  const [scanlinesEnabled, setScanlinesEnabled] = useState<boolean>(true);
+  const [scanlinesEnabled, setScanlinesEnabled] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [logs, setLogs] = useState<TerminalLogEntry[]>(INITIAL_LOGS);
   const [isAudioActive, setIsAudioActive] = useState<boolean>(false);
-  const [terminalTheme, setTerminalTheme] = useState<'classic' | 'googly'>(() => {
-    const saved = localStorage.getItem('g_terminal_theme');
-    return (saved === 'classic' || saved === 'googly') ? saved : 'classic';
+
+  // Day Skin state: 'auto' means automatically follow today's day of week
+  const [selectedSkinId, setSelectedSkinId] = useState<DaySkinId | 'auto'>(() => {
+    const saved = localStorage.getItem('audiofactory_day_skin');
+    if (saved && (saved === 'auto' || DAY_ORDER.includes(saved as DaySkinId))) {
+      return saved as DaySkinId | 'auto';
+    }
+    return 'auto'; // Default to auto matching today's day!
   });
 
-  useEffect(() => {
-    localStorage.setItem('g_terminal_theme', terminalTheme);
-  }, [terminalTheme]);
+  const isAutoDaySkin = selectedSkinId === 'auto';
 
+  // Resolved active skin
+  const activeSkin = useMemo<DaySkin>(() => {
+    const targetId: DaySkinId = isAutoDaySkin ? getTodaySkinId() : selectedSkinId;
+    return DAY_SKINS[targetId] || DAY_SKINS.thursday;
+  }, [selectedSkinId, isAutoDaySkin]);
+
+  // Apply CSS Variables and strip dark mode
+  useEffect(() => {
+    applyDaySkinVariables(activeSkin);
+    localStorage.setItem('audiofactory_day_skin', selectedSkinId);
+  }, [activeSkin, selectedSkinId]);
+
+  // Keep terminal mode flag saved without ever enabling dark mode
   useEffect(() => {
     localStorage.setItem('g_terminal_mode', String(isTerminalMode));
-    if (isTerminalMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.remove('dark');
   }, [isTerminalMode]);
 
   const toggleTerminalMode = () => setIsTerminalMode(prev => !prev);
@@ -108,7 +127,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     else if (level === 'NET' || level === 'AUDIO') color = 'green';
 
     setLogs(prev => [
-      ...prev.slice(-99), // Keep latest 100 logs
+      ...prev.slice(-99),
       {
         id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
         timestamp,
@@ -139,8 +158,10 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         clearLogs,
         isAudioActive,
         setIsAudioActive,
-        terminalTheme,
-        setTerminalTheme
+        selectedSkinId,
+        setSelectedSkinId,
+        activeSkin,
+        isAutoDaySkin,
       }}
     >
       {children}

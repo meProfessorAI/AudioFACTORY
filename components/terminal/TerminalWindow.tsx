@@ -3,13 +3,9 @@ import {
   Minimize2, 
   Maximize2, 
   X, 
-  Terminal, 
   ChevronDown, 
   ChevronUp, 
-  Minus, 
-  Square, 
-  ExternalLink,
-  Sparkles
+  Minus
 } from 'lucide-react';
 import { useTerminal } from './TerminalContext';
 
@@ -44,11 +40,10 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
   isMinimized: isMinimizedProp,
   onMinimizeChange,
   canMaximize = true,
-  accentColor = 'blue'
 }) => {
   const [internalMinimized, setInternalMinimized] = useState<boolean>(defaultMinimized);
   const isMinimized = isMinimizedProp !== undefined ? isMinimizedProp : internalMinimized;
-  const { terminalTheme } = useTerminal();
+  const { activeSkin } = useTerminal();
   const [isMaximized, setIsMaximized] = useState<boolean>(false);
 
   const setIsMinimized = (val: boolean | ((prev: boolean) => boolean)) => {
@@ -61,52 +56,6 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
     }
   };
 
-  const getGooglyBorderAndShadow = () => {
-    if (terminalTheme !== 'googly') return 'border-[#30363D] shadow-2xl';
-    switch (accentColor) {
-      case 'red': return 'border-[#EA4335]/70 shadow-[0_0_20px_rgba(234,67,53,0.18)]';
-      case 'yellow': return 'border-[#FBBC04]/70 shadow-[0_0_20px_rgba(251,188,4,0.18)]';
-      case 'green': return 'border-[#34A853]/70 shadow-[0_0_20px_rgba(52,168,83,0.18)]';
-      case 'blue':
-      default:
-        return 'border-[#4285F4]/70 shadow-[0_0_20px_rgba(66,133,244,0.18)]';
-    }
-  };
-
-  const getGooglyLeftAccent = () => {
-    if (terminalTheme !== 'googly') return '';
-    switch (accentColor) {
-      case 'red': return 'border-l-[5px] border-l-[#EA4335]';
-      case 'yellow': return 'border-l-[5px] border-l-[#FBBC04]';
-      case 'green': return 'border-l-[5px] border-l-[#34A853]';
-      case 'blue':
-      default:
-        return 'border-l-[5px] border-l-[#4285F4]';
-    }
-  };
-
-  const getAccentBorderClass = () => {
-    switch (accentColor) {
-      case 'red': return 'hover:border-[#EA4335] focus-within:border-[#EA4335]';
-      case 'yellow': return 'hover:border-[#FBBC04] focus-within:border-[#FBBC04]';
-      case 'green': return 'hover:border-[#34A853] focus-within:border-[#34A853]';
-      case 'blue': 
-      default:
-        return 'hover:border-[#4285F4] focus-within:border-[#4285F4]';
-    }
-  };
-
-  const getBadgeClass = () => {
-    switch (badgeColor) {
-      case 'red': return 'bg-[#EA4335]/15 text-[#EA4335] border-[#EA4335]/30';
-      case 'yellow': return 'bg-[#FBBC04]/15 text-[#FBBC04] border-[#FBBC04]/30';
-      case 'green': return 'bg-[#34A853]/15 text-[#34A853] border-[#34A853]/30';
-      case 'blue':
-      default:
-        return 'bg-[#4285F4]/15 text-[#4285F4] border-[#4285F4]/30';
-    }
-  };
-
   const parsedClassName = isMinimized 
     ? className.replace(/\b(h-full|h-\[.*?\]|flex-1)\b/g, '') + ' h-auto flex-initial'
     : className;
@@ -114,43 +63,53 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
   return (
     <div
       id={id}
-      className={`relative rounded-xl border bg-[#161B22]/95 backdrop-blur-md transition-all duration-250 flex flex-col ${getGooglyBorderAndShadow()} ${getGooglyLeftAccent()} ${getAccentBorderClass()} ${
+      className={`relative rounded-xl border transition-all duration-200 flex flex-col ${
         isMaximized 
-          ? 'fixed inset-4 z-50 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]' 
-          : 'overflow-hidden'
+          ? 'fixed inset-4 z-50 overflow-hidden shadow-2xl' 
+          : 'overflow-hidden shadow-sm'
       } ${parsedClassName}`}
+      style={{
+        backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+        borderColor: 'var(--skin-border, #E8D5C2)',
+        boxShadow: 'var(--skin-shadow, 0 4px 16px -2px rgba(0,0,0,0.06))',
+      }}
     >
-      {/* Terminal Title Bar */}
-      <div className="px-3.5 py-2.5 bg-[#0D1117]/90 border-b border-[#30363D] flex items-center justify-between gap-3 select-none flex-shrink-0">
-        
-        {/* Left: Google 4-Color Tactile Window Controls */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Red Control (Close / Reset) */}
+      {/* Window Header Bar */}
+      <div 
+        className="px-3.5 py-2.5 border-b flex items-center justify-between gap-3 select-none flex-shrink-0"
+        style={{
+          backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+          borderColor: 'var(--skin-border, #E8D5C2)',
+        }}
+      >
+        {/* Left: Tactile Window Controls */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Close / Collapse button */}
           <button
             onClick={onClose ? onClose : () => setIsMinimized(true)}
-            className="w-3 h-3 rounded-full bg-[#EA4335] hover:brightness-125 border border-[#EA4335]/40 flex items-center justify-center text-black/70 opacity-90 hover:opacity-100 transition-transform active:scale-90"
-            title={onClose ? 'Close Window' : 'Collapse Window'}
+            className="w-3 h-3 rounded-full border border-rose-300 bg-rose-400 hover:bg-rose-500 flex items-center justify-center text-white opacity-80 hover:opacity-100 transition-all active:scale-90"
+            title={onClose ? 'Close' : 'Collapse Window'}
             aria-label="Close"
           >
             <X className="w-2 h-2 opacity-0 hover:opacity-100 transition-opacity" />
           </button>
 
-          {/* Yellow Control (Minimize / Fold) */}
+          {/* Minimize / Fold button */}
           <button
             onClick={() => setIsMinimized(prev => !prev)}
-            className="w-3 h-3 rounded-full bg-[#FBBC04] hover:brightness-125 border border-[#FBBC04]/40 flex items-center justify-center text-black/70 opacity-90 hover:opacity-100 transition-transform active:scale-90"
-            title={isMinimized ? 'Expand Window' : 'Minimize Window'}
+            className="w-3 h-3 rounded-full border border-amber-300 bg-amber-400 hover:bg-amber-500 flex items-center justify-center text-zinc-900 opacity-80 hover:opacity-100 transition-all active:scale-90"
+            title={isMinimized ? 'Expand' : 'Minimize Window'}
             aria-label="Minimize"
           >
             <Minus className="w-2 h-2 opacity-0 hover:opacity-100 transition-opacity" />
           </button>
 
-          {/* Green Control (Maximize / Fullscreen Focus) */}
+          {/* Maximize button */}
           {canMaximize && (
             <button
               onClick={() => setIsMaximized(prev => !prev)}
-              className="w-3 h-3 rounded-full bg-[#34A853] hover:brightness-125 border border-[#34A853]/40 flex items-center justify-center text-black/70 opacity-90 hover:opacity-100 transition-transform active:scale-90"
-              title={isMaximized ? 'Restore Size' : 'Maximize Window'}
+              className="w-3 h-3 rounded-full border border-emerald-300 bg-emerald-400 hover:bg-emerald-500 flex items-center justify-center text-white opacity-80 hover:opacity-100 transition-all active:scale-90"
+              title={isMaximized ? 'Restore Window' : 'Maximize Window'}
               aria-label="Maximize"
             >
               {isMaximized ? (
@@ -161,20 +120,28 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
             </button>
           )}
 
-          {/* Terminal Prompt Prefix */}
-          <span className="text-[11px] font-mono font-bold text-[#8B949E] flex items-center gap-1.5 ml-1.5">
-            <span className="text-[#4285F4]">❯</span>
-            <span className="text-[#8B949E] hidden sm:inline">G-TERM:</span>
+          {/* Studio Prompt Accent */}
+          <span 
+            className="text-[11px] font-mono font-bold flex items-center gap-1 ml-1"
+            style={{ color: 'var(--skin-accent, #C2410C)' }}
+          >
+            <span>❯</span>
           </span>
         </div>
 
         {/* Center: Window Title & Subtitle */}
         <div className="flex items-center gap-2 min-w-0 flex-1 justify-start">
-          <span className="text-xs font-mono font-bold text-[#E6EDF3] tracking-wide truncate">
+          <span 
+            className="text-xs font-mono font-bold tracking-wide truncate"
+            style={{ color: 'var(--skin-text-primary, #431407)' }}
+          >
             {title}
           </span>
           {subtitle && (
-            <span className="text-[10px] font-mono text-[#8B949E] hidden md:inline truncate">
+            <span 
+              className="text-[10px] font-mono hidden md:inline truncate opacity-70"
+              style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
+            >
               // {subtitle}
             </span>
           )}
@@ -183,17 +150,25 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
         {/* Right: Badge & Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {badge && (
-            <span className={`text-[10px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${getBadgeClass()}`}>
+            <span 
+              className="text-[10px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 rounded border"
+              style={{
+                backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                borderColor: 'var(--skin-border, #E8D5C2)',
+                color: 'var(--skin-accent, #C2410C)',
+              }}
+            >
               {badge}
             </span>
           )}
 
           {headerActions}
 
-          {/* Collapse/Expand Chevron Toggle */}
+          {/* Collapse/Expand Toggle */}
           <button
             onClick={() => setIsMinimized(prev => !prev)}
-            className="p-1 rounded text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#21262D] transition-colors"
+            className="p-1 rounded hover:bg-black/5 transition-colors"
+            style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
             title={isMinimized ? 'Expand' : 'Collapse'}
           >
             {isMinimized ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
@@ -202,21 +177,31 @@ export const TerminalWindow: React.FC<TerminalWindowProps> = ({
 
       </div>
 
-      {/* Window Body (Animated folding on minimize) */}
+      {/* Window Body */}
       {!isMinimized && (
-        <div className="flex-1 flex flex-col min-h-0 bg-[#161B22] text-[#C9D1D9] transition-all">
+        <div 
+          className="flex-1 flex flex-col min-h-0 transition-all"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            color: 'var(--skin-text-primary, #431407)',
+          }}
+        >
           {children}
         </div>
       )}
 
-      {/* Minimized Placeholder Strip */}
+      {/* Minimized Placeholder */}
       {isMinimized && (
         <div 
           onClick={() => setIsMinimized(false)}
-          className="px-4 py-2 bg-[#0D1117]/60 text-center cursor-pointer text-[11px] font-mono text-[#8B949E] hover:text-[#4285F4] hover:bg-[#161B22] transition-colors flex items-center justify-center gap-2"
+          className="px-4 py-2 text-center cursor-pointer text-[11px] font-mono hover:opacity-100 transition-colors flex items-center justify-center gap-2"
+          style={{
+            backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+            color: 'var(--skin-text-secondary, #7C2D12)',
+          }}
         >
           <span>[WINDOW COLLAPSED - CLICK TO RESTORE]</span>
-          <ChevronDown className="w-3.5 h-3.5 text-[#FBBC04]" />
+          <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--skin-accent, #C2410C)' }} />
         </div>
       )}
     </div>
