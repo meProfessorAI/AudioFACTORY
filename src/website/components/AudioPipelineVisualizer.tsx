@@ -139,27 +139,44 @@ export const AudioPipelineVisualizer: React.FC = () => {
   const currentStep = PIPELINE_STEPS[activeStepIndex];
 
   return (
-    <div className="w-full bg-[#090D15] border border-white/10 rounded-2xl p-6 sm:p-8 lg:p-10 shadow-2xl relative overflow-hidden">
-      {/* Background Subtle Grid Texture */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+    <div 
+      className="w-full border rounded-2xl p-6 sm:p-8 lg:p-10 relative overflow-hidden transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+        borderColor: 'var(--skin-border, #E2E8F0)',
+        boxShadow: 'var(--skin-shadow, 0 4px 20px -2px rgba(0,0,0,0.05))',
+      }}
+    >
+      {/* Background Subtle Dot Texture */}
+      <div className="absolute inset-0 bg-[radial-gradient(#00000008_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
       
       {/* Header */}
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-amber-400 mb-1">
+          <div 
+            className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider mb-1"
+            style={{ color: 'var(--skin-accent, #0284C7)' }}
+          >
             <Cpu className="w-4 h-4" />
             <span>AudioFACTORY Studio Workflow</span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h3 
+            className="text-2xl sm:text-3xl font-black tracking-tight"
+            style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+          >
             The 5-Stage Audio Production Pipeline
           </h3>
         </div>
         <Link
           to="/app"
-          className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black bg-amber-400 hover:bg-amber-300 rounded-lg shadow-md transition-colors w-fit"
+          className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider rounded-lg shadow-xs transition-opacity hover:opacity-90 w-fit"
+          style={{
+            backgroundColor: 'var(--skin-accent, #0284C7)',
+            color: 'var(--skin-accent-text, #FFFFFF)',
+          }}
         >
           <span>Test in Studio</span>
-          <Zap className="w-3.5 h-3.5 fill-black" />
+          <Zap className="w-3.5 h-3.5 fill-current" />
         </Link>
       </div>
 
@@ -167,36 +184,52 @@ export const AudioPipelineVisualizer: React.FC = () => {
       <div className="relative z-10 grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mb-8">
         {PIPELINE_STEPS.map((step, idx) => {
           const isActive = idx === activeStepIndex;
-          const isPassed = idx < activeStepIndex;
           const Icon = step.icon;
 
           return (
             <button
               key={step.id}
               onClick={() => setActiveStepIndex(idx)}
-              className={`text-left p-3.5 rounded-xl border transition-all duration-200 relative group ${
-                isActive
-                  ? 'bg-zinc-800/90 border-amber-400/80 shadow-lg shadow-amber-500/10'
-                  : 'bg-zinc-900/40 border-white/5 hover:border-white/20 hover:bg-zinc-900/80'
+              className={`text-left p-3.5 rounded-xl border transition-all duration-150 relative group ${
+                isActive ? 'shadow-xs font-bold' : 'hover:opacity-90'
               }`}
+              style={{
+                backgroundColor: isActive ? 'var(--skin-bg-subtle, #F1F5F9)' : 'var(--skin-bg-card, #FFFFFF)',
+                borderColor: isActive ? 'var(--skin-accent, #0284C7)' : 'var(--skin-border, #E2E8F0)',
+              }}
             >
               {/* Step indicator */}
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-[10px] font-mono font-bold ${isActive ? 'text-amber-400' : 'text-zinc-500'}`}>
+                <span 
+                  className="text-[10px] font-mono font-bold"
+                  style={{ color: isActive ? 'var(--skin-accent, #0284C7)' : 'var(--skin-text-muted, #64748B)' }}
+                >
                   STAGE {step.stepNumber}
                 </span>
-                <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+                <Icon 
+                  className="w-4 h-4" 
+                  style={{ color: isActive ? 'var(--skin-accent, #0284C7)' : 'var(--skin-text-muted, #64748B)' }} 
+                />
               </div>
-              <div className="font-bold text-sm text-white flex items-center gap-1.5">
+              <div 
+                className="font-bold text-sm flex items-center gap-1.5"
+                style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+              >
                 <span>{step.name}</span>
                 {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span 
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+                    style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }} 
+                  />
                 )}
               </div>
               
-              {/* Active glow bar */}
+              {/* Active bar */}
               {isActive && (
-                <div className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full" />
+                <div 
+                  className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
+                  style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }}
+                />
               )}
             </button>
           );
@@ -204,32 +237,60 @@ export const AudioPipelineVisualizer: React.FC = () => {
       </div>
 
       {/* Active Step Showcase Card */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-zinc-950/80 border border-white/10 rounded-xl p-6 sm:p-8">
+      <div 
+        className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 border rounded-xl p-6 sm:p-8"
+        style={{
+          backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+          borderColor: 'var(--skin-border, #E2E8F0)'
+        }}
+      >
         {/* Step Explanation */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
+          <div 
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-mono font-medium"
+            style={{
+              backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+              borderColor: 'var(--skin-border, #E2E8F0)',
+              color: 'var(--skin-accent, #0284C7)'
+            }}
+          >
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }} />
             <span>{currentStep.badge}</span>
           </div>
           
-          <h4 className="text-2xl font-bold text-white tracking-tight">
+          <h4 
+            className="text-2xl font-bold tracking-tight"
+            style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+          >
             {currentStep.tagline}
           </h4>
           
-          <p className="text-zinc-300 text-sm leading-relaxed">
+          <p 
+            className="text-sm leading-relaxed"
+            style={{ color: 'var(--skin-text-secondary, #475569)' }}
+          >
             {currentStep.description}
           </p>
 
           <div className="pt-3 flex flex-wrap gap-2">
             <button
               onClick={() => setActiveStepIndex((prev) => (prev > 0 ? prev - 1 : PIPELINE_STEPS.length - 1))}
-              className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-white/10 rounded-lg"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors hover:opacity-90"
+              style={{
+                backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                borderColor: 'var(--skin-border, #E2E8F0)',
+                color: 'var(--skin-text-secondary, #475569)'
+              }}
             >
               &larr; Previous Stage
             </button>
             <button
               onClick={() => setActiveStepIndex((prev) => (prev < PIPELINE_STEPS.length - 1 ? prev + 1 : 0))}
-              className="px-3.5 py-1.5 text-xs font-semibold text-black bg-amber-400 hover:bg-amber-300 rounded-lg shadow-sm"
+              className="px-3.5 py-1.5 text-xs font-semibold rounded-lg shadow-xs transition-opacity hover:opacity-90"
+              style={{
+                backgroundColor: 'var(--skin-accent, #0284C7)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
             >
               Next Stage: {PIPELINE_STEPS[(activeStepIndex + 1) % PIPELINE_STEPS.length].name} &rarr;
             </button>
@@ -237,39 +298,64 @@ export const AudioPipelineVisualizer: React.FC = () => {
         </div>
 
         {/* Live Studio Mock Console */}
-        <div className="lg:col-span-6 bg-[#0B0F17] border border-white/10 rounded-lg p-4 sm:p-5 font-mono text-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10 text-zinc-400">
+        <div 
+          className="lg:col-span-6 border rounded-xl p-4 sm:p-5 font-mono text-xs flex flex-col justify-between shadow-xs"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            borderColor: 'var(--skin-border, #E2E8F0)'
+          }}
+        >
+          <div 
+            className="flex items-center justify-between pb-3 mb-3 border-b text-xs"
+            style={{ borderColor: 'var(--skin-border, #E2E8F0)' }}
+          >
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-              <span className="font-semibold text-zinc-200">{currentStep.mockDetails.label}</span>
+              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }} />
+              <span className="font-bold" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                {currentStep.mockDetails.label}
+              </span>
             </div>
-            <span className="text-[10px] text-zinc-500">DAW CH-0{activeStepIndex + 1}</span>
+            <span className="text-[10px]" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+              DAW CH-0{activeStepIndex + 1}
+            </span>
           </div>
 
           {/* Console lines */}
-          <div className="space-y-2 py-2 text-zinc-300">
+          <div className="space-y-2 py-2">
             {currentStep.mockDetails.items.map((line, i) => (
-              <div key={i} className="flex items-start gap-2 bg-black/40 p-2 rounded border border-white/5">
-                <span className="text-amber-400 font-bold select-none">&gt;</span>
+              <div 
+                key={i} 
+                className="flex items-start gap-2 p-2 rounded border"
+                style={{
+                  backgroundColor: 'var(--skin-bg-app, #F8FAFC)',
+                  borderColor: 'var(--skin-border, #E2E8F0)',
+                  color: 'var(--skin-text-primary, #0F172A)'
+                }}
+              >
+                <span className="font-bold select-none" style={{ color: 'var(--skin-accent, #0284C7)' }}>&gt;</span>
                 <span className="leading-snug">{line}</span>
               </div>
             ))}
           </div>
 
           {/* Live Waveform Simulation */}
-          <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-zinc-400 text-[11px]">
-            <div className="flex items-center gap-1.5">
-              <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+          <div 
+            className="mt-4 pt-3 border-t flex items-center justify-between text-[11px]"
+            style={{ borderColor: 'var(--skin-border, #E2E8F0)' }}
+          >
+            <div className="flex items-center gap-1.5" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
+              <Volume2 className="w-3.5 h-3.5" style={{ color: 'var(--skin-accent, #0284C7)' }} />
               <span>Real-Time Peak Meter: -0.2 dBFS</span>
             </div>
-            <div className="flex items-center gap-1 h-3">
+            <div className="flex items-center gap-1 h-3.5">
               {[40, 70, 95, 60, 85, 100, 50, 75, 90, 45, 65, 80, 55, 30].map((h, i) => (
                 <div
                   key={i}
-                  className="w-1 bg-amber-400/80 rounded-full"
+                  className="w-1 rounded-full transition-all"
                   style={{
                     height: `${(h * (activeStepIndex + 2)) % 100}%`,
-                    opacity: 0.4 + (i % 3) * 0.3
+                    backgroundColor: 'var(--skin-accent, #0284C7)',
+                    opacity: 0.5 + (i % 3) * 0.25
                   }}
                 />
               ))}
@@ -280,3 +366,4 @@ export const AudioPipelineVisualizer: React.FC = () => {
     </div>
   );
 };
+

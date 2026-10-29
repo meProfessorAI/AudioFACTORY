@@ -17,11 +17,14 @@ import {
   HelpCircle,
   Play
 } from 'lucide-react';
+import { useTerminal } from '../../../components/terminal/TerminalContext';
+import { DaySkinSelector } from '../../../components/theme/DaySkinSelector';
 
 export const MarketingNavbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { activeSkin } = useTerminal();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,48 +52,72 @@ export const MarketingNavbar: React.FC = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-[#090D14]/90 backdrop-blur-md border-b border-white/10 shadow-2xl py-3' 
-          : 'bg-transparent py-5'
+          ? 'backdrop-blur-md border-b shadow-sm py-3' 
+          : 'bg-transparent py-4'
       }`}
+      style={{
+        backgroundColor: isScrolled ? 'var(--skin-bg-card, #FFFFFF)' : 'transparent',
+        borderColor: isScrolled ? 'var(--skin-border, #E2E8F0)' : 'transparent',
+      }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           
           {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-amber-400/40 group-hover:scale-105 transition-transform duration-200">
+          <Link to="/" className="flex items-center gap-2.5 group focus:outline-none">
+            <div 
+              className="w-9 h-9 rounded-xl flex items-center justify-center shadow-xs border transition-transform duration-200 group-hover:scale-105"
+              style={{
+                backgroundColor: 'var(--skin-accent, #0284C7)',
+                borderColor: 'var(--skin-border-strong, #CBD5E1)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
+            >
               {/* Animated Waveform Icon */}
-              <div className="flex items-center gap-0.5 h-4">
-                <span className="w-0.5 h-2 bg-black rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
-                <span className="w-0.5 h-4 bg-black rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-                <span className="w-0.5 h-3 bg-black rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
-                <span className="w-0.5 h-4 bg-black rounded-full animate-pulse" style={{ animationDelay: '75ms' }} />
-                <span className="w-0.5 h-1.5 bg-black rounded-full animate-pulse" style={{ animationDelay: '220ms' }} />
+              <div className="flex items-center gap-0.5 h-3.5">
+                <span className="w-0.5 h-1.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+                <span className="w-0.5 h-3.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                <span className="w-0.5 h-2.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                <span className="w-0.5 h-3.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '75ms' }} />
+                <span className="w-0.5 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '220ms' }} />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tight text-white flex items-center">
-                Audio<span className="text-amber-400 font-black">FACTORY</span>
+              <span 
+                className="text-lg font-extrabold tracking-tight flex items-center"
+                style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+              >
+                Audio<span style={{ color: 'var(--skin-accent, #0284C7)' }}>FACTORY</span>
               </span>
-              <span className="text-[10px] uppercase font-mono tracking-widest text-zinc-400 -mt-1 font-semibold">
-                AI Sound Studio
+              <span 
+                className="text-[9px] uppercase font-mono tracking-widest -mt-1 font-semibold"
+                style={{ color: 'var(--skin-text-muted, #64748B)' }}
+              >
+                {activeSkin.dayName} Edition
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-zinc-900/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 shadow-inner">
+          <nav 
+            className="hidden lg:flex items-center gap-1 backdrop-blur-md px-3 py-1.5 rounded-full border shadow-2xs"
+            style={{
+              backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+              borderColor: 'var(--skin-border, #E2E8F0)'
+            }}
+          >
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`px-3.5 py-1.5 text-sm font-medium rounded-full transition-all duration-150 ${
-                    isActive 
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm' 
-                      : 'text-zinc-300 hover:text-white hover:bg-white/5'
-                  }`}
+                  className="px-3 py-1 text-xs font-semibold rounded-full transition-all duration-150 border"
+                  style={{
+                    backgroundColor: isActive ? 'var(--skin-accent-muted, #E0F2FE)' : 'transparent',
+                    borderColor: isActive ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                    color: isActive ? 'var(--skin-accent, #0284C7)' : 'var(--skin-text-secondary, #475569)',
+                  }}
                 >
                   {link.name}
                 </Link>
@@ -98,38 +125,65 @@ export const MarketingNavbar: React.FC = () => {
             })}
           </nav>
 
-          {/* CTA Actions */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* CTA Actions & 7-Day Light Skin Selector */}
+          <div className="hidden sm:flex items-center gap-2.5">
+            {/* 7-Day Skin Switcher on the landing page */}
+            <DaySkinSelector compact />
+
             <Link
               to="/app"
-              className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-800/80 rounded-lg transition-colors border border-transparent hover:border-zinc-700"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border"
+              style={{
+                backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                borderColor: 'var(--skin-border, #E2E8F0)',
+                color: 'var(--skin-text-secondary, #475569)',
+              }}
             >
               Sign In
             </Link>
             <Link
               to="/app"
-              className="group relative inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-black bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 rounded-lg shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:brightness-105 active:scale-[0.98] transition-all duration-200 border border-amber-300/60"
+              className="group relative inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg shadow-xs hover:opacity-90 active:scale-98 transition-all duration-150"
+              style={{
+                backgroundColor: 'var(--skin-accent, #0284C7)',
+                color: 'var(--skin-accent-text, #FFFFFF)',
+              }}
             >
-              <Sparkles className="w-4 h-4 text-black group-hover:rotate-12 transition-transform duration-300" />
+              <Sparkles className="w-3.5 h-3.5" />
               <span>Launch Studio</span>
-              <ArrowRight className="w-4 h-4 text-black group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
           {/* Mobile Hamburger Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg bg-zinc-900/80 border border-white/10 text-zinc-300 hover:text-white focus:outline-none"
-            aria-label="Toggle Navigation Menu"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-2 sm:hidden">
+            <DaySkinSelector compact />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-1.5 rounded-lg border transition-colors"
+              style={{
+                backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                borderColor: 'var(--skin-border, #E2E8F0)',
+                color: 'var(--skin-text-primary, #0F172A)'
+              }}
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+
         </div>
       </div>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#090D14]/98 border-b border-white/10 px-4 pt-4 pb-6 mt-3 space-y-3 backdrop-blur-xl shadow-2xl animate-in slide-in-from-top-4 duration-200">
+        <div 
+          className="lg:hidden border-b px-4 pt-4 pb-6 mt-3 space-y-3 backdrop-blur-xl shadow-xl animate-in slide-in-from-top-4 duration-200"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            borderColor: 'var(--skin-border, #E2E8F0)'
+          }}
+        >
           <div className="grid grid-cols-2 gap-2">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
@@ -137,11 +191,12 @@ export const MarketingNavbar: React.FC = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`p-3 text-sm font-semibold rounded-lg flex items-center justify-between border ${
-                    isActive 
-                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' 
-                      : 'bg-zinc-900/50 text-zinc-300 border-white/5 hover:bg-zinc-800/80'
-                  }`}
+                  className="p-2.5 text-xs font-bold rounded-lg flex items-center justify-between border transition-colors"
+                  style={{
+                    backgroundColor: isActive ? 'var(--skin-accent-muted, #E0F2FE)' : 'var(--skin-bg-subtle, #F1F5F9)',
+                    borderColor: isActive ? 'var(--skin-accent, #0284C7)' : 'var(--skin-border, #E2E8F0)',
+                    color: isActive ? 'var(--skin-accent, #0284C7)' : 'var(--skin-text-primary, #0F172A)'
+                  }}
                 >
                   <span>{link.name}</span>
                 </Link>
@@ -149,19 +204,17 @@ export const MarketingNavbar: React.FC = () => {
             })}
           </div>
 
-          <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
+          <div className="pt-2 border-t flex flex-col gap-2" style={{ borderColor: 'var(--skin-border, #E2E8F0)' }}>
             <Link
               to="/app"
-              className="w-full py-3 text-center text-sm font-bold text-black bg-gradient-to-r from-amber-400 to-amber-500 rounded-lg shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+              className="w-full py-2.5 text-center text-xs font-bold rounded-lg shadow-xs flex items-center justify-center gap-1.5"
+              style={{
+                backgroundColor: 'var(--skin-accent, #0284C7)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
             >
-              <Sparkles className="w-4 h-4 text-black" />
-              <span>Start Creating Free</span>
-            </Link>
-            <Link
-              to="/app"
-              className="w-full py-2.5 text-center text-sm font-semibold text-zinc-300 hover:text-white bg-zinc-900/80 border border-white/10 rounded-lg"
-            >
-              Open Audio Studio
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Launch Studio ({activeSkin.dayName})</span>
             </Link>
           </div>
         </div>
@@ -169,3 +222,4 @@ export const MarketingNavbar: React.FC = () => {
     </header>
   );
 };
+

@@ -13,7 +13,13 @@ interface MarketingLayoutProps {
 
 export const MarketingLayout: React.FC<MarketingLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-[#080C14] text-zinc-100 flex flex-col font-sans antialiased selection:bg-amber-500 selection:text-black">
+    <div 
+      className="min-h-screen flex flex-col font-sans antialiased transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--skin-bg-app, #FAF6EF)',
+        color: 'var(--skin-text-primary, #292524)',
+      }}
+    >
       <MarketingNavbar />
       <main className="flex-1 pt-20">
         {children}
@@ -22,3 +28,4 @@ export const MarketingLayout: React.FC<MarketingLayoutProps> = ({ children }) =>
     </div>
   );
 };
+

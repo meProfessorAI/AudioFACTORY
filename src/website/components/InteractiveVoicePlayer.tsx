@@ -205,14 +205,30 @@ export const InteractiveVoicePlayer: React.FC = () => {
     : FEATURED_VOICE_DEMOS.filter(v => v.category === filterCategory);
 
   return (
-    <div className="w-full bg-[#0B0F19] border border-white/10 rounded-2xl p-6 sm:p-8 lg:p-10 shadow-2xl">
+    <div 
+      className="w-full border rounded-2xl p-6 sm:p-8 lg:p-10 shadow-xs transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+        borderColor: 'var(--skin-border, #E2E8F0)',
+        boxShadow: 'var(--skin-shadow, 0 4px 20px -2px rgba(0,0,0,0.05))',
+      }}
+    >
       {/* Top Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+      <div 
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b"
+        style={{ borderColor: 'var(--skin-border, #E2E8F0)' }}
+      >
         <div>
-          <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400">
+          <span 
+            className="text-xs font-mono font-bold uppercase tracking-wider"
+            style={{ color: 'var(--skin-accent, #0284C7)' }}
+          >
             Interactive Voice Explorer
           </span>
-          <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          <h3 
+            className="text-xl sm:text-2xl font-black tracking-tight"
+            style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+          >
             Audition Neural Personas & Timbres
           </h3>
         </div>
@@ -223,11 +239,12 @@ export const InteractiveVoicePlayer: React.FC = () => {
             <button
               key={cat}
               onClick={() => setFilterCategory(cat)}
-              className={`px-3 py-1 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
-                filterCategory === cat
-                  ? 'bg-amber-400 text-black font-bold shadow-md shadow-amber-500/20'
-                  : 'bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800'
-              }`}
+              className="px-3 py-1 text-xs font-semibold rounded-full transition-all whitespace-nowrap border"
+              style={{
+                backgroundColor: filterCategory === cat ? 'var(--skin-accent, #0284C7)' : 'var(--skin-bg-subtle, #F1F5F9)',
+                borderColor: filterCategory === cat ? 'var(--skin-accent, #0284C7)' : 'var(--skin-border, #E2E8F0)',
+                color: filterCategory === cat ? 'var(--skin-accent-text, #FFFFFF)' : 'var(--skin-text-secondary, #475569)',
+              }}
             >
               {cat}
             </button>
@@ -239,7 +256,7 @@ export const InteractiveVoicePlayer: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-6">
         
         {/* Left Column: Voice Cards */}
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1">
+        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1 custom-scrollbar">
           {filteredVoices.map((voice) => {
             const isSelected = voice.id === activeVoiceId;
             const isThisPlaying = isSelected && isPlaying;
@@ -254,32 +271,46 @@ export const InteractiveVoicePlayer: React.FC = () => {
                     playVoiceSample(voice);
                   }
                 }}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer relative flex flex-col justify-between ${
-                  isSelected
-                    ? 'bg-zinc-800/90 border-amber-400/80 shadow-md shadow-amber-500/10'
-                    : 'bg-zinc-900/40 border-white/5 hover:border-white/20 hover:bg-zinc-900/80'
-                }`}
+                className="p-3.5 rounded-xl border transition-all cursor-pointer relative flex flex-col justify-between"
+                style={{
+                  backgroundColor: isSelected ? 'var(--skin-bg-subtle, #F1F5F9)' : 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: isSelected ? 'var(--skin-accent, #0284C7)' : 'var(--skin-border, #E2E8F0)',
+                  boxShadow: isSelected ? 'var(--skin-shadow)' : 'none',
+                }}
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-black/40 text-amber-300 border border-amber-500/20">
+                    <span 
+                      className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border"
+                      style={{
+                        backgroundColor: 'var(--skin-accent-muted, #E0F2FE)',
+                        borderColor: 'var(--skin-border, #E2E8F0)',
+                        color: 'var(--skin-accent, #0284C7)',
+                      }}
+                    >
                       {voice.category}
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-500">
+                    <span className="text-[10px] font-mono" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
                       {voice.provider}
                     </span>
                   </div>
-                  <h5 className="text-sm font-bold text-white flex items-center gap-1.5">
+                  <h5 
+                    className="text-sm font-bold flex items-center gap-1.5"
+                    style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+                  >
                     <span>{voice.name}</span>
                   </h5>
-                  <p className="text-[11px] text-zinc-400 mt-1 line-clamp-1">
+                  <p className="text-[11px] mt-1 line-clamp-1" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
                     {voice.style} &bull; {voice.accent}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
-                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-                    <Mic className="w-3 h-3 text-amber-400" />
+                <div 
+                  className="flex items-center justify-between mt-3 pt-2 border-t"
+                  style={{ borderColor: 'var(--skin-border, #E2E8F0)' }}
+                >
+                  <div className="flex items-center gap-1.5 text-[10px]" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                    <Mic className="w-3 h-3" style={{ color: 'var(--skin-accent, #0284C7)' }} />
                     <span>{voice.gender}</span>
                   </div>
                   <button
@@ -291,11 +322,12 @@ export const InteractiveVoicePlayer: React.FC = () => {
                         playVoiceSample(voice);
                       }
                     }}
-                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform active:scale-95 ${
-                      isThisPlaying
-                        ? 'bg-amber-400 text-black shadow-md shadow-amber-500/30'
-                        : 'bg-zinc-800 text-zinc-200 hover:bg-amber-400 hover:text-black'
-                    }`}
+                    className="w-7 h-7 rounded-full flex items-center justify-center transition-transform active:scale-95 shadow-2xs"
+                    style={{
+                      backgroundColor: isThisPlaying ? 'var(--skin-accent, #0284C7)' : 'var(--skin-bg-subtle, #F1F5F9)',
+                      color: isThisPlaying ? 'var(--skin-accent-text, #FFFFFF)' : 'var(--skin-text-primary, #0F172A)',
+                      border: '1px solid var(--skin-border, #E2E8F0)'
+                    }}
                     aria-label={`Audition ${voice.name}`}
                   >
                     {isThisPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current ml-0.5" />}
@@ -307,75 +339,110 @@ export const InteractiveVoicePlayer: React.FC = () => {
         </div>
 
         {/* Right Column: Master Audition Player Deck */}
-        <div className="lg:col-span-5 bg-black/60 border border-white/10 rounded-xl p-5 flex flex-col justify-between">
+        <div 
+          className="lg:col-span-5 border rounded-xl p-5 flex flex-col justify-between shadow-xs"
+          style={{
+            backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+            borderColor: 'var(--skin-border, #E2E8F0)'
+          }}
+        >
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
+              <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
                 Audition Console
               </span>
-              <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-mono font-bold text-emerald-700 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                 Live Audio Engine
               </span>
             </div>
 
             <div>
-              <h4 className="text-lg font-black text-white">{activeVoice.name}</h4>
-              <p className="text-xs text-amber-400 font-mono mt-0.5">
+              <h4 
+                className="text-lg font-black tracking-tight"
+                style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+              >
+                {activeVoice.name}
+              </h4>
+              <p className="text-xs font-mono mt-0.5 font-bold" style={{ color: 'var(--skin-accent, #0284C7)' }}>
                 {activeVoice.style} &bull; {activeVoice.provider}
               </p>
             </div>
 
             {/* Script Teleprompter Card */}
-            <div className="p-3.5 rounded-lg bg-zinc-900/90 border border-white/10 text-xs text-zinc-200 leading-relaxed italic relative">
+            <div 
+              className="p-3.5 rounded-lg border text-xs leading-relaxed italic relative shadow-2xs"
+              style={{
+                backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                borderColor: 'var(--skin-border, #E2E8F0)',
+                color: 'var(--skin-text-primary, #0F172A)'
+              }}
+            >
               &ldquo;{activeVoice.sampleLine}&rdquo;
             </div>
 
             {/* Audio Waveform Canvas Preview */}
             <div className="space-y-2">
-              <div className="h-10 bg-zinc-950 rounded-lg border border-white/10 p-2 flex items-center justify-between gap-1 overflow-hidden">
+              <div 
+                className="h-10 rounded-lg border p-2 flex items-center justify-between gap-1 overflow-hidden"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E2E8F0)'
+                }}
+              >
                 {[15, 45, 80, 60, 95, 100, 75, 40, 60, 85, 90, 50, 70, 95, 60, 40, 80, 50, 30, 60, 85, 70, 40, 90, 55, 30, 20].map((h, i) => (
                   <div
                     key={i}
-                    className={`flex-1 rounded-full transition-all duration-150 ${
-                      isPlaying
-                        ? 'bg-amber-400 shadow-sm shadow-amber-500/20'
-                        : 'bg-zinc-700'
-                    }`}
+                    className="flex-1 rounded-full transition-all duration-150"
                     style={{
                       height: isPlaying ? `${Math.max(15, (h * (i % 3 + 1)) % 100)}%` : '20%',
+                      backgroundColor: isPlaying ? 'var(--skin-accent, #0284C7)' : 'var(--skin-border-strong, #CBD5E1)',
+                      opacity: isPlaying ? 1 : 0.6
                     }}
                   />
                 ))}
               </div>
 
               {/* Progress bar */}
-              <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+              <div 
+                className="w-full h-1 rounded-full overflow-hidden"
+                style={{ backgroundColor: 'var(--skin-border, #E2E8F0)' }}
+              >
                 <div
-                  className="bg-amber-400 h-full transition-all duration-75"
-                  style={{ width: `${playbackProgress}%` }}
+                  className="h-full transition-all duration-75"
+                  style={{ 
+                    width: `${playbackProgress}%`,
+                    backgroundColor: 'var(--skin-accent, #0284C7)'
+                  }}
                 />
               </div>
             </div>
           </div>
 
           {/* Action Row */}
-          <div className="pt-5 border-t border-white/10 flex items-center justify-between gap-3 mt-4">
+          <div 
+            className="pt-5 border-t flex items-center justify-between gap-3 mt-4"
+            style={{ borderColor: 'var(--skin-border, #E2E8F0)' }}
+          >
             <button
               onClick={() => {
                 if (isPlaying) stopAudio();
                 else playVoiceSample(activeVoice);
               }}
-              className="flex-1 py-2.5 px-4 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-amber-500/20 transition-all active:scale-[0.98]"
+              className="flex-1 py-2.5 px-4 rounded-lg font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-opacity hover:opacity-90 active:scale-98"
+              style={{
+                backgroundColor: 'var(--skin-accent, #0284C7)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
             >
               {isPlaying ? (
                 <>
-                  <Pause className="w-3.5 h-3.5 fill-black" />
+                  <Pause className="w-3.5 h-3.5 fill-current" />
                   <span>Pause Audition</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-3.5 h-3.5 fill-black" />
+                  <Play className="w-3.5 h-3.5 fill-current" />
                   <span>Play Sample ({activeVoice.name.split(' ')[0]})</span>
                 </>
               )}
@@ -383,7 +450,12 @@ export const InteractiveVoicePlayer: React.FC = () => {
 
             <Link
               to="/app"
-              className="px-3.5 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-white/10 flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2.5 rounded-lg font-semibold text-xs border flex items-center gap-1.5 transition-colors hover:opacity-90 shadow-2xs"
+              style={{
+                backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                borderColor: 'var(--skin-border, #E2E8F0)',
+                color: 'var(--skin-text-primary, #0F172A)'
+              }}
             >
               <span>Use in Studio</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -395,3 +467,4 @@ export const InteractiveVoicePlayer: React.FC = () => {
     </div>
   );
 };
+
