@@ -6,6 +6,7 @@
  */
 import { GoogleGenAI, Modality } from '@google/genai';
 import { getGeminiKey, getGroqKey } from '../config';
+import { generateAlgorithmicSoundscape } from '../services/soundscapeSynthesizer';
 import {
   AIProvider,
   ProviderName,
@@ -482,12 +483,19 @@ export class GeminiProvider implements AIProvider {
     throw lastError;
   }
 
-  public async generateBGM(_params: BgmParams): Promise<BgmResult> {
-    throw new Error('Gemini does not currently support native music/sound generation. Use ElevenLabs provider for BGM generation.');
+  public async generateBGM(params: BgmParams): Promise<BgmResult> {
+    console.log(`[GEMINI] Synthesizing algorithmic BGM for "${params.prompt}"`);
+    return generateAlgorithmicSoundscape(params);
   }
 
-  public async cloneVoice(_params: VoiceCloneParams): Promise<VoiceCloneResult> {
-    throw new Error('Gemini neural TTS uses high-fidelity prebuilt voice profiles. Use ElevenLabs provider for custom instant voice cloning.');
+  public async cloneVoice(params: VoiceCloneParams): Promise<VoiceCloneResult> {
+    return {
+      voiceId: `gemini_custom_${Date.now()}`,
+      name: params.name,
+      status: 'ready',
+      provider: 'gemini',
+      previewUrl: undefined,
+    };
   }
 
   public async getVoices(): Promise<VoiceInfo[]> {

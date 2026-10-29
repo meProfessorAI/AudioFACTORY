@@ -41,7 +41,7 @@ export const BgmGenerator: React.FC<BgmGeneratorProps> = ({ onBgmGenerated, onRe
       setLastGeneratedUrl(URL.createObjectURL(blob));
       onBgmGenerated(audioBytes.buffer as ArrayBuffer);
     } catch (err: any) {
-      setError(err.message || "Failed to generate BGM. Please verify your ElevenLabs API key.");
+      setError(err.message || "Failed to generate BGM soundscape.");
     } finally {
       setIsGenerating(false);
     }

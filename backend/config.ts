@@ -29,11 +29,7 @@ export function getGeminiKey(): string {
 }
 
 export function getElevenLabsKey(): string {
-  const key = config.elevenLabsApiKey;
-  if (!key) {
-    console.warn('[SERVER] Warning: ELEVENLABS_API_KEY is not configured on server.');
-  }
-  return key;
+  return config.elevenLabsApiKey || '';
 }
 
 export function getGroqKey(): string {

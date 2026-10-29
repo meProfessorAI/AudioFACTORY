@@ -199,6 +199,9 @@ export class GenerationService {
     if (isElevenLabsConfigured && !params.provider) {
       providerName = 'elevenlabs';
       finalVoiceId = mapGeminiToElevenLabs(voiceNameOrId);
+    } else if (!isElevenLabsConfigured && providerName === 'elevenlabs') {
+      providerName = 'gemini';
+      finalVoiceId = 'Algieba';
     }
 
     const provider = providerRegistry.getProvider(providerName);
@@ -314,6 +317,9 @@ export class GenerationService {
           if (isElevenLabsConfigured && !line.provider) {
             lineProviderName = 'elevenlabs';
             finalVoiceId = mapGeminiToElevenLabs(line.voice);
+          } else if (!isElevenLabsConfigured && lineProviderName === 'elevenlabs') {
+            lineProviderName = 'gemini';
+            finalVoiceId = 'Puck';
           }
 
           const provider = lineProviderName === 'elevenlabs' ? elevenLabsProvider : geminiProvider;
@@ -367,12 +373,16 @@ export class GenerationService {
       throw err;
     }
 
-    const provider = providerRegistry.getElevenLabsProvider();
+    const isElevenConfigured = providerRegistry.getElevenLabsProvider().isConfigured();
+    const providerName: ProviderName = isElevenConfigured ? 'elevenlabs' : 'gemini';
+    const provider = isElevenConfigured 
+      ? providerRegistry.getElevenLabsProvider() 
+      : providerRegistry.getGeminiProvider();
 
     return this.executeProtectedJob<BgmResult>(
       userCtx,
       'bgm',
-      'elevenlabs',
+      providerName,
       {
         prompt: params.prompt,
         durationSeconds: params.durationSeconds || 10,
@@ -404,12 +414,16 @@ export class GenerationService {
       throw err;
     }
 
-    const provider = providerRegistry.getElevenLabsProvider();
+    const isElevenConfigured = providerRegistry.getElevenLabsProvider().isConfigured();
+    const providerName: ProviderName = isElevenConfigured ? 'elevenlabs' : 'gemini';
+    const provider = isElevenConfigured
+      ? providerRegistry.getElevenLabsProvider()
+      : providerRegistry.getGeminiProvider();
 
     return this.executeProtectedJob<VoiceCloneResult>(
       userCtx,
       'voice_clone',
-      'elevenlabs',
+      providerName,
       {
         name: params.name,
         audioSize: params.audioBuffer.length,

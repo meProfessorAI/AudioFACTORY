@@ -235,15 +235,21 @@ export async function handleGenerateBgm(req: Request, res: Response): Promise<vo
       durationSeconds: Number(duration),
     });
 
-    if (req.headers.accept === 'audio/mpeg' || req.query.binary === 'true') {
-      res.setHeader('Content-Type', 'audio/mpeg');
+    if (req.headers.accept === 'audio/mpeg' || req.headers.accept === 'audio/wav' || req.query.binary === 'true') {
+      res.setHeader('Content-Type', result.data.contentType || 'audio/wav');
       res.setHeader('X-Job-Id', result.jobId);
       res.send(result.data.audioBuffer);
       return;
     }
 
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.send(result.data.audioBuffer);
+    res.json({
+      success: true,
+      audioBase64: result.data.audioBuffer.toString('base64'),
+      contentType: result.data.contentType || 'audio/wav',
+      durationSeconds: result.data.durationSeconds,
+      jobId: result.jobId,
+      quotaRemaining: result.quotaRemaining,
+    });
   } catch (error: any) {
     const status = error.statusCode || 500;
     res.status(status).json({
