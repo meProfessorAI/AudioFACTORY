@@ -150,6 +150,7 @@ class MainActivity : AppCompatActivity() {
         val audioBridge = AudioFactoryBridge()
         webView.addJavascriptInterface(audioBridge, "AudioFactoryBridge")
         webView.addJavascriptInterface(audioBridge, "AndroidBridge")
+        webView.addJavascriptInterface(audioBridge, "AudioFactoryNative")
 
         // WebChromeClient for File Uploads, Microphone, Dialogs, Popups & Progress
         webView.webChromeClient = object : WebChromeClient() {

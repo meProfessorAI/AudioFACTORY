@@ -11,6 +11,8 @@ import {
   signInWithRedirect,
   linkWithRedirect,
   getRedirectResult,
+  signInWithCredential,
+  linkWithCredential,
   GoogleAuthProvider, 
   signInAnonymously as firebaseSignInAnonymously, 
   signOut as firebaseSignOut,
@@ -79,26 +81,145 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 }
 
 /**
- * Validate connection to Firestore on boot (conforms to skill requirement)
+ * Validate connection to Firestore on boot (distinguishing reachable server vs offline vs invalid config)
  */
 export async function testFirestoreConnection(): Promise<boolean> {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
+    console.log("[Firestore] Health check: Document test/connection retrieved successfully.");
     return true;
   } catch (error: any) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     const errorCode = error?.code || '';
+
+    // Document missing or rules/auth restricted means server WAS reached!
+    if (errorCode === 'not-found' || errorCode === 'permission-denied' || errorCode === 'unauthenticated') {
+      console.log(`[Firestore] Health check: Backend reachable (Server status: ${errorCode}).`);
+      return true;
+    }
+
+    // Client offline or network unavailable
     if (
       errorCode === 'unavailable' ||
+      errorCode === 'failed-precondition' ||
       errorMsg.includes('the client is offline') || 
       errorMsg.includes('unavailable') ||
       errorMsg.includes('Could not reach Cloud Firestore backend')
     ) {
-      console.warn("Firestore connection check: Operating in offline / local cache mode.");
+      console.warn("[Firestore] Health check: Operating in offline / local cache mode.");
       return false;
     }
-    return true;
+
+    // Missing or invalid database configuration
+    if (errorCode === 'invalid-argument' || errorMsg.includes('Database') || errorMsg.includes('projectId')) {
+      console.error("[Firestore] Health check failed: Invalid database selection or project config.", errorMsg);
+      return false;
+    }
+
+    console.warn("[Firestore] Health check notice:", errorCode, errorMsg);
+    return false;
   }
+}
+
+/**
+ * Native Android Authentication Bridge Handoff:
+ * Invoked when Android layer passes a Google ID token via `window.AudioFactoryNative.onGoogleIdToken(idToken)`
+ */
+let isAuthenticatingNative = false;
+
+export async function handleNativeGoogleIdToken(idToken: string): Promise<User> {
+  if (!idToken || typeof idToken !== 'string' || idToken.trim().length === 0) {
+    const errMsg = "Invalid or empty Google ID token received from native bridge.";
+    console.error("[Auth Bridge]", errMsg);
+    notifyAndroidAuthResult(false, errMsg);
+    throw new Error(errMsg);
+  }
+
+  if (isAuthenticatingNative) {
+    console.warn("[Auth Bridge] Authentication attempt already in progress. Suppressing duplicate call.");
+    return new Promise((_, reject) => reject(new Error("Authentication in progress")));
+  }
+
+  isAuthenticatingNative = true;
+
+  try {
+    const credential = GoogleAuthProvider.credential(idToken);
+    const currentUser = auth.currentUser;
+
+    let userCredential: any;
+
+    if (currentUser && currentUser.isAnonymous) {
+      try {
+        console.log("[Auth Bridge] Linking existing anonymous account with native Google credential...");
+        userCredential = await linkWithCredential(currentUser, credential);
+        console.log("[Auth Bridge] Successfully linked guest account to Google!");
+      } catch (linkError: any) {
+        console.warn("[Auth Bridge] Linking notice:", linkError?.code || linkError?.message);
+        if (
+          linkError.code === 'auth/credential-already-in-use' ||
+          linkError.code === 'auth/email-already-in-use' ||
+          linkError.code === 'auth/provider-already-linked'
+        ) {
+          console.log("[Auth Bridge] Credential already associated with existing user. Signing in directly...");
+          userCredential = await signInWithCredential(auth, credential);
+        } else {
+          throw linkError;
+        }
+      }
+    } else {
+      console.log("[Auth Bridge] Signing in with native Google credential...");
+      userCredential = await signInWithCredential(auth, credential);
+    }
+
+    const user = userCredential.user;
+    console.log("[Auth Bridge] Native authentication succeeded for user UID:", user.uid);
+
+    notifyAndroidAuthResult(true);
+    return user;
+  } catch (error: any) {
+    const errorCode = error?.code || 'auth/unknown-error';
+    const errorMessage = error?.message || 'Native authentication failed';
+    console.error("[Auth Bridge] Error during native token sign-in:", errorCode);
+
+    notifyAndroidAuthResult(false, `${errorCode}: ${errorMessage}`);
+    throw error;
+  } finally {
+    isAuthenticatingNative = false;
+  }
+}
+
+function notifyAndroidAuthResult(success: boolean, error?: string) {
+  try {
+    if ((window as any).AudioFactoryNative?.onAuthResult) {
+      (window as any).AudioFactoryNative.onAuthResult(success, error);
+    }
+    if ((window as any).AudioFactoryBridge?.onAuthResult) {
+      (window as any).AudioFactoryBridge.onAuthResult(success, error);
+    }
+  } catch (e) {
+    console.warn("[Auth Bridge] Could not notify native layer:", e);
+  }
+}
+
+/**
+ * Register global window.AudioFactoryNative contract for Android WebView
+ */
+export function registerNativeAuthBridge() {
+  if (typeof window === 'undefined') return;
+
+  if (!(window as any).AudioFactoryNative) {
+    (window as any).AudioFactoryNative = {};
+  }
+
+  (window as any).AudioFactoryNative.onGoogleIdToken = async (idToken: string) => {
+    try {
+      await handleNativeGoogleIdToken(idToken);
+    } catch (err) {
+      // Error notifications sent inside handleNativeGoogleIdToken
+    }
+  };
+
+  console.log("[Auth Bridge] Registered window.AudioFactoryNative.onGoogleIdToken contract.");
 }
 
 /**

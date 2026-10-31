@@ -28,6 +28,10 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
+    function isValidTimestampString(ts) {
+      return ts is string && ts.size() >= 10 && ts.size() <= 64;
+    }
+
     function incoming() {
       return request.resource.data;
     }
@@ -38,27 +42,45 @@ service cloud.firestore {
 
     // Validation helper for AudioProject
     function isValidAudioProject(data) {
+      let authUid = request.auth.uid;
       return data.keys().hasAll(['id', 'title', 'userId', 'lines']) &&
              data.id is string && isValidId(data.id) &&
              data.title is string && data.title.size() <= 256 &&
-             data.userId == request.auth.uid &&
+             data.userId == authUid &&
              data.lines is list && data.lines.size() <= 200 &&
              (!('summary' in data) || (data.summary is string && data.summary.size() <= 4000)) &&
              (!('format' in data) || (data.format is string && data.format.size() <= 100)) &&
              (!('style' in data) || (data.style is string && data.style.size() <= 100)) &&
              (!('speakerCount' in data) || (data.speakerCount is number)) &&
-             (!('speakers' in data) || (data.speakers is list && data.speakers.size() <= 20));
+             (!('speakers' in data) || (data.speakers is list && data.speakers.size() <= 20)) &&
+             !('role' in data) && !('isAdmin' in data) && !('plan' in data) && !('quota' in data);
     }
 
-    // Validation helper for Monologue
-    function isValidMonologue(data) {
+    // Validation helper for Audio Monologue
+    function isValidAudioMonologue(data) {
+      let authUid = request.auth.uid;
       return data.keys().hasAll(['id', 'title', 'voice', 'text', 'userId']) &&
              data.id is string && isValidId(data.id) &&
              data.title is string && data.title.size() <= 256 &&
              data.voice is string && data.voice.size() <= 100 &&
              data.text is string && data.text.size() <= 50000 &&
-             data.userId == request.auth.uid &&
-             (!('styleId' in data) || (data.styleId is string && data.styleId.size() <= 100));
+             data.userId == authUid &&
+             (!('styleId' in data) || (data.styleId is string && data.styleId.size() <= 100)) &&
+             !('role' in data) && !('isAdmin' in data) && !('plan' in data);
+    }
+
+    function isValidMonologue(data) {
+      return isValidAudioMonologue(data);
+    }
+
+    // Validation helper for User Profile
+    function isValidUserProfile(data) {
+      let authUid = request.auth.uid;
+      return data.userId == authUid &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 128)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 256)) &&
+             !('role' in data) && !('isAdmin' in data) && !('plan' in data) &&
+             !('planId' in data) && !('entitlement' in data) && !('quota' in data);
     }
 
     // Admins collection for role checking
@@ -71,26 +93,56 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if isOwner(userId) || isAdmin();
 
+      // User Profile
+      match /profile/{profileId} {
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow create: if (isOwner(userId) || isAdmin()) && isValidId(profileId) && isValidUserProfile(incoming());
+        allow update: if (isOwner(userId) || isAdmin()) && isValidId(profileId) && isValidUserProfile(incoming());
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
       // Audio Projects subcollection
       match /projects/{projectId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if (isOwner(userId) || isAdmin()) && isValidId(projectId) && isValidAudioProject(incoming());
-        allow update: if (isOwner(userId) || isAdmin()) && isValidId(projectId) && isValidAudioProject(incoming()) && incoming().userId == existing().userId;
+        allow update: if (isOwner(userId) || isAdmin()) && isValidId(projectId) && isValidAudioProject(incoming()) && incoming().userId == existing().userId && incoming().createdAt == existing().createdAt;
         allow delete: if isOwner(userId) || isAdmin();
       }
 
       // Monologues subcollection
       match /monologues/{monologueId} {
         allow get, list: if isOwner(userId) || isAdmin();
-        allow create: if (isOwner(userId) || isAdmin()) && isValidId(monologueId) && isValidMonologue(incoming());
-        allow update: if (isOwner(userId) || isAdmin()) && isValidId(monologueId) && isValidMonologue(incoming()) && incoming().userId == existing().userId;
+        allow create: if (isOwner(userId) || isAdmin()) && isValidId(monologueId) && isValidAudioMonologue(incoming());
+        allow update: if (isOwner(userId) || isAdmin()) && isValidId(monologueId) && isValidAudioMonologue(incoming()) && incoming().userId == existing().userId && incoming().createdAt == existing().createdAt;
         allow delete: if isOwner(userId) || isAdmin();
       }
 
-      // Daily usage records (authoritative client read, admin/server write)
-      match /usage/{date} {
-        allow get, list: if isOwner(userId) || isAdmin();
-        allow write: if isAdmin();
+      // Daily usage records (read-only for clients, admin/server write)
+      match /usage/{dateId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow write: if false;
+      }
+
+      // Entitlements ledger (read-only for clients, server write)
+      match /entitlements/{docId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow write: if false;
+      }
+
+      // Purchases log (read-only for clients, server write)
+      match /purchases/{purchaseId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow write: if false;
+      }
+
+      // Generation Jobs (read-only for clients, server write)
+      match /generationJobs/{jobId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow write: if false;
       }
     }
   }

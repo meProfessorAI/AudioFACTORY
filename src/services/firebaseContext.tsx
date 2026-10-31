@@ -20,7 +20,8 @@ import {
   saveMonologue,
   deleteMonologue,
   testFirestoreConnection,
-  checkRedirectResult
+  checkRedirectResult,
+  registerNativeAuthBridge
 } from './firebaseService';
 import { SavedAudioProject, SavedMonologue, ProjectInput, MonologueInput, UsageRecord } from '../../types';
 
@@ -59,8 +60,9 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  // 1. Test Firestore connectivity on boot
+  // 1. Test Firestore connectivity & register native auth bridge on boot
   useEffect(() => {
+    registerNativeAuthBridge();
     testFirestoreConnection().then(online => {
       setIsOnline(online);
     });
