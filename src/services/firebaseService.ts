@@ -8,6 +8,9 @@ import {
   db,
   signInWithPopup, 
   linkWithPopup,
+  signInWithRedirect,
+  linkWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider, 
   signInAnonymously as firebaseSignInAnonymously, 
   signOut as firebaseSignOut,
@@ -99,21 +102,48 @@ export async function testFirestoreConnection(): Promise<boolean> {
 }
 
 /**
- * Google Sign In / Sign Up handler using GoogleAuthProvider & popup
+ * Check if the user just returned from a Google redirect authentication
+ */
+export async function checkRedirectResult(): Promise<User | null> {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      console.log("[Auth] Successfully authenticated from redirect:", result.user.email);
+      return result.user;
+    }
+  } catch (err: any) {
+    console.warn("[Auth] Redirect result notification:", err?.message || err);
+  }
+  return null;
+}
+
+/**
+ * Google Sign In / Sign Up handler using GoogleAuthProvider with popup and redirect fallback
  */
 export async function signInWithGoogle(): Promise<{ user: User; isNewUser?: boolean }> {
   try {
     const result = await signInWithPopup(auth, googleAuthProvider);
     return { user: result.user };
   } catch (err: any) {
-    console.error("Google sign-in error:", err);
+    console.warn("Google sign-in popup attempt error:", err?.code || err?.message);
+    // If popup is blocked or unsupported in current environment (e.g. mobile webview), fallback to redirect
+    if (
+      err.code === 'auth/popup-blocked' ||
+      err.code === 'auth/operation-not-supported-in-this-environment' ||
+      err.code === 'auth/cancelled-popup-request'
+    ) {
+      console.log("[Auth] Falling back to signInWithRedirect...");
+      await signInWithRedirect(auth, googleAuthProvider);
+      return new Promise(() => {}); // Wait for redirect to occur
+    }
     throw err;
   }
 }
 
 /**
  * Google Sign In with Account Linking:
- * Links anonymous guest account to Google without losing existing UID and work
+ * Links anonymous guest account to Google without losing existing UID and work,
+ * with graceful redirect fallback for mobile webviews.
  */
 export async function linkOrSignInWithGoogle(): Promise<{ user: User; linked: boolean }> {
   const currentUser = auth.currentUser;
@@ -124,15 +154,46 @@ export async function linkOrSignInWithGoogle(): Promise<{ user: User; linked: bo
       return { user: result.user, linked: true };
     } catch (err: any) {
       if (err.code === 'auth/credential-already-in-use' || err.code === 'auth/email-already-in-use') {
-        const credential = await signInWithPopup(auth, googleAuthProvider);
-        return { user: credential.user, linked: false };
+        try {
+          const credential = await signInWithPopup(auth, googleAuthProvider);
+          return { user: credential.user, linked: false };
+        } catch (subErr: any) {
+          if (
+            subErr.code === 'auth/popup-blocked' ||
+            subErr.code === 'auth/operation-not-supported-in-this-environment'
+          ) {
+            console.log("[Auth] Falling back to signInWithRedirect...");
+            await signInWithRedirect(auth, googleAuthProvider);
+            return new Promise(() => {});
+          }
+          throw subErr;
+        }
+      } else if (
+        err.code === 'auth/popup-blocked' ||
+        err.code === 'auth/operation-not-supported-in-this-environment'
+      ) {
+        console.log("[Auth] Falling back to linkWithRedirect...");
+        await linkWithRedirect(currentUser, googleAuthProvider);
+        return new Promise(() => {});
       }
       throw err;
     }
   }
 
-  const credential = await signInWithPopup(auth, googleAuthProvider);
-  return { user: credential.user, linked: false };
+  try {
+    const credential = await signInWithPopup(auth, googleAuthProvider);
+    return { user: credential.user, linked: false };
+  } catch (err: any) {
+    if (
+      err.code === 'auth/popup-blocked' ||
+      err.code === 'auth/operation-not-supported-in-this-environment'
+    ) {
+      console.log("[Auth] Falling back to signInWithRedirect...");
+      await signInWithRedirect(auth, googleAuthProvider);
+      return new Promise(() => {});
+    }
+    throw err;
+  }
 }
 
 /**

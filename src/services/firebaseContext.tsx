@@ -19,7 +19,8 @@ import {
   deleteAudioProject,
   saveMonologue,
   deleteMonologue,
-  testFirestoreConnection
+  testFirestoreConnection,
+  checkRedirectResult
 } from './firebaseService';
 import { SavedAudioProject, SavedMonologue, ProjectInput, MonologueInput, UsageRecord } from '../../types';
 
@@ -69,6 +70,16 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     let isMounted = true;
     let isSigningIn = false;
+
+    // Check if returning from a mobile redirect authentication
+    checkRedirectResult().then(redirectUser => {
+      if (redirectUser && isMounted) {
+        setUser(redirectUser);
+        setAuthLoading(false);
+      }
+    }).catch(err => {
+      console.warn("Redirect check notice:", err);
+    });
 
     const unsubscribe = subscribeToAuth(async (currentUser) => {
       if (!isMounted) return;

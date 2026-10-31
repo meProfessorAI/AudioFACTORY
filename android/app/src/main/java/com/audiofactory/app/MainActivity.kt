@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
             visibility = View.INVISIBLE // Hide until first content paints successfully
         }
 
-        // Enable modern web settings required for AudioFACTORY
+        // Enable modern web settings required for AudioFACTORY and Google Firebase Authentication
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -131,24 +131,94 @@ class MainActivity : AppCompatActivity() {
             allowFileAccess = true
             allowContentAccess = true
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            
-            // Append explicit AudioFACTORY app identifier to User Agent string
-            userAgentString = "$userAgentString AudioFACTORYAndroid/1.0"
+            // Enable multiple windows for Firebase Auth popup flows
+            setSupportMultipleWindows(true)
+            javaScriptCanOpenWindowsAutomatically = true
+
+            // CRITICAL: Strip '; wv' and 'Version/4.0' from User-Agent so Google OAuth does NOT trigger 403 "disallowed_useragent"
+            val defaultUa = userAgentString
+            userAgentString = defaultUa.replace("; wv", "").replace("Version/4.0 ", "")
         }
 
-        // Configure cookies
+        // Configure cookies with full third-party support for cross-domain OAuth tokens
         CookieManager.getInstance().apply {
             setAcceptCookie(true)
             setAcceptThirdPartyCookies(webView, true)
         }
 
-        // Add Native JavaScript Bridge for Seamless Audio Saving (MediaStore Scoped Storage)
+        // Add Native JavaScript Bridge for Seamless Audio Saving & Platform Identification
         val audioBridge = AudioFactoryBridge()
         webView.addJavascriptInterface(audioBridge, "AudioFactoryBridge")
         webView.addJavascriptInterface(audioBridge, "AndroidBridge")
 
-        // WebChromeClient for File Uploads, Microphone, Dialogs & Progress
+        // WebChromeClient for File Uploads, Microphone, Dialogs, Popups & Progress
         webView.webChromeClient = object : WebChromeClient() {
+            override fun onCreateWindow(
+                view: WebView?,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: android.os.Message?
+            ): Boolean {
+                val popupWebView = WebView(this@MainActivity).apply {
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.databaseEnabled = true
+                    settings.setSupportMultipleWindows(true)
+                    settings.javaScriptCanOpenWindowsAutomatically = true
+                    // Standard Chrome Mobile User-Agent to satisfy Google OAuth policy
+                    val baseUa = settings.userAgentString
+                    settings.userAgentString = baseUa.replace("; wv", "").replace("Version/4.0 ", "")
+                }
+
+                CookieManager.getInstance().apply {
+                    setAcceptCookie(true)
+                    setAcceptThirdPartyCookies(popupWebView, true)
+                }
+
+                val dialog = android.app.Dialog(this@MainActivity, android.R.style.Theme_DeviceDefault_Light_NoActionBar_Fullscreen).apply {
+                    setContentView(popupWebView)
+                    setOnDismissListener {
+                        try {
+                            popupWebView.destroy()
+                        } catch (e: Exception) {
+                            Log.w("AudioFACTORY", "Popup webview destroy notice: ${e.message}")
+                        }
+                    }
+                }
+
+                popupWebView.webChromeClient = object : WebChromeClient() {
+                    override fun onCloseWindow(window: WebView?) {
+                        try {
+                            dialog.dismiss()
+                        } catch (e: Exception) {
+                            Log.w("AudioFACTORY", "Popup dialog dismiss notice: ${e.message}")
+                        }
+                    }
+                }
+
+                popupWebView.webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                        val url = request.url.toString()
+                        if (isAuthOrAllowedUrl(url)) {
+                            return false
+                        }
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            startActivity(intent)
+                            return true
+                        } catch (e: Exception) {
+                            return false
+                        }
+                    }
+                }
+
+                val transport = resultMsg?.obj as? WebView.WebViewTransport
+                transport?.webView = popupWebView
+                resultMsg?.sendToTarget()
+                dialog.show()
+                return true
+            }
+
             override fun onShowFileChooser(
                 webView: WebView,
                 filePathCallback: ValueCallback<Array<Uri>>,
@@ -172,7 +242,7 @@ class MainActivity : AppCompatActivity() {
                 val hasMicrophone = resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)
                 if (hasMicrophone) {
                     val origin = request.origin.toString()
-                    if (origin.startsWith(PRODUCTION_URL) || origin.contains(ALLOWED_HOST)) {
+                    if (isAuthOrAllowedUrl(origin)) {
                         // Check Android microphone permission
                         if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                             request.grant(arrayOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
@@ -212,23 +282,6 @@ class MainActivity : AppCompatActivity() {
                 return handleNavigationRules(url)
             }
 
-            private fun handleNavigationRules(url: String): Boolean {
-                // Stay inside the WebView for AudioFACTORY domains
-                if (url.startsWith(PRODUCTION_URL) || url.contains(ALLOWED_HOST)) {
-                    return false
-                }
-
-                // External URLs like oauth providers, payment gateways must open in system browser
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    startActivity(intent)
-                    return true
-                } catch (e: Exception) {
-                    Log.e("AudioFACTORY", "Failed to launch external browser for URL: $url", e)
-                    return false
-                }
-            }
-
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
                 // Dismiss splash only once we successfully connect and render the live app
@@ -249,6 +302,66 @@ class MainActivity : AppCompatActivity() {
                 showErrorState()
             }
         }
+
+    private fun isAuthOrAllowedUrl(url: String): Boolean {
+        return try {
+            val uri = Uri.parse(url)
+            val host = uri.host?.lowercase() ?: return false
+
+            // 1. AudioFACTORY Domains & Dev Environments
+            if (host == "audiofactory.vercel.app" || 
+                host == "audiofactory.app" ||
+                host.endsWith(".vercel.app") ||
+                host.endsWith(".run.app") ||
+                host == "localhost" ||
+                host == "10.0.2.2" ||
+                host == "127.0.0.1") {
+                return true
+            }
+
+            // 2. Firebase Authentication & Handler Domains
+            if (host == "audiofactory-eia.firebaseapp.com" ||
+                host.endsWith(".firebaseapp.com") ||
+                host.endsWith(".web.app") ||
+                host.endsWith(".firebase.com")) {
+                return true
+            }
+
+            // 3. Google OAuth & Sign-In Domains
+            if (host == "accounts.google.com" ||
+                host == "accounts.youtube.com" ||
+                host == "apis.google.com" ||
+                host == "oauth2.googleapis.com" ||
+                host == "myaccount.google.com" ||
+                host.endsWith(".google.com") ||
+                host.endsWith(".googleapis.com") ||
+                host.endsWith(".googleusercontent.com") ||
+                host.endsWith(".gstatic.com")) {
+                return true
+            }
+
+            false
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun handleNavigationRules(url: String): Boolean {
+        // Keep all app and authentication flows inside the WebView
+        if (isAuthOrAllowedUrl(url)) {
+            return false
+        }
+
+        // Only truly external links (external social media, external web pages) launch system browser
+        return try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+            true
+        } catch (e: Exception) {
+            Log.e("AudioFACTORY", "Failed to launch external browser for URL: $url", e)
+            false
+        }
+    }
 
         // Configure DownloadListener for generated audio downloads
         webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
@@ -490,6 +603,9 @@ class MainActivity : AppCompatActivity() {
      * Native JavaScript Bridge to save and share audio without requiring legacy storage permissions
      */
     inner class AudioFactoryBridge {
+        @JavascriptInterface
+        fun isAndroid(): Boolean = true
+
         @JavascriptInterface
         fun saveAudio(base64Data: String, filename: String, mimeType: String): Boolean {
             return try {
