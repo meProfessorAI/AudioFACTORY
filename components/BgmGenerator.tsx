@@ -48,34 +48,50 @@ export const BgmGenerator: React.FC<BgmGeneratorProps> = ({ onBgmGenerated, onRe
   };
 
   return (
-    <div className="flex flex-col gap-3.5 bg-white border border-zinc-200 rounded-xl p-4 sm:p-5 shadow-2xs">
+    <div 
+      className="flex flex-col gap-3.5 rounded-xl p-4 sm:p-5 border shadow-2xs"
+      style={{
+        backgroundColor: 'var(--af-surface, #FFFFFF)',
+        borderColor: 'var(--af-border, #E8D5C2)'
+      }}
+    >
       
       {/* Preset Vibe Chips */}
       <div>
-        <label className="block text-xs font-mono font-bold text-zinc-600 uppercase tracking-wider mb-2">
+        <label 
+          className="block text-xs font-semibold uppercase tracking-wider mb-2"
+          style={{ color: 'var(--af-text, #431407)' }}
+        >
           Preset Moods & Soundscapes
         </label>
         <div className="flex flex-wrap gap-1.5">
-          {PRESET_STYLES.map((style) => (
-            <button
-              key={style.label}
-              type="button"
-              onClick={() => setPrompt(style.prompt)}
-              className={`px-2.5 py-1 rounded-md text-xs font-mono transition-all border ${
-                prompt === style.prompt
-                  ? 'bg-amber-100 text-amber-900 border-amber-300 font-bold shadow-2xs'
-                  : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border-zinc-200'
-              }`}
-            >
-              {style.label}
-            </button>
-          ))}
+          {PRESET_STYLES.map((style) => {
+            const isSelected = prompt === style.prompt;
+            return (
+              <button
+                key={style.label}
+                type="button"
+                onClick={() => setPrompt(style.prompt)}
+                className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all border cursor-pointer"
+                style={{
+                  backgroundColor: isSelected ? 'var(--af-accent, #C2410C)' : 'var(--af-raised, #F6EDE2)',
+                  color: isSelected ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+                  borderColor: isSelected ? 'var(--af-accent, #C2410C)' : 'var(--af-border, #E8D5C2)'
+                }}
+              >
+                {style.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Input Prompt Box */}
       <div>
-        <label className="block text-xs font-mono font-bold text-zinc-600 uppercase tracking-wider mb-1.5">
+        <label 
+          className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+          style={{ color: 'var(--af-text, #431407)' }}
+        >
           Soundscape Prompt Directives
         </label>
         <div className="relative">
@@ -84,7 +100,12 @@ export const BgmGenerator: React.FC<BgmGeneratorProps> = ({ onBgmGenerated, onRe
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
             placeholder="Describe your desired mood, instrumentation, and tempo..."
-            className="w-full px-3.5 py-2.5 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white text-zinc-900 placeholder:text-zinc-400 text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all shadow-inner"
+            className="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-sans focus:outline-none transition-all shadow-inner"
+            style={{
+              backgroundColor: 'var(--af-raised, #F6EDE2)',
+              borderColor: 'var(--af-border, #E8D5C2)',
+              color: 'var(--af-text, #431407)'
+            }}
           />
         </div>
       </div>
@@ -92,36 +113,44 @@ export const BgmGenerator: React.FC<BgmGeneratorProps> = ({ onBgmGenerated, onRe
       {/* Duration and Action Row */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono font-bold text-zinc-600 uppercase">Duration:</span>
-          {[10, 15, 30].map(sec => (
-            <button
-              key={sec}
-              type="button"
-              onClick={() => setDuration(sec)}
-              className={`px-2.5 py-1 rounded-md text-xs font-mono font-bold border transition-colors ${
-                duration === sec
-                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-2xs'
-                  : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border-zinc-200'
-              }`}
-            >
-              {sec}s
-            </button>
-          ))}
+          <span className="text-xs font-semibold" style={{ color: 'var(--af-text, #431407)' }}>Duration:</span>
+          {[10, 15, 30].map(sec => {
+            const isSelected = duration === sec;
+            return (
+              <button
+                key={sec}
+                type="button"
+                onClick={() => setDuration(sec)}
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer"
+                style={{
+                  backgroundColor: isSelected ? 'var(--af-accent, #C2410C)' : 'var(--af-raised, #F6EDE2)',
+                  color: isSelected ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+                  borderColor: isSelected ? 'var(--af-accent, #C2410C)' : 'var(--af-border, #E8D5C2)'
+                }}
+              >
+                {sec}s
+              </button>
+            );
+          })}
         </div>
 
         <button 
           onClick={() => handleGenerate()} 
           disabled={isGenerating || !prompt.trim()}
-          className="px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-zinc-950 font-mono text-xs font-bold uppercase tracking-wider border border-amber-500 flex items-center gap-2 shadow-xs transition-all active:scale-95"
+          className="px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+          style={{
+            backgroundColor: 'var(--af-accent, #C2410C)',
+            color: 'var(--af-accent-text, #FFFFFF)'
+          }}
         >
           {isGenerating ? (
             <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-950" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
               <span>Synthesizing Bed...</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-3.5 h-3.5 text-zinc-950" />
+              <Sparkles className="w-3.5 h-3.5" />
               <span>Generate Soundscape</span>
             </>
           )}
@@ -130,8 +159,14 @@ export const BgmGenerator: React.FC<BgmGeneratorProps> = ({ onBgmGenerated, onRe
 
       {/* Audio Sample Player if generated */}
       {lastGeneratedUrl && (
-        <div className="mt-1 pt-3 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-2 bg-amber-50/50 p-2.5 rounded-lg border border-amber-100">
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-900">
+        <div 
+          className="mt-1 pt-3 border-t flex flex-col sm:flex-row items-center justify-between gap-2 p-2.5 rounded-xl border"
+          style={{
+            backgroundColor: 'var(--af-raised, #F6EDE2)',
+            borderColor: 'var(--af-border, #E8D5C2)'
+          }}
+        >
+          <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--af-text, #431407)' }}>
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>Soundscape Ready ({duration}s stem)</span>
           </div>
@@ -140,7 +175,7 @@ export const BgmGenerator: React.FC<BgmGeneratorProps> = ({ onBgmGenerated, onRe
       )}
 
       {error && (
-        <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 font-mono text-xs">
+        <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
           {error}
         </div>
       )}
@@ -148,3 +183,4 @@ export const BgmGenerator: React.FC<BgmGeneratorProps> = ({ onBgmGenerated, onRe
     </div>
   );
 };
+

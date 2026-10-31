@@ -559,29 +559,19 @@ export const StudioApp: React.FC = () => {
               estimatedSeconds={estimatedSeconds}
             />
           ) : activeMode === 'multispeaker' ? (
-            <div 
-              className="flex-1 flex flex-col h-full overflow-hidden"
-              style={{ backgroundColor: 'var(--af-canvas, var(--skin-bg-app))' }}
-            >
-              <MultiSpeakerStudio 
-                onBgmOverlay={(buf) => setBgmBuffer(buf)} 
-                loadedProject={loadedMultiSpeakerProject}
-                onOpenCloudModal={() => setIsCloudModalOpen(true)}
-                onRequireAuth={handleRequireAuth}
-              />
-            </div>
+            <MultiSpeakerStudio 
+              onBgmOverlay={(buf) => setBgmBuffer(buf)} 
+              loadedProject={loadedMultiSpeakerProject}
+              onOpenCloudModal={() => setIsCloudModalOpen(true)}
+              onRequireAuth={handleRequireAuth}
+            />
           ) : (
-            <div 
-              className="flex-1 flex flex-col h-full overflow-hidden"
-              style={{ backgroundColor: 'var(--af-canvas, var(--skin-bg-app))' }}
-            >
-              <AudioProductionSuite
-                onBgmBufferGenerated={(buf: AudioBuffer) => setBgmBuffer(buf)}
-                activeBgmBuffer={bgmBuffer}
-                onOpenVoiceCloning={() => setIsCloningOpen(true)}
-                onRequireAuth={handleRequireAuth}
-              />
-            </div>
+            <AudioProductionSuite
+              onBgmBufferGenerated={(buf: AudioBuffer) => setBgmBuffer(buf)}
+              activeBgmBuffer={bgmBuffer}
+              onOpenVoiceCloning={() => setIsCloningOpen(true)}
+              onRequireAuth={handleRequireAuth}
+            />
           )
         }
         inspector={

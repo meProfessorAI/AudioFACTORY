@@ -29,7 +29,7 @@ export const HomePage: React.FC = () => {
   const { activeSkin } = useTerminal();
 
   return (
-    <div className="space-y-20 sm:space-y-28">
+    <div className="space-y-16 sm:space-y-28 overflow-x-hidden w-full max-w-full">
       <SeoHead
         title="AudioFACTORY | Turn words into finished audio."
         description="AI-powered scripts, voices, dialogue and sound — in one production studio. Create multi-speaker scenes, high-fidelity speech, instant voice cloning, and algorithmic BGM."
@@ -37,10 +37,10 @@ export const HomePage: React.FC = () => {
       />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-8 sm:pt-16 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+      <section className="relative pt-6 sm:pt-16 pb-12 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center overflow-hidden">
         {/* Day Accent Ambient Glow */}
         <div 
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] rounded-full blur-3xl pointer-events-none opacity-20"
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] max-w-full h-[300px] rounded-full blur-3xl pointer-events-none opacity-20"
           style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }} 
         />
 
@@ -48,7 +48,7 @@ export const HomePage: React.FC = () => {
           
           {/* Studio Release Badge */}
           <div 
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-xs font-mono font-semibold shadow-2xs"
+            className="inline-flex max-w-full flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-4 py-1.5 rounded-full border text-[11px] sm:text-xs font-mono font-semibold shadow-2xs mx-auto"
             style={{
               backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
               borderColor: 'var(--skin-border, #E2E8F0)',
@@ -56,13 +56,13 @@ export const HomePage: React.FC = () => {
             }}
           >
             <span 
-              className="w-2 h-2 rounded-full animate-pulse"
+              className="w-2 h-2 rounded-full animate-pulse flex-shrink-0"
               style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }} 
             />
             <span style={{ color: 'var(--skin-accent, #0284C7)' }} className="font-bold">
               {activeSkin.dayName} Edition • {activeSkin.themeName}
             </span>
-            <span className="opacity-40">|</span>
+            <span className="opacity-40 hidden sm:inline">|</span>
             <span style={{ color: 'var(--skin-text-secondary, #475569)' }}>Gemini 2.5 Flash Audio</span>
           </div>
 

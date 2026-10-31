@@ -73,10 +73,7 @@ const INITIAL_LOGS: TerminalLogEntry[] = [
 ];
 
 export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isTerminalMode, setIsTerminalMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('g_terminal_mode');
-    return saved !== null ? saved === 'true' : false; // Default to clean studio mode
-  });
+  const [isTerminalMode, setIsTerminalMode] = useState<boolean>(false);
 
   const [scanlinesEnabled, setScanlinesEnabled] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);

@@ -105,34 +105,42 @@ export const UsageCard: React.FC<UsageCardProps> = ({
 
   return (
     <div 
-      className={`rounded-xl border p-4 transition-all ${
-        isTerminalMode
-          ? 'bg-[#161B22] border-[#30363D] text-[#E6EDF3] font-mono'
-          : 'bg-white border-zinc-200 text-zinc-900 font-sans shadow-2xs'
-      } ${className}`}
+      className={`rounded-xl border p-4 transition-all shadow-xs ${className}`}
+      style={{
+        backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+        borderColor: 'var(--skin-border, #E8D5C2)',
+        color: 'var(--skin-text-primary, #431407)'
+      }}
     >
       {/* Top row: Headline & Badge */}
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
           {isUnlimited ? (
-            <div className={`p-1.5 rounded-lg ${isTerminalMode ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-800'}`}>
+            <div 
+              className="p-1.5 rounded-lg"
+              style={{
+                backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                color: 'var(--skin-accent, #C2410C)'
+              }}
+            >
               <Crown className="w-4 h-4" />
             </div>
           ) : (
-            <div className={`p-1.5 rounded-lg ${
-              isAtLimit 
-                ? 'bg-rose-500/20 text-rose-500' 
-                : isNearLimit 
-                ? 'bg-amber-500/20 text-amber-500' 
-                : isTerminalMode ? 'bg-blue-500/20 text-blue-400' : 'bg-zinc-100 text-zinc-700'
-            }`}>
+            <div 
+              className="p-1.5 rounded-lg"
+              style={{
+                backgroundColor: isAtLimit ? 'rgba(239, 68, 68, 0.15)' : 'var(--skin-bg-subtle, #F6EDE2)',
+                color: isAtLimit ? '#dc2626' : 'var(--skin-accent, #C2410C)'
+              }}
+            >
               <Zap className="w-4 h-4" />
             </div>
           )}
           <div>
-            <span className={`text-[11px] font-mono uppercase tracking-wider block ${
-              isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'
-            }`}>
+            <span 
+              className="text-[11px] font-mono uppercase tracking-wider block"
+              style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+            >
               {isUnlimited ? 'Active Plan Allowance' : "Today's Usage"}
             </span>
             <h4 className="text-sm font-bold tracking-tight">
@@ -143,18 +151,26 @@ export const UsageCard: React.FC<UsageCardProps> = ({
 
         <div className="flex items-center gap-1.5">
           {isUnlimited ? (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
+            <span 
+              className="px-2 py-0.5 rounded-full text-[10px] font-extrabold border flex items-center gap-1"
+              style={{
+                backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                color: 'var(--skin-accent, #C2410C)',
+                borderColor: 'var(--skin-border, #E8D5C2)'
+              }}
+            >
               <InfinityIcon className="w-3 h-3" />
               Unlimited
             </span>
           ) : (
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
-              isAtLimit 
-                ? 'bg-rose-500/15 text-rose-500 border-rose-500/30' 
-                : isNearLimit 
-                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' 
-                : isTerminalMode ? 'bg-[#21262D] text-[#8B949E] border-[#30363D]' : 'bg-zinc-100 text-zinc-600 border-zinc-200'
-            }`}>
+            <span 
+              className="px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
+              style={{
+                backgroundColor: isAtLimit ? 'rgba(239, 68, 68, 0.1)' : 'var(--skin-bg-subtle, #F6EDE2)',
+                color: isAtLimit ? '#dc2626' : 'var(--skin-text-secondary, #7C2D12)',
+                borderColor: isAtLimit ? 'rgba(239, 68, 68, 0.25)' : 'var(--skin-border, #E8D5C2)'
+              }}
+            >
               {remainingQuota} remaining
             </span>
           )}
@@ -164,26 +180,27 @@ export const UsageCard: React.FC<UsageCardProps> = ({
       {/* Progress Bar (for limited quotas) */}
       {!isUnlimited && (
         <div className="my-3">
-          <div className={`w-full h-2 rounded-full overflow-hidden ${
-            isTerminalMode ? 'bg-[#21262D]' : 'bg-zinc-100'
-          }`}>
+          <div 
+            className="w-full h-2 rounded-full overflow-hidden"
+            style={{ backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)' }}
+          >
             <div 
-              className={`h-full transition-all duration-300 rounded-full ${
-                isAtLimit 
-                  ? 'bg-rose-500' 
-                  : isNearLimit 
-                  ? 'bg-amber-500' 
-                  : isTerminalMode ? 'bg-[#4285F4]' : 'bg-zinc-900'
-              }`}
-              style={{ width: `${percentage}%` }}
+              className="h-full transition-all duration-300 rounded-full"
+              style={{ 
+                width: `${percentage}%`,
+                backgroundColor: isAtLimit ? '#dc2626' : isNearLimit ? '#d97706' : 'var(--skin-accent, #C2410C)'
+              }}
             />
           </div>
           
-          <div className="flex items-center justify-between text-[11px] font-mono mt-1.5">
-            <span className={isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'}>
+          <div 
+            className="flex items-center justify-between text-[11px] font-mono mt-1.5"
+            style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+          >
+            <span>
               {percentage}% used
             </span>
-            <span className={`flex items-center gap-1 ${isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'}`}>
+            <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               <span>Resets tomorrow {timeUntilReset ? `(in ${timeUntilReset})` : ''}</span>
             </span>
@@ -194,11 +211,17 @@ export const UsageCard: React.FC<UsageCardProps> = ({
       {/* Unlimited Active Details */}
       {isUnlimited && (
         <div className="my-2.5 flex items-center justify-between text-xs">
-          <span className={`flex items-center gap-1.5 ${isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-600'}`}>
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+          <span 
+            className="flex items-center gap-1.5"
+            style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
             Uncapped Gemini 2.5 & ElevenLabs generation
           </span>
-          <span className={`font-mono text-[11px] ${isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-400'}`}>
+          <span 
+            className="font-mono text-[11px]"
+            style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+          >
             {usedToday} rendered today
           </span>
         </div>

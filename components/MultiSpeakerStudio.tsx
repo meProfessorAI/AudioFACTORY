@@ -587,91 +587,83 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
   const readyCount = lines.filter(l => l.status === 'ready').length;
   const currentSpeakingLine = lines.find(l => l.id === playingLineId);
 
-  if (isTerminalMode) {
-    return (
-      <TerminalMultiSpeakerView
-        projectTitle={projectTitle}
-        format={format}
-        setFormat={setFormat}
-        styleTone={styleTone}
-        setStyleTone={setStyleTone}
-        speakerCount={speakerCount}
-        setSpeakerCount={setSpeakerCount}
-        topic={topic}
-        setTopic={setTopic}
-        speakers={speakers}
-        setSpeakers={setSpeakers}
-        lines={lines}
-        setLines={setLines}
-        readyCount={readyCount}
-        isPlayingFullSequence={isPlayingFullSequence}
-        isBatchGenerating={isBatchGenerating}
-        isSaving={isSaving}
-        justSaved={justSaved}
-        activeTool={activeTool}
-        setActiveTool={setActiveTool}
-        rawTextToAnalyze={rawTextToAnalyze}
-        setRawTextToAnalyze={setRawTextToAnalyze}
-        isAnalyzing={isAnalyzing}
-        isScriptGenerating={isScriptGenerating}
-        collapsedLineIds={collapsedLineIds}
-        toggleLineCollapse={toggleLineCollapse}
-        toggleCollapseAll={toggleCollapseAll}
-        handleMoveLine={handleMoveLine}
-        handleRemoveLine={handleRemoveLine}
-        handleAddLine={handleAddLine}
-        handleAddSpeaker={handleAddSpeaker}
-        handleSpeakerVoiceChange={handleSpeakerVoiceChange}
-        handlePlayFullScene={handlePlayFullScene}
-        stopCurrentPlayback={stopCurrentPlayback}
-        handleGenerateAllLines={handleGenerateAllLines}
-        handleDownloadCombinedWav={handleDownloadCombinedWav}
-        handleSaveToCloud={handleSaveToCloud}
-        onOpenCloudModal={onOpenCloudModal}
-        savedProjects={savedProjects}
-        elevenLabsVoices={elevenLabsVoices}
-        hasElevenLabsKey={hasElevenLabsKey}
-        batchProgress={batchProgress}
-        playLineAudio={playLineAudio}
-        playingLineId={playingLineId}
-        handleGenerateLine={handleGenerateLine}
-        handleAnalyzeContent={handleAnalyzeContent}
-        handleGenerateScriptWithAI={handleGenerateScriptWithAI}
-      />
-    );
-  }
-
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F4] dark:bg-[#0D1117] text-zinc-900 dark:text-[#E6EDF3] overflow-hidden select-none">
-      
-      {/* 1. TOP STUDIO SUB-HEADER (Clean & Precision-Engineered) */}
-      <div className="border-b border-zinc-200 dark:border-[#30363D] bg-white dark:bg-[#161B22]/95 px-4 md:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 flex-shrink-0 z-20 backdrop-blur-md">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={() => setIsInspectorOpen(!isInspectorOpen)}
-            className="hidden md:flex items-center justify-center w-8 h-8 rounded-md border border-zinc-200 dark:border-[#30363D] text-zinc-600 dark:text-[#8B949E] hover:text-zinc-950 hover:bg-zinc-100 dark:hover:bg-[#21262D] transition-colors"
-            title={isInspectorOpen ? "Collapse Cast Inspector" : "Expand Cast Inspector"}
-          >
-            {isInspectorOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          </button>
+    <div 
+      className="af-canvas select-none custom-scrollbar min-h-full flex flex-col gap-3 pb-24 sm:pb-12"
+      style={{
+        backgroundColor: 'var(--af-canvas, var(--skin-bg-app, #FAF6EF))',
+        color: 'var(--af-text, var(--skin-text-primary, #431407))'
+      }}
+    >
+      {/* Collaboration Live Presence */}
+      <div className="flex-shrink-0">
+        <LivePresenceBar />
+      </div>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider bg-rose-50 dark:bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30">
-                Multi-Speaker
-              </span>
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono uppercase text-zinc-600 dark:text-[#8B949E] bg-zinc-100 dark:bg-[#21262D] border border-zinc-200 dark:border-[#30363D]">
-                {format}
-              </span>
-              <span className="hidden lg:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono text-zinc-500 dark:text-[#8B949E]">
-                • {styleTone}
-              </span>
+      {/* Quota Exhaustion & Upgrade Prompt */}
+      <QuotaExhaustedBanner actionName="scene generation" />
+
+      {/* Main Studio Card */}
+      <div 
+        className="flex-1 min-h-[420px] rounded-2xl border shadow-sm flex flex-col overflow-hidden"
+        style={{
+          backgroundColor: 'var(--af-surface, #FFFFFF)',
+          borderColor: 'var(--af-border, #E8D5C2)'
+        }}
+      >
+        {/* Card Header Bar */}
+        <div 
+          className="px-4 py-3 border-b flex flex-wrap items-center justify-between gap-2.5"
+          style={{
+            backgroundColor: 'var(--af-raised, #F6EDE2)',
+            borderColor: 'var(--af-border, #E8D5C2)'
+          }}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => setIsInspectorOpen(!isInspectorOpen)}
+              className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg border text-xs transition-colors hover:opacity-80"
+              style={{
+                borderColor: 'var(--af-border, #E8D5C2)',
+                backgroundColor: 'var(--af-surface, #FFFFFF)',
+                color: 'var(--af-text, #431407)'
+              }}
+              title={isInspectorOpen ? "Collapse Cast Inspector" : "Expand Cast Inspector"}
+            >
+              {isInspectorOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </button>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span 
+                  className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider border"
+                  style={{
+                    backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                    borderColor: 'var(--skin-border, #E8D5C2)',
+                    color: 'var(--skin-accent, #C2410C)'
+                  }}
+                >
+                  Multi-Speaker
+                </span>
+                <span 
+                  className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono uppercase border"
+                  style={{
+                    backgroundColor: 'var(--af-surface, #FFFFFF)',
+                    borderColor: 'var(--af-border, #E8D5C2)',
+                    color: 'var(--af-text-secondary, #7C2D12)'
+                  }}
+                >
+                  {format}
+                </span>
+                <span className="hidden lg:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono opacity-80">
+                  • {styleTone}
+                </span>
+              </div>
+              <h1 className="text-sm md:text-base font-bold tracking-tight truncate mt-0.5" style={{ color: 'var(--af-text, #431407)' }}>
+                {projectTitle}
+              </h1>
             </div>
-            <h1 className="text-sm md:text-base font-bold text-zinc-950 dark:text-[#E6EDF3] tracking-tight truncate mt-0.5">
-              {projectTitle}
-            </h1>
           </div>
-        </div>
 
         {/* Studio Top Action Bar */}
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -791,39 +783,44 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
         </div>
       </div>
 
-      {/* Liveblocks Collaborative Room Presence Bar */}
-      <div className="px-3 sm:px-6 py-1.5 bg-zinc-100 border-b border-zinc-200 flex-shrink-0">
-        <LivePresenceBar />
-      </div>
-
-      {/* Quota Exhaustion & Upgrade Prompt */}
-      <div className="px-3 sm:px-6">
-        <QuotaExhaustedBanner actionName="scene generation" />
-      </div>
-
       {/* MOBILE SEGMENTED CONTROL TABS (< md) */}
-      <div className="flex md:hidden border-b border-zinc-200 bg-zinc-100 p-1 gap-1">
+      <div 
+        className="flex md:hidden border-b p-1.5 gap-1.5"
+        style={{
+          backgroundColor: 'var(--af-raised, #F6EDE2)',
+          borderColor: 'var(--af-border, #E8D5C2)'
+        }}
+      >
         <button
           onClick={() => setMobileTab('script')}
-          className={`flex-1 py-1.5 text-xs font-mono font-medium rounded text-center transition-colors ${
-            mobileTab === 'script' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500'
-          }`}
+          className="flex-1 py-1.5 text-xs font-mono font-bold rounded-lg text-center transition-all"
+          style={{
+            backgroundColor: mobileTab === 'script' ? 'var(--af-surface, #FFFFFF)' : 'transparent',
+            color: mobileTab === 'script' ? 'var(--af-accent, #C2410C)' : 'var(--af-text-muted, #9A5B32)',
+            boxShadow: mobileTab === 'script' ? 'var(--skin-shadow)' : 'none'
+          }}
         >
           Dialogue ({lines.length})
         </button>
         <button
           onClick={() => setMobileTab('cast')}
-          className={`flex-1 py-1.5 text-xs font-mono font-medium rounded text-center transition-colors ${
-            mobileTab === 'cast' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500'
-          }`}
+          className="flex-1 py-1.5 text-xs font-mono font-bold rounded-lg text-center transition-all"
+          style={{
+            backgroundColor: mobileTab === 'cast' ? 'var(--af-surface, #FFFFFF)' : 'transparent',
+            color: mobileTab === 'cast' ? 'var(--af-accent, #C2410C)' : 'var(--af-text-muted, #9A5B32)',
+            boxShadow: mobileTab === 'cast' ? 'var(--skin-shadow)' : 'none'
+          }}
         >
           Cast ({speakers.length})
         </button>
         <button
           onClick={() => setMobileTab('ai')}
-          className={`flex-1 py-1.5 text-xs font-mono font-medium rounded text-center transition-colors ${
-            mobileTab === 'ai' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500'
-          }`}
+          className="flex-1 py-1.5 text-xs font-mono font-bold rounded-lg text-center transition-all"
+          style={{
+            backgroundColor: mobileTab === 'ai' ? 'var(--af-surface, #FFFFFF)' : 'transparent',
+            color: mobileTab === 'ai' ? 'var(--af-accent, #C2410C)' : 'var(--af-text-muted, #9A5B32)',
+            boxShadow: mobileTab === 'ai' ? 'var(--skin-shadow)' : 'none'
+          }}
         >
           AI Tools
         </button>
@@ -1535,6 +1532,7 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
         </div>
       </footer>
 
+      </div> {/* End Main Studio Card */}
     </div>
   );
 };

@@ -50,18 +50,16 @@ export const MarketingNavbar: React.FC = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'backdrop-blur-md border-b shadow-sm py-3' 
-          : 'bg-transparent py-4'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 border-b backdrop-blur-md ${
+        isScrolled ? 'py-2.5 shadow-sm' : 'py-3 shadow-2xs'
       }`}
       style={{
-        backgroundColor: isScrolled ? 'var(--skin-bg-card, #FFFFFF)' : 'transparent',
-        borderColor: isScrolled ? 'var(--skin-border, #E2E8F0)' : 'transparent',
+        backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+        borderColor: 'var(--skin-border, #E2E8F0)',
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-2">
           
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-2.5 group focus:outline-none">

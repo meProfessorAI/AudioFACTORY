@@ -55,12 +55,14 @@
 }
 
 /* Global Light Styles */
-body {
+html, body {
   background-color: var(--skin-bg-app);
   color: var(--skin-text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Precision Studio Shadows */
