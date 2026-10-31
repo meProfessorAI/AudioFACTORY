@@ -43,9 +43,8 @@ import { useFirebase } from '../services/firebaseContext';
 import { useLiveblocks } from '../services/liveblocksContext';
 import { LivePresenceBar } from './LivePresenceBar';
 import { QuotaExhaustedBanner } from './QuotaExhaustedBanner';
+import { downloadAudioBlob } from '../src/utils/audioDownloader';
 import { useTerminal } from './terminal/TerminalContext';
-import { TerminalWindow } from './terminal/TerminalWindow';
-import { TerminalMultiSpeakerView } from './terminal/TerminalMultiSpeakerView';
 
 interface MultiSpeakerStudioProps {
   onBgmOverlay?: (buffer: AudioBuffer) => void;
@@ -445,7 +444,7 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
     playNext();
   };
 
-  // Download stitched master WAV
+  // Download stitched master WAV with mobile share & Android download support
   const handleDownloadCombinedWav = async () => {
     const buffers = lines.map(l => l.audioBuffer).filter((b): b is AudioBuffer => b != null);
     if (buffers.length === 0) {
@@ -457,16 +456,30 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const combinedBuffer = await stitchAudioBuffers(buffers, audioContext);
       const wavBlob = audioBufferToWavBlob(combinedBuffer);
-      const url = URL.createObjectURL(wavBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${projectTitle.toLowerCase().replace(/\s+/g, '_')}_combined.wav`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const filename = `${projectTitle.toLowerCase().replace(/\s+/g, '_')}_combined.wav`;
+      await downloadAudioBlob(wavBlob, filename, `AudioFACTORY - ${projectTitle}`);
     } catch (err: any) {
-      setErrorMessage(`Failed to stitch audio: ${err.message}`);
+      setErrorMessage(`Failed to export audio: ${err.message}`);
+    }
+  };
+
+  // Download single dialogue turn audio with mobile share support
+  const handleDownloadSingleLine = async (line: DialogueLine, idx: number) => {
+    if (!line.audioBuffer && !line.audioUrl) return;
+    try {
+      let blob: Blob;
+      if (line.audioBuffer) {
+        blob = audioBufferToWavBlob(line.audioBuffer);
+      } else if (line.audioUrl) {
+        const res = await fetch(line.audioUrl);
+        blob = await res.blob();
+      } else {
+        return;
+      }
+      const filename = `${line.speaker.toLowerCase().replace(/\s+/g, '_')}_turn_${idx + 1}.wav`;
+      await downloadAudioBlob(blob, filename, `AudioFACTORY - ${line.speaker} Turn #${idx + 1}`);
+    } catch (err: any) {
+      setErrorMessage(`Failed to download turn audio: ${err.message}`);
     }
   };
 
@@ -677,11 +690,14 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
               }
             }}
             disabled={readyCount === 0 || isBatchGenerating}
-            className={`px-3 py-1.5 rounded-md font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs ${
-              isPlayingFullSequence 
-                ? 'bg-rose-600 hover:bg-rose-500 text-white border border-rose-700 animate-pulse' 
-                : 'bg-zinc-950 hover:bg-zinc-800 text-white border border-zinc-950 disabled:opacity-50'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+              isPlayingFullSequence ? 'animate-pulse' : ''
             }`}
+            style={{
+              backgroundColor: isPlayingFullSequence ? '#EF4444' : 'var(--af-accent, #C2410C)',
+              color: 'var(--af-accent-text, #FFFFFF)',
+              opacity: (readyCount === 0 || isBatchGenerating) ? 0.45 : 1
+            }}
             title={isPlayingFullSequence ? 'Stop Scene' : 'Play Full Scene'}
           >
             {isPlayingFullSequence ? (
@@ -702,7 +718,12 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
             <button
               onClick={() => handleGenerateAllLines()}
               disabled={isBatchGenerating}
-              className="px-2.5 py-1.5 rounded-md text-xs font-mono font-bold border border-amber-400 bg-amber-400 hover:bg-amber-300 text-zinc-950 flex items-center gap-1.5 shadow-xs"
+              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 shadow-xs cursor-pointer transition-colors"
+              style={{
+                backgroundColor: 'var(--af-raised, #F6EDE2)',
+                borderColor: 'var(--af-border, #E8D5C2)',
+                color: 'var(--af-accent, #C2410C)'
+              }}
               title={`Synthesize all ${lines.length - readyCount} remaining lines`}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isBatchGenerating ? 'animate-spin' : ''}`} />
@@ -715,7 +736,12 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
           <button
             onClick={handleDownloadCombinedWav}
             disabled={readyCount === 0 || isBatchGenerating}
-            className="px-2.5 py-1.5 rounded-md text-xs font-mono font-bold border border-emerald-600 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white flex items-center gap-1.5 shadow-xs"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-40 transition-colors"
+            style={{
+              backgroundColor: 'var(--af-surface, #FFFFFF)',
+              borderColor: 'var(--af-border, #E8D5C2)',
+              color: 'var(--af-text, #431407)'
+            }}
             title="Export Master continuous WAV"
           >
             <Download className="w-3.5 h-3.5" />
@@ -723,44 +749,47 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
             <span className="sm:hidden">WAV</span>
           </button>
 
-          <div className="h-4 w-[1px] bg-zinc-200 hidden sm:block mx-0.5" />
+          <div className="h-4 w-[1px] hidden sm:block mx-0.5" style={{ backgroundColor: 'var(--af-border, #E8D5C2)' }} />
 
           <button
             onClick={() => setActiveTool(activeTool === 'generator' ? null : 'generator')}
-            className={`px-2.5 py-1.5 rounded-md text-xs font-mono font-medium border flex items-center gap-1.5 transition-colors ${
-              activeTool === 'generator' 
-                ? 'bg-zinc-900 text-white border-zinc-950 shadow-sm' 
-                : 'bg-white text-zinc-700 hover:bg-zinc-50 border-zinc-200'
-            }`}
+            className="px-2.5 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-colors cursor-pointer"
+            style={{
+              backgroundColor: activeTool === 'generator' ? 'var(--af-accent, #C2410C)' : 'var(--af-surface, #FFFFFF)',
+              color: activeTool === 'generator' ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+              borderColor: 'var(--af-border, #E8D5C2)'
+            }}
           >
-            <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+            <Sparkles className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">AI Generator</span>
             <span className="sm:hidden">AI</span>
           </button>
 
           <button
             onClick={() => setActiveTool(activeTool === 'analyzer' ? null : 'analyzer')}
-            className={`px-2.5 py-1.5 rounded-md text-xs font-mono font-medium border flex items-center gap-1.5 transition-colors ${
-              activeTool === 'analyzer' 
-                ? 'bg-zinc-900 text-white border-zinc-950 shadow-sm' 
-                : 'bg-white text-zinc-700 hover:bg-zinc-50 border-zinc-200'
-            }`}
+            className="px-2.5 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-colors cursor-pointer"
+            style={{
+              backgroundColor: activeTool === 'analyzer' ? 'var(--af-accent, #C2410C)' : 'var(--af-surface, #FFFFFF)',
+              color: activeTool === 'analyzer' ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+              borderColor: 'var(--af-border, #E8D5C2)'
+            }}
           >
-            <Wand2 className="w-3.5 h-3.5 text-amber-600" />
+            <Wand2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Auto-Detect</span>
             <span className="sm:hidden">Detect</span>
           </button>
 
-          <div className="h-4 w-[1px] bg-zinc-200 hidden sm:block mx-0.5" />
+          <div className="h-4 w-[1px] hidden sm:block mx-0.5" style={{ backgroundColor: 'var(--af-border, #E8D5C2)' }} />
 
           <button
             onClick={handleSaveToCloud}
             disabled={isSaving || lines.length === 0}
-            className={`px-2.5 py-1.5 rounded-md text-xs font-mono font-medium border flex items-center gap-1.5 transition-all shadow-sm ${
-              justSaved 
-                ? 'bg-emerald-600 text-white border-emerald-700' 
-                : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-700'
-            }`}
+            className="px-2.5 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-40"
+            style={{
+              backgroundColor: justSaved ? 'rgba(16, 185, 129, 0.15)' : 'var(--af-surface, #FFFFFF)',
+              borderColor: justSaved ? '#10B981' : 'var(--af-border, #E8D5C2)',
+              color: justSaved ? '#059669' : 'var(--af-text, #431407)'
+            }}
             title="Save this scene to Firebase Firestore"
           >
             {justSaved ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Cloud className="w-3.5 h-3.5" />}
@@ -770,12 +799,24 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
           {onOpenCloudModal && (
             <button
               onClick={onOpenCloudModal}
-              className="px-2.5 py-1.5 rounded-md text-xs font-mono font-medium border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 flex items-center gap-1.5"
+              className="px-2.5 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 cursor-pointer"
+              style={{
+                backgroundColor: 'var(--af-surface, #FFFFFF)',
+                borderColor: 'var(--af-border, #E8D5C2)',
+                color: 'var(--af-text, #431407)'
+              }}
               title="Open saved projects from Firebase"
             >
-              <FolderOpen className="w-3.5 h-3.5 text-sky-600" />
+              <FolderOpen className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Projects</span>
-              <span className="text-[10px] px-1.5 py-0.2 bg-zinc-100 rounded-full font-bold">
+              <span 
+                className="text-[10px] px-1.5 py-0.2 rounded-full font-bold border"
+                style={{
+                  backgroundColor: 'var(--af-raised, #F6EDE2)',
+                  borderColor: 'var(--af-border, #E8D5C2)',
+                  color: 'var(--af-accent, #C2410C)'
+                }}
+              >
                 {savedProjects.length}
               </span>
             </button>
@@ -839,17 +880,24 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
 
       {/* COLLAPSIBLE ACCORDION 1: AI SCRIPT GENERATOR */}
       {activeTool === 'generator' && (
-        <div className="border-b border-zinc-200 bg-white p-4 md:p-6 shadow-studio space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 z-10">
+        <div 
+          className="border-b p-4 md:p-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 z-10 shadow-xs"
+          style={{
+            backgroundColor: 'var(--af-surface, #FFFFFF)',
+            borderColor: 'var(--af-border, #E8D5C2)'
+          }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-sky-600" />
-              <h2 className="text-xs font-mono uppercase font-bold tracking-wider text-zinc-900">
+              <Sparkles className="w-4 h-4" style={{ color: 'var(--af-accent, #C2410C)' }} />
+              <h2 className="text-xs uppercase font-bold tracking-wider" style={{ color: 'var(--af-text, #431407)' }}>
                 AI Script Generator
               </h2>
             </div>
             <button 
               onClick={() => setActiveTool(null)}
-              className="text-xs font-mono text-zinc-400 hover:text-zinc-700 p-1"
+              className="text-xs p-1 cursor-pointer hover:opacity-80"
+              style={{ color: 'var(--af-text-muted, #9A5B32)' }}
             >
               ✕ Close
             </button>
@@ -857,7 +905,7 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="sm:col-span-2">
-              <label className="block text-[10px] font-mono uppercase text-zinc-500 mb-1">
+              <label className="block text-[10px] font-mono uppercase mb-1" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
                 Scene Prompt / Topic
               </label>
               <input
@@ -865,18 +913,28 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
                 placeholder="e.g. A founder pitching a skeptical venture capitalist..."
-                className="w-full px-3 py-2 border border-zinc-200 rounded-md text-xs font-mono bg-zinc-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500"
+                className="w-full px-3 py-2 border rounded-lg text-xs outline-none"
+                style={{
+                  backgroundColor: 'var(--af-raised, #F6EDE2)',
+                  borderColor: 'var(--af-border, #E8D5C2)',
+                  color: 'var(--af-text, #431407)'
+                }}
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase text-zinc-500 mb-1">
+              <label className="block text-[10px] font-mono uppercase mb-1" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
                 Format
               </label>
               <select
                 value={format}
                 onChange={e => setFormat(e.target.value)}
-                className="w-full px-2.5 py-2 border border-zinc-200 rounded-md text-xs font-mono bg-white focus:outline-none focus:ring-1 focus:ring-sky-500"
+                className="w-full px-2.5 py-2 border rounded-lg text-xs outline-none cursor-pointer"
+                style={{
+                  backgroundColor: 'var(--af-raised, #F6EDE2)',
+                  borderColor: 'var(--af-border, #E8D5C2)',
+                  color: 'var(--af-text, #431407)'
+                }}
               >
                 <option value="Podcast Dialogue">Podcast Dialogue</option>
                 <option value="All-Hands Kickoff">All-Hands Kickoff</option>
@@ -888,13 +946,18 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase text-zinc-500 mb-1">
+              <label className="block text-[10px] font-mono uppercase mb-1" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
                 Style Tone
               </label>
               <select
                 value={styleTone}
                 onChange={e => setStyleTone(e.target.value)}
-                className="w-full px-2.5 py-2 border border-zinc-200 rounded-md text-xs font-mono bg-white focus:outline-none focus:ring-1 focus:ring-sky-500"
+                className="w-full px-2.5 py-2 border rounded-lg text-xs outline-none cursor-pointer"
+                style={{
+                  backgroundColor: 'var(--af-raised, #F6EDE2)',
+                  borderColor: 'var(--af-border, #E8D5C2)',
+                  color: 'var(--af-text, #431407)'
+                }}
               >
                 <option value="High Stakes & Dramatic">High Stakes & Dramatic</option>
                 <option value="Casual & Conversational">Casual & Conversational</option>
@@ -907,90 +970,123 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
 
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-zinc-500">Speakers:</span>
-              {[2, 3, 4].map(num => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => setSpeakerCount(num)}
-                  className={`w-7 h-7 rounded border text-xs font-mono font-bold transition-colors ${
-                    speakerCount === num ? 'bg-zinc-900 text-white border-zinc-950' : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
+              <span className="text-xs" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>Speakers:</span>
+              {[2, 3, 4].map(num => {
+                const isSelected = speakerCount === num;
+                return (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setSpeakerCount(num)}
+                    className="w-7 h-7 rounded-lg border text-xs font-bold transition-colors cursor-pointer"
+                    style={{
+                      backgroundColor: isSelected ? 'var(--af-accent, #C2410C)' : 'var(--af-surface, #FFFFFF)',
+                      color: isSelected ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+                      borderColor: isSelected ? 'var(--af-accent, #C2410C)' : 'var(--af-border, #E8D5C2)'
+                    }}
+                  >
+                    {num}
+                  </button>
+                );
+              })}
             </div>
 
-            <BauhausButton
+            <button
               onClick={() => handleGenerateScriptWithAI()}
               disabled={isScriptGenerating || !topic.trim()}
-              variant="primary"
-              className="px-4 py-2 text-xs"
+              className="px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-50 active:scale-95"
+              style={{
+                backgroundColor: 'var(--af-accent, #C2410C)',
+                color: 'var(--af-accent-text, #FFFFFF)'
+              }}
             >
               {isScriptGenerating ? (
-                <span className="flex items-center gap-1.5">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Generating...
-                </span>
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Generating Script...</span>
+                </>
               ) : (
-                <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" /> Write Script with AI
-                </span>
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Write Script with AI</span>
+                </>
               )}
-            </BauhausButton>
+            </button>
           </div>
         </div>
       )}
 
       {/* COLLAPSIBLE ACCORDION 2: CONTENT AUTO-DETECTION */}
       {activeTool === 'analyzer' && (
-        <div className="border-b border-zinc-200 bg-amber-50/50 p-4 md:p-6 shadow-studio space-y-3 animate-in fade-in slide-in-from-top-2 duration-200 z-10">
+        <div 
+          className="border-b p-4 md:p-6 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200 z-10 shadow-xs"
+          style={{
+            backgroundColor: 'var(--af-raised, #F6EDE2)',
+            borderColor: 'var(--af-border, #E8D5C2)'
+          }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Wand2 className="w-4 h-4 text-amber-600" />
-              <h2 className="text-xs font-mono uppercase font-bold tracking-wider text-zinc-900">
+              <Wand2 className="w-4 h-4" style={{ color: 'var(--af-accent, #C2410C)' }} />
+              <h2 className="text-xs uppercase font-bold tracking-wider" style={{ color: 'var(--af-text, #431407)' }}>
                 Auto-Detection & Speaker Extraction Engine
               </h2>
             </div>
             <button 
               onClick={() => setActiveTool(null)}
-              className="text-xs font-mono text-zinc-400 hover:text-zinc-700 p-1"
+              className="text-xs p-1 cursor-pointer hover:opacity-80"
+              style={{ color: 'var(--af-text-muted, #9A5B32)' }}
             >
               ✕ Close
             </button>
           </div>
-          <p className="text-xs font-mono text-zinc-600">
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
             Paste any article excerpt, screenplay dialogue, or meeting transcript below. Gemini will automatically decompose the text into distinct speakers, emotions, and structured dialogue scenes.
           </p>
           <textarea
             value={rawTextToAnalyze}
             onChange={e => setRawTextToAnalyze(e.target.value)}
             placeholder="Paste your dialogue script (e.g. 'Sarah: Did you review the numbers?\nMark: Not yet, but I have the summary ready.') or article excerpt here..."
-            className="w-full h-32 p-3 border border-zinc-300 rounded-md font-mono text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 resize-y"
+            className="w-full h-32 p-3 border rounded-xl text-xs outline-none resize-y"
+            style={{
+              backgroundColor: 'var(--af-surface, #FFFFFF)',
+              borderColor: 'var(--af-border, #E8D5C2)',
+              color: 'var(--af-text, #431407)'
+            }}
           />
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setActiveTool(null)}
-              className="px-3 py-1.5 rounded-md border border-zinc-200 text-xs font-mono bg-white hover:bg-zinc-50 text-zinc-700"
+              className="px-3 py-1.5 rounded-lg border text-xs cursor-pointer hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--af-surface, #FFFFFF)',
+                borderColor: 'var(--af-border, #E8D5C2)',
+                color: 'var(--af-text, #431407)'
+              }}
             >
               Cancel
             </button>
-            <BauhausButton
+            <button
               onClick={handleAnalyzeContent}
               disabled={isAnalyzing || !rawTextToAnalyze.trim()}
-              variant="secondary"
-              className="px-4 py-1.5 text-xs"
+              className="px-4 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-50 active:scale-95"
+              style={{
+                backgroundColor: 'var(--af-accent, #C2410C)',
+                color: 'var(--af-accent-text, #FFFFFF)'
+              }}
             >
               {isAnalyzing ? (
-                <span className="flex items-center gap-1.5">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Analyzing Content...
-                </span>
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Analyzing Content...</span>
+                </>
               ) : (
-                <span className="flex items-center gap-1.5">
-                  <Wand2 className="w-3.5 h-3.5" /> Analyze & Parse Speakers
-                </span>
+                <>
+                  <Wand2 className="w-3.5 h-3.5" />
+                  <span>Analyze & Parse Speakers</span>
+                </>
               )}
-            </BauhausButton>
+            </button>
           </div>
         </div>
       )}
@@ -999,22 +1095,35 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
       <div className="flex-1 flex overflow-hidden min-h-0">
 
         {/* ZONE A: COLLAPSIBLE LEFT INSPECTOR (Cast, Voice Matrix, Scene Nav) */}
-        <aside className={`
-          ${isInspectorOpen ? 'w-72 lg:w-80' : 'w-14'}
-          hidden md:flex flex-col border-r border-zinc-200 dark:border-[#30363D] bg-white dark:bg-[#161B22]/95 flex-shrink-0 transition-all duration-200 overflow-hidden
-        `}>
+        <aside 
+          className={`
+            ${isInspectorOpen ? 'w-72 lg:w-80' : 'w-14'}
+            hidden md:flex flex-col border-r flex-shrink-0 transition-all duration-200 overflow-hidden
+          `}
+          style={{
+            backgroundColor: 'var(--af-surface, #FFFFFF)',
+            borderColor: 'var(--af-border, #E8D5C2)'
+          }}
+        >
           {isInspectorOpen ? (
-            <div className="flex flex-col h-full overflow-hidden text-zinc-900 dark:text-[#E6EDF3]">
-              <div className="p-3.5 border-b border-zinc-200 dark:border-[#30363D] flex items-center justify-between bg-zinc-50/80 dark:bg-[#0D1117]/60">
+            <div className="flex flex-col h-full overflow-hidden" style={{ color: 'var(--af-text, #431407)' }}>
+              <div 
+                className="p-3.5 border-b flex items-center justify-between"
+                style={{
+                  backgroundColor: 'var(--af-raised, #F6EDE2)',
+                  borderColor: 'var(--af-border, #E8D5C2)'
+                }}
+              >
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-zinc-600 dark:text-[#8B949E]" />
-                  <span className="text-xs font-mono uppercase font-bold tracking-wider text-zinc-800 dark:text-[#E6EDF3]">
+                  <Users className="w-4 h-4" style={{ color: 'var(--af-accent, #C2410C)' }} />
+                  <span className="text-xs uppercase font-bold tracking-wider" style={{ color: 'var(--af-text, #431407)' }}>
                     Cast & Voice Roster
                   </span>
                 </div>
                 <button
                   onClick={handleAddSpeaker}
-                  className="text-[11px] font-mono font-bold text-sky-600 hover:text-sky-800 flex items-center gap-0.5"
+                  className="text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                  style={{ color: 'var(--af-accent, #C2410C)' }}
                   title="Add another speaker"
                 >
                   <Plus className="w-3.5 h-3.5" /> Add
@@ -1028,37 +1137,60 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                   return (
                     <div 
                       key={idx} 
-                      className={`p-3 rounded-lg border border-zinc-200 bg-white hover:border-zinc-300 shadow-studio transition-all space-y-2.5`}
+                      className="p-3 rounded-xl border shadow-2xs space-y-2.5"
+                      style={{
+                        backgroundColor: 'var(--af-raised, #F6EDE2)',
+                        borderColor: 'var(--af-border, #E8D5C2)'
+                      }}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 min-w-0">
                           <span className={`w-3 h-3 rounded-full ${theme.dot} flex-shrink-0`} />
-                          <span className="font-mono text-xs font-bold text-zinc-900 truncate">
+                          <span className="text-xs font-bold truncate" style={{ color: 'var(--af-text, #431407)' }}>
                             {sp.name}
                           </span>
                         </div>
-                        <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600">
+                        <span 
+                          className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border"
+                          style={{
+                            backgroundColor: 'var(--af-surface, #FFFFFF)',
+                            borderColor: 'var(--af-border, #E8D5C2)',
+                            color: 'var(--af-text-muted, #9A5B32)'
+                          }}
+                        >
                           {sp.gender || 'MALE'}
                         </span>
                       </div>
 
                       {/* Provider Switcher */}
-                      <div className="flex rounded-md border border-zinc-200 p-0.5 bg-zinc-100 text-[10px] font-mono">
+                      <div 
+                        className="flex rounded-lg border p-0.5 text-[10px]"
+                        style={{
+                          backgroundColor: 'var(--af-surface, #FFFFFF)',
+                          borderColor: 'var(--af-border, #E8D5C2)'
+                        }}
+                      >
                         <button
                           type="button"
                           onClick={() => handleSpeakerVoiceChange(sp.name, 'Algieba', 'gemini')}
-                          className={`flex-1 py-1 rounded text-center font-medium transition-colors ${
-                            sp.provider === 'gemini' ? 'bg-white text-zinc-900 shadow-xs font-bold' : 'text-zinc-500 hover:text-zinc-800'
-                          }`}
+                          className="flex-1 py-1 rounded text-center transition-colors cursor-pointer"
+                          style={{
+                            backgroundColor: sp.provider === 'gemini' ? 'var(--af-accent, #C2410C)' : 'transparent',
+                            color: sp.provider === 'gemini' ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+                            fontWeight: sp.provider === 'gemini' ? 'bold' : 'normal'
+                          }}
                         >
                           Gemini TTS
                         </button>
                         <button
                           type="button"
                           onClick={() => handleSpeakerVoiceChange(sp.name, '21m00Tcm4TlvDq8ikWAM', 'elevenlabs')}
-                          className={`flex-1 py-1 rounded text-center font-medium transition-colors ${
-                            sp.provider === 'elevenlabs' ? 'bg-sky-600 text-white shadow-xs font-bold' : 'text-zinc-500 hover:text-zinc-800'
-                          }`}
+                          className="flex-1 py-1 rounded text-center transition-colors cursor-pointer"
+                          style={{
+                            backgroundColor: sp.provider === 'elevenlabs' ? 'var(--af-accent, #C2410C)' : 'transparent',
+                            color: sp.provider === 'elevenlabs' ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+                            fontWeight: sp.provider === 'elevenlabs' ? 'bold' : 'normal'
+                          }}
                         >
                           ElevenLabs
                         </button>
@@ -1070,7 +1202,12 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                           <select
                             value={sp.voice}
                             onChange={e => handleSpeakerVoiceChange(sp.name, e.target.value, 'gemini')}
-                            className="w-full p-1.5 border border-zinc-200 rounded text-xs font-mono bg-zinc-50 hover:bg-white focus:bg-white outline-none focus:ring-1 focus:ring-sky-500"
+                            className="w-full p-1.5 border rounded-lg text-xs outline-none cursor-pointer"
+                            style={{
+                              backgroundColor: 'var(--af-surface, #FFFFFF)',
+                              borderColor: 'var(--af-border, #E8D5C2)',
+                              color: 'var(--af-text, #431407)'
+                            }}
                           >
                             {ALL_VOICES.map(v => (
                               <option key={v.name} value={v.name}>
@@ -1082,7 +1219,12 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                           <select
                             value={sp.voice}
                             onChange={e => handleSpeakerVoiceChange(sp.name, e.target.value, 'elevenlabs')}
-                            className="w-full p-1.5 border border-zinc-200 rounded text-xs font-mono bg-zinc-50 hover:bg-white focus:bg-white outline-none focus:ring-1 focus:ring-sky-500"
+                            className="w-full p-1.5 border rounded-lg text-xs outline-none cursor-pointer"
+                            style={{
+                              backgroundColor: 'var(--af-surface, #FFFFFF)',
+                              borderColor: 'var(--af-border, #E8D5C2)',
+                              color: 'var(--af-text, #431407)'
+                            }}
                           >
                             {elevenLabsVoices.map(v => (
                               <option key={v.id} value={v.id}>
@@ -1097,19 +1239,25 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                 })}
 
                 {/* Project Overview Card */}
-                <div className="p-3 rounded-lg border border-zinc-200 bg-zinc-50/70 space-y-2 mt-4 text-xs font-mono">
-                  <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">
+                <div 
+                  className="p-3 rounded-xl border space-y-2 mt-4 text-xs"
+                  style={{
+                    backgroundColor: 'var(--af-raised, #F6EDE2)',
+                    borderColor: 'var(--af-border, #E8D5C2)'
+                  }}
+                >
+                  <div className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
                     Session Diagnostics
                   </div>
-                  <div className="flex justify-between text-zinc-600">
+                  <div className="flex justify-between" style={{ color: 'var(--af-text, #431407)' }}>
                     <span>Dialogue Turns:</span>
-                    <span className="font-bold text-zinc-900">{lines.length}</span>
+                    <span className="font-bold">{lines.length}</span>
                   </div>
-                  <div className="flex justify-between text-zinc-600">
+                  <div className="flex justify-between" style={{ color: 'var(--af-text, #431407)' }}>
                     <span>Synthesized:</span>
                     <span className="font-bold text-emerald-600">{readyCount} / {lines.length}</span>
                   </div>
-                  <div className="flex justify-between text-zinc-600">
+                  <div className="flex justify-between" style={{ color: 'var(--af-text, #431407)' }}>
                     <span>ElevenLabs Key:</span>
                     <span className={`font-bold ${hasElevenLabsKey ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {hasElevenLabsKey ? 'Detected' : 'Fallback'}
@@ -1123,12 +1271,17 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
             <div className="flex flex-col items-center py-4 space-y-4">
               <button
                 onClick={() => setIsInspectorOpen(true)}
-                className="w-8 h-8 rounded-md border border-zinc-200 flex items-center justify-center text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
+                className="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors cursor-pointer hover:opacity-80"
+                style={{
+                  backgroundColor: 'var(--af-raised, #F6EDE2)',
+                  borderColor: 'var(--af-border, #E8D5C2)',
+                  color: 'var(--af-text, #431407)'
+                }}
                 title="Expand Inspector"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
-              <div className="w-6 h-[1px] bg-zinc-200" />
+              <div className="w-6 h-[1px]" style={{ backgroundColor: 'var(--af-border, #E8D5C2)' }} />
               {speakers.map((sp, idx) => {
                 const theme = SPEAKER_COLOR_MAP[sp.color || 'yellow'] || SPEAKER_COLOR_MAP.yellow;
                 return (
@@ -1146,20 +1299,36 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
         </aside>
 
         {/* ZONE B: MAIN ARRANGER / SCRIPT TIMELINE WORKSPACE */}
-        <main className="flex-1 flex flex-col min-w-0 bg-[#F7F7F4] dark:bg-[#0D1117] overflow-hidden">
-          
+        <main 
+          className="flex-1 flex flex-col min-w-0 overflow-hidden"
+          style={{
+            backgroundColor: 'var(--af-canvas, #FDF8F3)'
+          }}
+        >
           {/* SCRIPT WORKSPACE ACTION BAR */}
-          <div className="border-b border-zinc-200 dark:border-[#30363D] bg-white/70 dark:bg-[#161B22]/80 px-4 md:px-6 py-2 flex items-center justify-between text-xs font-mono text-zinc-600 dark:text-[#8B949E] flex-shrink-0 backdrop-blur-md">
+          <div 
+            className="border-b px-4 md:px-6 py-2.5 flex items-center justify-between text-xs flex-shrink-0"
+            style={{
+              backgroundColor: 'var(--af-raised, #F6EDE2)',
+              borderColor: 'var(--af-border, #E8D5C2)',
+              color: 'var(--af-text, #431407)'
+            }}
+          >
             <div className="flex items-center gap-3">
-              <span className="font-bold text-zinc-900 dark:text-[#E6EDF3]">Script Timeline</span>
-              <span>•</span>
-              <span>{lines.length} dialogue turns</span>
+              <span className="font-bold">Script Timeline</span>
+              <span className="opacity-40">•</span>
+              <span className="text-[11px] opacity-80 font-mono">{lines.length} dialogue turns</span>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleCollapseAll}
-                className="text-[11px] text-zinc-500 hover:text-zinc-900 flex items-center gap-1 px-2 py-1 rounded hover:bg-zinc-100 transition-colors"
+                className="text-[11px] flex items-center gap-1 px-2.5 py-1 rounded-lg border transition-colors cursor-pointer"
+                style={{
+                  backgroundColor: 'var(--af-surface, #FFFFFF)',
+                  borderColor: 'var(--af-border, #E8D5C2)',
+                  color: 'var(--af-text, #431407)'
+                }}
                 title="Toggle expand/collapse on all cards"
               >
                 {lines.every(l => collapsedLineIds[l.id]) ? (
@@ -1175,7 +1344,12 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
 
               <button
                 onClick={handleAddLine}
-                className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded flex items-center gap-1 transition-colors"
+                className="text-[11px] font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1 transition-colors cursor-pointer shadow-xs"
+                style={{
+                  backgroundColor: 'var(--af-surface, #FFFFFF)',
+                  borderColor: 'var(--af-border, #E8D5C2)',
+                  color: 'var(--af-accent, #C2410C)'
+                }}
               >
                 <Plus className="w-3 h-3" /> Add Turn
               </button>
@@ -1183,32 +1357,71 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
           </div>
 
           {/* SCRIPT CARDS SCROLLABLE CONTAINER */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 space-y-3 custom-scrollbar">
+          <div 
+            className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 space-y-3 custom-scrollbar"
+            style={{
+              backgroundColor: 'var(--af-canvas, #FDF8F3)'
+            }}
+          >
             {/* MOBILE ONLY VIEW FOR CAST TAB */}
             {mobileTab === 'cast' && (
               <div className="md:hidden space-y-3 pb-6">
-                <div className="flex justify-between items-center pb-2 border-b border-zinc-200">
-                  <h3 className="font-mono text-xs font-bold uppercase text-zinc-800">Cast & Voice Settings</h3>
-                  <button onClick={handleAddSpeaker} className="text-xs font-mono text-sky-600 font-bold">+ Add Speaker</button>
+                <div 
+                  className="flex justify-between items-center pb-2 border-b"
+                  style={{ borderColor: 'var(--af-border, #E8D5C2)' }}
+                >
+                  <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--af-text, #431407)' }}>
+                    Cast & Voice Settings
+                  </h3>
+                  <button 
+                    onClick={handleAddSpeaker} 
+                    className="text-xs font-bold cursor-pointer"
+                    style={{ color: 'var(--af-accent, #C2410C)' }}
+                  >
+                    + Add Speaker
+                  </button>
                 </div>
                 {speakers.map((sp, idx) => {
                   const theme = SPEAKER_COLOR_MAP[sp.color || 'yellow'] || SPEAKER_COLOR_MAP.yellow;
                   return (
-                    <div key={idx} className="p-3 rounded-lg border border-zinc-200 bg-white space-y-2">
+                    <div 
+                      key={idx} 
+                      className="p-3.5 rounded-xl border space-y-2.5 shadow-2xs"
+                      style={{
+                        backgroundColor: 'var(--af-surface, #FFFFFF)',
+                        borderColor: 'var(--af-border, #E8D5C2)'
+                      }}
+                    >
                       <div className="flex items-center gap-2">
                         <span className={`w-3 h-3 rounded-full ${theme.dot}`} />
-                        <span className="font-mono text-xs font-bold text-zinc-900">{sp.name}</span>
+                        <span className="text-xs font-bold" style={{ color: 'var(--af-text, #431407)' }}>{sp.name}</span>
                       </div>
-                      <div className="flex border border-zinc-200 rounded text-[10px] font-mono">
+                      <div 
+                        className="flex border rounded-lg p-0.5 text-[10px]"
+                        style={{
+                          backgroundColor: 'var(--af-raised, #F6EDE2)',
+                          borderColor: 'var(--af-border, #E8D5C2)'
+                        }}
+                      >
                         <button
                           onClick={() => handleSpeakerVoiceChange(sp.name, 'Algieba', 'gemini')}
-                          className={`flex-1 py-1 text-center ${sp.provider === 'gemini' ? 'bg-zinc-900 text-white font-bold' : 'bg-white text-zinc-700'}`}
+                          className="flex-1 py-1 rounded text-center transition-colors cursor-pointer"
+                          style={{
+                            backgroundColor: sp.provider === 'gemini' ? 'var(--af-accent, #C2410C)' : 'transparent',
+                            color: sp.provider === 'gemini' ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+                            fontWeight: sp.provider === 'gemini' ? 'bold' : 'normal'
+                          }}
                         >
                           Gemini
                         </button>
                         <button
                           onClick={() => handleSpeakerVoiceChange(sp.name, '21m00Tcm4TlvDq8ikWAM', 'elevenlabs')}
-                          className={`flex-1 py-1 text-center ${sp.provider === 'elevenlabs' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-zinc-700'}`}
+                          className="flex-1 py-1 rounded text-center transition-colors cursor-pointer"
+                          style={{
+                            backgroundColor: sp.provider === 'elevenlabs' ? 'var(--af-accent, #C2410C)' : 'transparent',
+                            color: sp.provider === 'elevenlabs' ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+                            fontWeight: sp.provider === 'elevenlabs' ? 'bold' : 'normal'
+                          }}
                         >
                           ElevenLabs
                         </button>
@@ -1216,7 +1429,12 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                       <select
                         value={sp.voice}
                         onChange={e => handleSpeakerVoiceChange(sp.name, e.target.value, sp.provider)}
-                        className="w-full p-2 border border-zinc-200 rounded text-xs font-mono bg-zinc-50"
+                        className="w-full p-2 border rounded-lg text-xs outline-none cursor-pointer"
+                        style={{
+                          backgroundColor: 'var(--af-raised, #F6EDE2)',
+                          borderColor: 'var(--af-border, #E8D5C2)',
+                          color: 'var(--af-text, #431407)'
+                        }}
                       >
                         {sp.provider === 'gemini'
                           ? ALL_VOICES.map(v => <option key={v.name} value={v.name}>{v.name} ({v.style})</option>)
@@ -1242,23 +1460,28 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                   return (
                     <div 
                       key={line.id} 
-                      className={`
-                        rounded-lg border transition-all duration-150 overflow-hidden shadow-studio
-                        ${isPlayingThis 
-                          ? 'border-amber-500 bg-amber-50/50 ring-1 ring-amber-400' 
-                          : 'border-zinc-200 bg-white hover:border-zinc-300'
-                        }
-                      `}
+                      className="rounded-xl border transition-all duration-150 overflow-hidden shadow-xs"
+                      style={{
+                        backgroundColor: isPlayingThis ? 'var(--af-raised, #F6EDE2)' : 'var(--af-surface, #FFFFFF)',
+                        borderColor: isPlayingThis ? 'var(--af-accent, #C2410C)' : 'var(--af-border, #E8D5C2)',
+                        boxShadow: isPlayingThis ? '0 0 0 2px var(--af-accent, #C2410C)' : undefined
+                      }}
                     >
                       {/* CARD HEADER BAR */}
-                      <div className="px-3.5 py-2 border-b border-zinc-100 flex items-center justify-between gap-2 flex-wrap bg-zinc-50/60">
+                      <div 
+                        className="px-3.5 py-2.5 border-b flex items-center justify-between gap-2 flex-wrap"
+                        style={{
+                          backgroundColor: 'var(--af-raised, #F6EDE2)',
+                          borderColor: 'var(--af-border, #E8D5C2)'
+                        }}
+                      >
                         <div className="flex items-center gap-2 min-w-0">
                           {/* Reordering Up/Down */}
-                          <div className="flex items-center text-zinc-400">
+                          <div className="flex items-center" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
                             <button
                               onClick={() => handleMoveLine(idx, 'up')}
                               disabled={idx === 0}
-                              className="p-0.5 hover:text-zinc-800 disabled:opacity-20 transition-colors"
+                              className="p-0.5 hover:opacity-80 disabled:opacity-20 transition-colors cursor-pointer"
                               title="Move Turn Up"
                             >
                               <ChevronUp className="w-3.5 h-3.5" />
@@ -1266,19 +1489,25 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                             <button
                               onClick={() => handleMoveLine(idx, 'down')}
                               disabled={idx === lines.length - 1}
-                              className="p-0.5 hover:text-zinc-800 disabled:opacity-20 transition-colors"
+                              className="p-0.5 hover:opacity-80 disabled:opacity-20 transition-colors cursor-pointer"
                               title="Move Turn Down"
                             >
                               <ChevronDown className="w-3.5 h-3.5" />
                             </button>
                           </div>
 
-                          <span className="text-[10px] font-mono font-bold text-zinc-400">
+                          <span className="text-[10px] font-mono font-bold" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
                             #{idx + 1}
                           </span>
 
                           {/* Speaker Selector Pill */}
-                          <div className="flex items-center gap-1.5 bg-white border border-zinc-200 rounded-full px-2 py-0.5 shadow-xs">
+                          <div 
+                            className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 border shadow-2xs"
+                            style={{
+                              backgroundColor: 'var(--af-surface, #FFFFFF)',
+                              borderColor: 'var(--af-border, #E8D5C2)'
+                            }}
+                          >
                             <span className={`w-2 h-2 rounded-full ${theme.dot}`} />
                             <select
                               value={line.speaker}
@@ -1286,7 +1515,8 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                                 const newSp = e.target.value;
                                 setLines(prev => prev.map(l => l.id === line.id ? { ...l, speaker: newSp } : l));
                               }}
-                              className="text-[11px] font-mono font-bold text-zinc-800 bg-transparent outline-none cursor-pointer pr-1"
+                              className="text-[11px] font-bold bg-transparent outline-none cursor-pointer pr-1"
+                              style={{ color: 'var(--af-text, #431407)' }}
                             >
                               {speakers.map(s => (
                                 <option key={s.name} value={s.name}>
@@ -1305,10 +1535,15 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                               setLines(prev => prev.map(l => l.id === line.id ? { ...l, emotion: newEm } : l));
                             }}
                             placeholder="Emotion (e.g. Whispering, Bold)"
-                            className="hidden sm:inline-block text-[10px] font-mono border border-zinc-200 rounded px-1.5 py-0.5 bg-white text-zinc-600 max-w-[140px] focus:border-zinc-400 outline-none"
+                            className="hidden sm:inline-block text-[10px] rounded-lg border px-2 py-0.5 max-w-[140px] outline-none"
+                            style={{
+                              backgroundColor: 'var(--af-surface, #FFFFFF)',
+                              borderColor: 'var(--af-border, #E8D5C2)',
+                              color: 'var(--af-text, #431407)'
+                            }}
                           />
 
-                          <span className="hidden md:inline-block text-[10px] font-mono text-zinc-400">
+                          <span className="hidden md:inline-block text-[10px] font-mono" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
                             {line.scene || 'Scene 1'}
                           </span>
                         </div>
@@ -1316,13 +1551,27 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                         {/* Status, Play micro-button, and Collapse */}
                         <div className="flex items-center gap-1.5">
                           {line.status === 'ready' && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                            <span 
+                              className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border font-semibold"
+                              style={{
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderColor: 'rgba(16, 185, 129, 0.3)',
+                                color: '#059669'
+                              }}
+                            >
                               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                               <span className="hidden sm:inline">Ready</span>
                             </span>
                           )}
                           {line.status === 'generating' && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded animate-pulse">
+                            <span 
+                              className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border font-semibold animate-pulse"
+                              style={{
+                                backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                                borderColor: 'rgba(2, 132, 199, 0.3)',
+                                color: '#0284C7'
+                              }}
+                            >
                               <RefreshCw className="w-3 h-3 animate-spin" />
                               <span className="hidden sm:inline">Synthesizing...</span>
                             </span>
@@ -1338,11 +1587,12 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                                   playLineAudio(line.id, line.audioBuffer!);
                                 }
                               }}
-                              className={`p-1 rounded border text-xs font-mono transition-colors ${
-                                isPlayingThis 
-                                  ? 'bg-rose-600 text-white border-rose-700' 
-                                  : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-100'
-                              }`}
+                              className="p-1.5 rounded-lg border text-xs transition-colors cursor-pointer"
+                              style={{
+                                backgroundColor: isPlayingThis ? '#EF4444' : 'var(--af-surface, #FFFFFF)',
+                                borderColor: isPlayingThis ? '#EF4444' : 'var(--af-border, #E8D5C2)',
+                                color: isPlayingThis ? '#FFFFFF' : 'var(--af-text, #431407)'
+                              }}
                               title={isPlayingThis ? 'Pause' : 'Play Turn'}
                             >
                               {isPlayingThis ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current ml-0.5" />}
@@ -1352,7 +1602,8 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                           {/* Collapse Line Toggle */}
                           <button
                             onClick={() => toggleLineCollapse(line.id)}
-                            className="p-1 text-zinc-400 hover:text-zinc-700 transition-colors"
+                            className="p-1.5 rounded-lg transition-colors cursor-pointer hover:opacity-80"
+                            style={{ color: 'var(--af-text-muted, #9A5B32)' }}
                             title={isCollapsed ? "Expand Dialogue" : "Collapse Dialogue"}
                           >
                             {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
@@ -1361,7 +1612,8 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                           {/* Delete Turn */}
                           <button
                             onClick={() => handleRemoveLine(line.id)}
-                            className="p-1 text-zinc-400 hover:text-rose-600 transition-colors"
+                            className="p-1.5 rounded-lg transition-colors cursor-pointer hover:text-rose-600"
+                            style={{ color: 'var(--af-text-muted, #9A5B32)' }}
                             title="Delete Turn"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1386,38 +1638,55 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                               } : l));
                             }}
                             rows={2}
-                            className="w-full p-2.5 rounded border border-zinc-200 font-mono text-xs text-zinc-900 bg-zinc-50/50 focus:bg-white outline-none focus:ring-1 focus:ring-sky-500 resize-y leading-relaxed"
+                            className="w-full p-3 rounded-xl border text-xs outline-none resize-y leading-relaxed"
+                            style={{
+                              backgroundColor: 'var(--af-raised, #F6EDE2)',
+                              borderColor: 'var(--af-border, #E8D5C2)',
+                              color: 'var(--af-text, #431407)'
+                            }}
                             placeholder="Enter character dialogue..."
                           />
 
                           {/* Emotion Quick Presets */}
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[10px] font-mono text-zinc-400">Tone:</span>
-                            {EMOTION_PRESETS.slice(0, 5).map(em => (
-                              <button
-                                key={em}
-                                type="button"
-                                onClick={() => {
-                                  setLines(prev => prev.map(l => l.id === line.id ? { ...l, emotion: em } : l));
-                                }}
-                                className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors ${
-                                  line.emotion === em 
-                                    ? 'bg-zinc-800 text-white border-zinc-900 font-bold' 
-                                    : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-100'
-                                }`}
-                              >
-                                {em}
-                              </button>
-                            ))}
+                            <span className="text-[10px]" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>Tone:</span>
+                            {EMOTION_PRESETS.slice(0, 5).map(em => {
+                              const isSelected = line.emotion === em;
+                              return (
+                                <button
+                                  key={em}
+                                  type="button"
+                                  onClick={() => {
+                                    setLines(prev => prev.map(l => l.id === line.id ? { ...l, emotion: em } : l));
+                                  }}
+                                  className="text-[10px] px-2 py-0.5 rounded-lg border transition-colors cursor-pointer"
+                                  style={{
+                                    backgroundColor: isSelected ? 'var(--af-accent, #C2410C)' : 'var(--af-surface, #FFFFFF)',
+                                    color: isSelected ? 'var(--af-accent-text, #FFFFFF)' : 'var(--af-text, #431407)',
+                                    borderColor: isSelected ? 'var(--af-accent, #C2410C)' : 'var(--af-border, #E8D5C2)',
+                                    fontWeight: isSelected ? 'bold' : 'normal'
+                                  }}
+                                >
+                                  {em}
+                                </button>
+                              );
+                            })}
                           </div>
 
                           {/* Action Toolbar for this line */}
-                          <div className="flex items-center justify-between flex-wrap gap-2 pt-1 border-t border-zinc-100">
+                          <div 
+                            className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t"
+                            style={{ borderColor: 'var(--af-border, #E8D5C2)' }}
+                          >
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleGenerateLine(line.id)}
                                 disabled={isGeneratingThis || isBatchGenerating || !line.text.trim()}
-                                className="px-3 py-1 rounded border border-amber-500 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-[11px] font-mono font-bold text-zinc-950 flex items-center gap-1.5 transition-all shadow-xs"
+                                className="px-3 py-1.5 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                                style={{
+                                  backgroundColor: 'var(--af-accent, #C2410C)',
+                                  color: 'var(--af-accent-text, #FFFFFF)'
+                                }}
                               >
                                 {isGeneratingThis ? (
                                   <RefreshCw className="w-3 h-3 animate-spin" />
@@ -1427,16 +1696,20 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                                 <span>{line.status === 'ready' ? 'Regenerate' : 'Synthesize Voice'}</span>
                               </button>
 
-                              {line.audioUrl && (
-                                <a
-                                  href={line.audioUrl}
-                                  download={`${line.speaker.toLowerCase().replace(/\s+/g, '_')}_line_${idx + 1}.wav`}
-                                  className="px-2 py-1 rounded border border-zinc-200 bg-white hover:bg-zinc-50 text-[11px] font-mono text-zinc-700 flex items-center gap-1"
-                                  title="Download line audio"
+                              {(line.audioBuffer || line.audioUrl) && (
+                                <button
+                                  onClick={() => handleDownloadSingleLine(line, idx)}
+                                  className="px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                                  style={{
+                                    backgroundColor: 'var(--af-surface, #FFFFFF)',
+                                    borderColor: 'var(--af-border, #E8D5C2)',
+                                    color: 'var(--af-text, #431407)'
+                                  }}
+                                  title="Export dialogue turn WAV"
                                 >
-                                  <Download className="w-3 h-3" />
+                                  <Download className="w-3.5 h-3.5" />
                                   <span className="hidden sm:inline">WAV</span>
-                                </a>
+                                </button>
                               )}
                             </div>
 
@@ -1447,12 +1720,15 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                                   {[4, 8, 12, 6, 14, 10, 6, 12].map((h, i) => (
                                     <div 
                                       key={i} 
-                                      style={{ height: `${isPlayingThis ? h : 4}px` }} 
-                                      className={`w-0.5 rounded-full transition-all ${isPlayingThis ? 'bg-amber-500 animate-pulse' : 'bg-zinc-300'}`}
+                                      style={{ 
+                                        height: `${isPlayingThis ? h : 4}px`,
+                                        backgroundColor: isPlayingThis ? 'var(--af-accent, #C2410C)' : 'var(--af-border, #E8D5C2)'
+                                      }} 
+                                      className={`w-0.5 rounded-full transition-all ${isPlayingThis ? 'animate-pulse' : ''}`}
                                     />
                                   ))}
                                 </div>
-                                <span className="text-[10px] font-mono text-zinc-500">
+                                <span className="text-[10px] font-mono" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
                                   {(line.audioBuffer.duration).toFixed(1)}s
                                 </span>
                               </div>
@@ -1467,9 +1743,14 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                 {/* Bottom Add Turn trigger button */}
                 <button
                   onClick={handleAddLine}
-                  className="w-full py-3 rounded-lg border-2 border-dashed border-zinc-300 hover:border-zinc-400 hover:bg-white text-zinc-500 hover:text-zinc-800 text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full py-3.5 rounded-xl border-2 border-dashed text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer hover:opacity-80"
+                  style={{
+                    backgroundColor: 'var(--af-surface, #FFFFFF)',
+                    borderColor: 'var(--af-border, #E8D5C2)',
+                    color: 'var(--af-text, #431407)'
+                  }}
                 >
-                  <Plus className="w-4 h-4" /> Add Next Dialogue Turn
+                  <Plus className="w-4 h-4" style={{ color: 'var(--af-accent, #C2410C)' }} /> Add Next Dialogue Turn
                 </button>
               </>
             )}
@@ -1478,28 +1759,55 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
       </div>
 
       {/* 3. SLEEK BENTO TIMELINE RIBBON (Compact Scrubber) */}
-      <footer className="border-t border-zinc-200 bg-white px-3 sm:px-6 py-2 flex-shrink-0 flex items-center justify-between gap-3 shadow-xs z-30">
+      <footer 
+        className="border-t px-3 sm:px-6 py-2.5 flex-shrink-0 flex items-center justify-between gap-3 shadow-xs z-30"
+        style={{
+          backgroundColor: 'var(--af-raised, #F6EDE2)',
+          borderColor: 'var(--af-border, #E8D5C2)',
+          color: 'var(--af-text, #431407)'
+        }}
+      >
         <div className="flex items-center gap-2 min-w-0">
           {isPlayingFullSequence && currentSpeakingLine ? (
-            <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+            <div 
+              className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-lg border"
+              style={{
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderColor: 'rgba(239, 68, 68, 0.25)',
+                color: '#DC2626'
+              }}
+            >
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
               <span className="truncate">Live: {currentSpeakingLine.speaker}</span>
             </div>
           ) : isBatchGenerating ? (
-            <div className="flex items-center gap-1.5 text-xs font-mono text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-              <RefreshCw className="w-3 h-3 animate-spin text-sky-600" />
+            <div 
+              className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-lg border"
+              style={{
+                backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                borderColor: 'rgba(2, 132, 199, 0.25)',
+                color: '#0284C7'
+              }}
+            >
+              <RefreshCw className="w-3 h-3 animate-spin" />
               <span>Batch {batchProgress.current}/{batchProgress.total}</span>
             </div>
           ) : (
-            <span className="text-xs font-mono text-zinc-500 hidden sm:inline">
-              Ready: <strong className="text-zinc-800">{readyCount}</strong>/{lines.length} turns
+            <span className="text-xs hidden sm:inline" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
+              Ready: <strong style={{ color: 'var(--af-text, #431407)' }}>{readyCount}</strong>/{lines.length} turns
             </span>
           )}
         </div>
 
         {/* Center Interactive Timeline Scrubber */}
         <div className="flex-1 max-w-md flex flex-col gap-0.5">
-          <div className="flex items-center gap-1 h-3.5 bg-zinc-100 rounded p-0.5 border border-zinc-200 overflow-hidden">
+          <div 
+            className="flex items-center gap-1 h-3.5 rounded-lg p-0.5 border overflow-hidden"
+            style={{
+              backgroundColor: 'var(--af-surface, #FFFFFF)',
+              borderColor: 'var(--af-border, #E8D5C2)'
+            }}
+          >
             {lines.map((line, i) => {
               const isPlaying = playingLineId === line.id;
               const isReady = line.status === 'ready';
@@ -1511,15 +1819,22 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
                   onClick={() => {
                     if (line.audioBuffer) playLineAudio(line.id, line.audioBuffer);
                   }}
-                  className={`flex-1 h-full rounded-xs transition-all ${
+                  className={`flex-1 h-full rounded-xs transition-all cursor-pointer ${
                     isPlaying 
-                      ? 'bg-amber-500 animate-pulse' 
-                      : isReady 
-                      ? 'bg-emerald-500 hover:bg-emerald-400' 
+                      ? 'animate-pulse' 
                       : isGen 
-                      ? 'bg-sky-400 animate-pulse' 
-                      : 'bg-zinc-300 hover:bg-zinc-400'
+                      ? 'animate-pulse' 
+                      : ''
                   }`}
+                  style={{
+                    backgroundColor: isPlaying
+                      ? '#F59E0B'
+                      : isReady
+                      ? '#10B981'
+                      : isGen
+                      ? '#38BDF8'
+                      : 'var(--af-raised, #F6EDE2)'
+                  }}
                   title={`#${i + 1} ${line.speaker} (${line.status})`}
                 />
               );
@@ -1527,7 +1842,7 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
           </div>
         </div>
 
-        <div className="text-[11px] font-mono text-zinc-500 hidden sm:block">
+        <div className="text-[11px] font-mono hidden sm:block" style={{ color: 'var(--af-text-muted, #9A5B32)' }}>
           Audition bar
         </div>
       </footer>

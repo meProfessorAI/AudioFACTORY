@@ -9,6 +9,7 @@ import { INTRO_STYLES, CUSTOM_STYLE, SUPPORTED_LANGUAGES } from '../../constants
 import { IntroStyle, Voice, SavedAudioProject } from '../../types';
 import { ALL_VOICES } from '../../voices';
 import { generateSpeech, dramatizeText, audioBufferToWavBlob } from '../../services/geminiService';
+import { downloadAudioBlob } from '../utils/audioDownloader';
 import { 
   getElevenLabsVoices, 
   generateSpeechElevenLabs, 
@@ -440,19 +441,15 @@ export const StudioApp: React.FC = () => {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!generatedAudio) return;
     try {
       AdManager.getInstance().suppressAds('download');
       const wavBlob = audioBufferToWavBlob(generatedAudio.buffer);
-      const url = URL.createObjectURL(wavBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `audiofactory-${selectedStyle.id}-${Date.now()}.wav`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const filename = `audiofactory-${selectedStyle.id}-${Date.now()}.wav`;
+      await downloadAudioBlob(wavBlob, filename, `AudioFACTORY - ${selectedStyle.name}`);
+    } catch (err) {
+      console.error('Download error:', err);
     } finally {
       AdManager.getInstance().resumeAds('download');
     }

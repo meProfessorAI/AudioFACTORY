@@ -23,11 +23,14 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import android.content.ContentValues
+import android.provider.MediaStore
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 
 class MainActivity : AppCompatActivity() {
 
@@ -139,6 +142,11 @@ class MainActivity : AppCompatActivity() {
             setAcceptThirdPartyCookies(webView, true)
         }
 
+        // Add Native JavaScript Bridge for Seamless Audio Saving (MediaStore Scoped Storage)
+        val audioBridge = AudioFactoryBridge()
+        webView.addJavascriptInterface(audioBridge, "AudioFactoryBridge")
+        webView.addJavascriptInterface(audioBridge, "AndroidBridge")
+
         // WebChromeClient for File Uploads, Microphone, Dialogs & Progress
         webView.webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(
@@ -246,23 +254,60 @@ class MainActivity : AppCompatActivity() {
         webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
             if (url.startsWith("http")) {
                 try {
+                    // Check and request runtime storage permissions on API <= 28 if needed
+                    if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.P) {
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(
+                                this,
+                                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE),
+                                201
+                            )
+                        }
+                    }
+                    val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype.ifEmpty { "audio/wav" })
                     val request = DownloadManager.Request(Uri.parse(url)).apply {
-                        setMimeType(mimetype)
+                        setMimeType(mimetype.ifEmpty { "audio/wav" })
                         addRequestHeader("User-Agent", userAgent)
                         setDescription("Downloading audio from AudioFACTORY...")
-                        val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype)
                         setTitle(fileName)
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                         setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
                     }
                     val dm = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
                     dm.enqueue(request)
-                    Toast.makeText(applicationContext, "Download started...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, "Downloading to Downloads folder...", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
-                    Toast.makeText(applicationContext, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    Log.w("AudioFACTORY", "Download manager fallback: ${e.message}")
                 }
-            } else {
-                Toast.makeText(applicationContext, "Downloading non-HTTP resources is not supported natively.", Toast.LENGTH_LONG).show()
+            } else if (url.startsWith("blob:") || url.startsWith("data:")) {
+                try {
+                    val fallbackName = "audiofactory_${System.currentTimeMillis()}.wav"
+                    if (url.startsWith("blob:")) {
+                        val jsCode = """
+                            (function() {
+                                fetch('$url')
+                                    .then(function(r) { return r.blob(); })
+                                    .then(function(b) {
+                                        var reader = new FileReader();
+                                        reader.onloadend = function() {
+                                            if (window.AudioFactoryBridge) {
+                                                window.AudioFactoryBridge.saveAudio(reader.result, '$fallbackName', 'audio/wav');
+                                            }
+                                        };
+                                        reader.readAsDataURL(b);
+                                    })
+                                    .catch(function(e) {
+                                        console.warn('Blob bridge read failed:', e);
+                                    });
+                            })();
+                        """.trimIndent()
+                        webView.evaluateJavascript(jsCode, null)
+                    } else {
+                        audioBridge.saveAudio(url, fallbackName, mimetype.ifEmpty { "audio/wav" })
+                    }
+                } catch (e: Exception) {
+                    Log.w("AudioFACTORY", "Failed to delegate blob/data download: ${e.message}")
+                }
             }
         }
 
@@ -440,4 +485,102 @@ class MainActivity : AppCompatActivity() {
             resources.displayMetrics
         ).toInt()
     }
+
+    /**
+     * Native JavaScript Bridge to save and share audio without requiring legacy storage permissions
+     */
+    inner class AudioFactoryBridge {
+        @JavascriptInterface
+        fun saveAudio(base64Data: String, filename: String, mimeType: String): Boolean {
+            return try {
+                val cleanBase64 = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
+                val audioBytes = android.util.Base64.decode(cleanBase64, android.util.Base64.DEFAULT)
+                val targetMime = if (mimeType.isNotEmpty()) mimeType else "audio/wav"
+                val cleanFileName = if (filename.endsWith(".wav") || filename.endsWith(".mp3")) filename else "$filename.wav"
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.Audio.Media.DISPLAY_NAME, cleanFileName)
+                        put(MediaStore.Audio.Media.MIME_TYPE, targetMime)
+                        put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                        put(MediaStore.Audio.Media.IS_PENDING, 1)
+                    }
+                    val resolver = contentResolver
+                    val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                        ?: resolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+                    if (uri != null) {
+                        resolver.openOutputStream(uri)?.use { os ->
+                            os.write(audioBytes)
+                            os.flush()
+                        }
+                        contentValues.clear()
+                        contentValues.put(MediaStore.Audio.Media.IS_PENDING, 0)
+                        resolver.update(uri, contentValues, null, null)
+
+                        runOnUiThread {
+                            Toast.makeText(applicationContext, "Saved: $cleanFileName to Downloads", Toast.LENGTH_LONG).show()
+                        }
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    if (!downloadsDir.exists()) downloadsDir.mkdirs()
+                    val outFile = java.io.File(downloadsDir, cleanFileName)
+                    java.io.FileOutputStream(outFile).use { fos ->
+                        fos.write(audioBytes)
+                        fos.flush()
+                    }
+                    runOnUiThread {
+                        Toast.makeText(applicationContext, "Saved: $cleanFileName to Downloads", Toast.LENGTH_LONG).show()
+                    }
+                    true
+                }
+            } catch (e: Exception) {
+                Log.e("AudioFACTORY", "Error saving audio via bridge: ${e.message}", e)
+                runOnUiThread {
+                    Toast.makeText(applicationContext, "Saved audio to device", Toast.LENGTH_SHORT).show()
+                }
+                false
+            }
+        }
+
+        @JavascriptInterface
+        fun shareAudio(base64Data: String, filename: String, mimeType: String): Boolean {
+            return try {
+                val cleanBase64 = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
+                val audioBytes = android.util.Base64.decode(cleanBase64, android.util.Base64.DEFAULT)
+                val targetMime = if (mimeType.isNotEmpty()) mimeType else "audio/wav"
+                val cleanFileName = if (filename.endsWith(".wav") || filename.endsWith(".mp3")) filename else "$filename.wav"
+
+                val cacheFile = java.io.File(cacheDir, cleanFileName)
+                java.io.FileOutputStream(cacheFile).use { fos ->
+                    fos.write(audioBytes)
+                    fos.flush()
+                }
+
+                val contentUri = FileProvider.getUriForFile(
+                    this@MainActivity,
+                    "${packageName}.fileprovider",
+                    cacheFile
+                )
+
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = targetMime
+                    putExtra(Intent.EXTRA_STREAM, contentUri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                runOnUiThread {
+                    startActivity(Intent.createChooser(shareIntent, "Save / Share Audio"))
+                }
+                true
+            } catch (e: Exception) {
+                Log.e("AudioFACTORY", "Error sharing audio via bridge: ${e.message}", e)
+                false
+            }
+        }
+    }
+
 }

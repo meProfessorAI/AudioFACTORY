@@ -56,6 +56,7 @@
 
 /* Global Light Styles */
 html, body {
+  color-scheme: light;
   background-color: var(--skin-bg-app);
   color: var(--skin-text-primary);
   font-family: var(--font-sans);
