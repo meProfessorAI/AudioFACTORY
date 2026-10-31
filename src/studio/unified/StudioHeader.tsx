@@ -189,18 +189,18 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
           </button>
         )}
 
-        {/* Diagnostics Trigger */}
+        {/* Diagnostics & AI Metrics Trigger */}
         {onOpenDiagnostics && (
           <button
             onClick={onOpenDiagnostics}
-            className="hidden lg:inline-flex p-2 rounded-xl border transition-colors cursor-pointer hover:opacity-80"
+            className="inline-flex p-2 rounded-xl border transition-colors cursor-pointer hover:opacity-80 relative"
             style={{
               borderColor: 'var(--af-border, #E8D5C2)',
               backgroundColor: 'var(--af-surface, #FFFFFF)',
               color: 'var(--af-text-muted, #9A5B32)'
             }}
-            title="System Diagnostics & Telemetry"
-            aria-label="System Diagnostics"
+            title="System Diagnostics & AI Metrics (Latency & Tokens)"
+            aria-label="System Diagnostics & AI Metrics"
           >
             <Activity className="w-4 h-4" />
           </button>

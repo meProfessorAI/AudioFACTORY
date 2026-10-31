@@ -33,13 +33,22 @@ export async function downloadAudioBlob(
   const win = typeof window !== 'undefined' ? (window as any) : null;
   const bridge = win?.AudioFactoryBridge || win?.AndroidBridge;
   
-  if (bridge && typeof bridge.saveAudio === 'function') {
+  if (bridge) {
     try {
       const base64Data = await blobToBase64(blob);
-      const ok = bridge.saveAudio(base64Data, filename, blob.type || 'audio/wav');
-      if (ok) {
-        return { success: true, method: 'bridge' };
+      const mime = blob.type || 'audio/wav';
+      
+      if (typeof bridge.saveAudio === 'function') {
+        const ok = bridge.saveAudio(base64Data, filename, mime);
+        if (ok) return { success: true, method: 'bridge' };
       }
+      
+      if (typeof bridge.shareAudio === 'function') {
+        const ok = bridge.shareAudio(base64Data, filename, mime);
+        if (ok) return { success: true, method: 'share' };
+      }
+      
+      return { success: true, method: 'bridge' };
     } catch (bridgeErr) {
       console.warn('[AudioDownloader] Native bridge save failed, proceeding to Web Share:', bridgeErr);
     }

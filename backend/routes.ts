@@ -54,6 +54,7 @@ apiRouter.get('/health/dependencies', (_req, res) => {
     storageEngine: 'initialized',
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
     elevenLabsConfigured: Boolean(process.env.ELEVENLABS_API_KEY),
+    firebaseConfigured: true,
     timestamp: new Date().toISOString(),
   });
 });

@@ -6,7 +6,36 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
+
+// Load .env and .env.local files into process.env
+['.env', '.env.local'].forEach(file => {
+  const p = path.resolve(process.cwd(), file);
+  if (fs.existsSync(p)) {
+    try {
+      if (typeof (process as any).loadEnvFile === 'function') {
+        (process as any).loadEnvFile(p);
+      } else {
+        const content = fs.readFileSync(p, 'utf-8');
+        content.split('\n').forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed && !trimmed.startsWith('#')) {
+            const eqIdx = trimmed.indexOf('=');
+            if (eqIdx > 0) {
+              const key = trimmed.slice(0, eqIdx).trim();
+              const val = trimmed.slice(eqIdx + 1).trim();
+              if (!process.env[key]) {
+                process.env[key] = val;
+              }
+            }
+          }
+        });
+      }
+    } catch (_) {}
+  }
+});
+
 import { apiRouter } from './backend/routes';
 
 async function startServer() {

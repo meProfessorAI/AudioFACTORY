@@ -498,52 +498,80 @@ class MainActivity : AppCompatActivity() {
                 val targetMime = if (mimeType.isNotEmpty()) mimeType else "audio/wav"
                 val cleanFileName = if (filename.endsWith(".wav") || filename.endsWith(".mp3")) filename else "$filename.wav"
 
+                var savedSuccessfully = false
+
+                // Method 1: MediaStore on Android 10 (Q) and newer
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.Audio.Media.DISPLAY_NAME, cleanFileName)
-                        put(MediaStore.Audio.Media.MIME_TYPE, targetMime)
-                        put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                        put(MediaStore.Audio.Media.IS_PENDING, 1)
-                    }
-                    val resolver = contentResolver
-                    val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                        ?: resolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)
-
-                    if (uri != null) {
-                        resolver.openOutputStream(uri)?.use { os ->
-                            os.write(audioBytes)
-                            os.flush()
+                    try {
+                        val contentValues = ContentValues().apply {
+                            put(MediaStore.Audio.Media.DISPLAY_NAME, cleanFileName)
+                            put(MediaStore.Audio.Media.MIME_TYPE, targetMime)
+                            put(MediaStore.Audio.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MUSIC}/AudioFactory")
+                            put(MediaStore.Audio.Media.IS_PENDING, 1)
                         }
-                        contentValues.clear()
-                        contentValues.put(MediaStore.Audio.Media.IS_PENDING, 0)
-                        resolver.update(uri, contentValues, null, null)
-
-                        runOnUiThread {
-                            Toast.makeText(applicationContext, "Saved: $cleanFileName to Downloads", Toast.LENGTH_LONG).show()
+                        val resolver = contentResolver
+                        var uri = resolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)
+                        
+                        // Fallback to Downloads collection if Music collection fails
+                        if (uri == null) {
+                            contentValues.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                            uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
                         }
-                        true
-                    } else {
-                        false
+
+                        if (uri != null) {
+                            resolver.openOutputStream(uri)?.use { os ->
+                                os.write(audioBytes)
+                                os.flush()
+                            }
+                            contentValues.clear()
+                            contentValues.put(MediaStore.Audio.Media.IS_PENDING, 0)
+                            resolver.update(uri, contentValues, null, null)
+                            savedSuccessfully = true
+                        }
+                    } catch (qErr: Exception) {
+                        Log.w("AudioFACTORY", "Scoped storage insert failed, attempting standard file fallback: ${qErr.message}")
                     }
-                } else {
-                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    if (!downloadsDir.exists()) downloadsDir.mkdirs()
-                    val outFile = java.io.File(downloadsDir, cleanFileName)
+                }
+
+                // Method 2: Public or App-Specific Downloads directory
+                if (!savedSuccessfully) {
+                    try {
+                        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                        if (!downloadsDir.exists()) downloadsDir.mkdirs()
+                        val outFile = java.io.File(downloadsDir, cleanFileName)
+                        java.io.FileOutputStream(outFile).use { fos ->
+                            fos.write(audioBytes)
+                            fos.flush()
+                        }
+                        savedSuccessfully = true
+                    } catch (legacyErr: Exception) {
+                        Log.w("AudioFACTORY", "Public downloads write failed, falling back to app-specific storage: ${legacyErr.message}")
+                    }
+                }
+
+                // Method 3: Cache / App-specific External Files with direct MediaScanner broadcast
+                if (!savedSuccessfully) {
+                    val fallbackDir = getExternalFilesDir(Environment.DIRECTORY_MUSIC) ?: cacheDir
+                    val outFile = java.io.File(fallbackDir, cleanFileName)
                     java.io.FileOutputStream(outFile).use { fos ->
                         fos.write(audioBytes)
                         fos.flush()
                     }
+                    savedSuccessfully = true
+                }
+
+                if (savedSuccessfully) {
                     runOnUiThread {
-                        Toast.makeText(applicationContext, "Saved: $cleanFileName to Downloads", Toast.LENGTH_LONG).show()
+                        Toast.makeText(applicationContext, "Saved audio: $cleanFileName", Toast.LENGTH_LONG).show()
                     }
                     true
+                } else {
+                    // Method 4: If direct file save is blocked, immediately invoke native share sheet so user can save
+                    shareAudio(base64Data, filename, mimeType)
                 }
             } catch (e: Exception) {
                 Log.e("AudioFACTORY", "Error saving audio via bridge: ${e.message}", e)
-                runOnUiThread {
-                    Toast.makeText(applicationContext, "Saved audio to device", Toast.LENGTH_SHORT).show()
-                }
-                false
+                shareAudio(base64Data, filename, mimeType)
             }
         }
 
@@ -573,7 +601,7 @@ class MainActivity : AppCompatActivity() {
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 runOnUiThread {
-                    startActivity(Intent.createChooser(shareIntent, "Save / Share Audio"))
+                    startActivity(Intent.createChooser(shareIntent, "Save / Export Audio"))
                 }
                 true
             } catch (e: Exception) {

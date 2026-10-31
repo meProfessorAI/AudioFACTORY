@@ -7,3 +7,4 @@ export * from './useEntitlement';
 export * from './useUsage';
 export * from './useGenerationQuota';
 export * from './useDeepLinks';
+export * from './useApiMetrics';

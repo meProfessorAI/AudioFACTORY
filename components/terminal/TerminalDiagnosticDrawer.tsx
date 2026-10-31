@@ -11,9 +11,15 @@ import {
   Check, 
   Sparkles,
   Eye,
-  EyeOff
+  EyeOff,
+  Zap,
+  Timer,
+  Gauge,
+  BarChart3,
+  Download
 } from 'lucide-react';
 import { useTerminal } from './TerminalContext';
+import { useApiMetrics } from '../../src/hooks/useApiMetrics';
 
 interface TerminalDiagnosticDrawerProps {
   onTriggerSynth?: () => void;
@@ -37,7 +43,9 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
     activeSkin
   } = useTerminal();
 
-  const [activeTab, setActiveTab] = useState<'logs' | 'shell' | 'telemetry'>('logs');
+  const { summary, recentCalls, clearMetrics } = useApiMetrics();
+
+  const [activeTab, setActiveTab] = useState<'logs' | 'shell' | 'telemetry' | 'metrics'>('metrics');
   const [commandInput, setCommandInput] = useState<string>('');
   const [shellHistory, setShellHistory] = useState<{ cmd: string; res: string; color?: string }[]>([
     { cmd: 'sys.init', res: `AudioFACTORY Studio Engine online. ${activeSkin.themeName} skin active.`, color: '#16A34A' }
@@ -152,11 +160,16 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
             <div className="flex items-center gap-2 sm:gap-3 text-[10px] font-mono truncate" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
               <span className="font-bold flex-shrink-0" style={{ color: '#16A34A' }}>● READY</span>
               <span className="hidden md:inline flex-shrink-0">24kHz PCM</span>
-              <span className="hidden sm:inline flex-shrink-0" style={{ color: 'var(--skin-accent, #0284C7)' }}>
-                {activeSkin.dayShort}: {activeSkin.themeName}
+              <span className="flex-shrink-0 font-bold" style={{ color: 'var(--skin-accent, #0284C7)' }}>
+                ⚡ {summary.totalTokens.toLocaleString()} TOKENS
               </span>
-              <span className="truncate hidden lg:inline" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
-                {logs[logs.length - 1]?.message || 'Awaiting command input...'}
+              {summary.avgLatencyMs > 0 && (
+                <span className="hidden sm:inline flex-shrink-0 text-emerald-600 font-bold">
+                  ⏱️ {summary.avgLatencyMs}ms AVG
+                </span>
+              )}
+              <span className="hidden lg:inline flex-shrink-0" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                {activeSkin.dayShort}: {activeSkin.themeName}
               </span>
             </div>
           </div>
@@ -190,6 +203,22 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
             }}
           >
             <div className="flex items-center gap-1.5 flex-shrink-0">
+              <button
+                onClick={() => setActiveTab('metrics')}
+                className={`px-2.5 sm:px-3 py-1 rounded-md text-xs font-mono font-bold uppercase transition-all whitespace-nowrap border flex items-center gap-1.5 ${
+                  activeTab === 'metrics'
+                    ? 'shadow-xs font-extrabold text-white'
+                    : 'hover:opacity-100 opacity-70 border-transparent'
+                }`}
+                style={{
+                  backgroundColor: activeTab === 'metrics' ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                  borderColor: activeTab === 'metrics' ? 'var(--skin-accent, #0284C7)' : 'transparent',
+                  color: activeTab === 'metrics' ? 'var(--skin-accent-text, #FFFFFF)' : 'var(--skin-text-primary, #0F172A)'
+                }}
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                AI Metrics ({summary.totalCalls})
+              </button>
               <button
                 onClick={() => setActiveTab('logs')}
                 className={`px-2.5 sm:px-3 py-1 rounded-md text-xs font-mono font-bold uppercase transition-all whitespace-nowrap border ${
@@ -446,6 +475,232 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {/* TAB 4: AI METRICS & LATENCY (LIVE) */}
+          {activeTab === 'metrics' && (
+            <div 
+              className="flex-1 overflow-y-auto p-3 sm:p-4 font-mono text-xs space-y-4 custom-scrollbar"
+              style={{ backgroundColor: 'var(--skin-bg-app, #F8FAFC)' }}
+            >
+              {/* Metric KPI Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+                {/* Total Tokens Card */}
+                <div 
+                  className="p-3 border rounded-lg shadow-2xs space-y-1"
+                  style={{
+                    backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                    borderColor: 'var(--skin-border, #E2E8F0)'
+                  }}
+                >
+                  <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: 'var(--skin-accent, #0284C7)' }}>
+                    <span className="flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-amber-500" /> TOTAL TOKENS
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-amber-500/10 text-amber-600 font-extrabold">LIVE</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-black" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                    {summary.totalTokens.toLocaleString()}
+                  </div>
+                  <div className="text-[10px] flex items-center justify-between" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                    <span>In: {summary.totalPromptTokens.toLocaleString()}</span>
+                    <span>Out: {summary.totalCompletionTokens.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Generation Latency Card */}
+                <div 
+                  className="p-3 border rounded-lg shadow-2xs space-y-1"
+                  style={{
+                    backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                    borderColor: 'var(--skin-border, #E2E8F0)'
+                  }}
+                >
+                  <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: '#16A34A' }}>
+                    <span className="flex items-center gap-1.5">
+                      <Timer className="w-3.5 h-3.5" /> AVG LATENCY
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-emerald-500/10 text-emerald-600 font-extrabold">DSP</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-black" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                    {summary.avgLatencyMs > 0 ? `${summary.avgLatencyMs}ms` : '--'}
+                  </div>
+                  <div className="text-[10px] flex items-center justify-between" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                    <span>Min: {summary.minLatencyMs ? `${summary.minLatencyMs}ms` : '0ms'}</span>
+                    <span>Max: {summary.maxLatencyMs ? `${summary.maxLatencyMs}ms` : '0ms'}</span>
+                  </div>
+                </div>
+
+                {/* Total Invocations Card */}
+                <div 
+                  className="p-3 border rounded-lg shadow-2xs space-y-1"
+                  style={{
+                    backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                    borderColor: 'var(--skin-border, #E2E8F0)'
+                  }}
+                >
+                  <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: '#D97706' }}>
+                    <span className="flex items-center gap-1.5">
+                      <Gauge className="w-3.5 h-3.5" /> AI CALLS
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-blue-500/10 text-blue-600 font-extrabold">API</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-black" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                    {summary.totalCalls}
+                  </div>
+                  <div className="text-[10px] flex items-center justify-between" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                    <span className="text-emerald-600 font-bold">{summary.successfulCalls} success</span>
+                    <span className="text-rose-600">{summary.failedCalls} fail</span>
+                  </div>
+                </div>
+
+                {/* Estimated Cost Card */}
+                <div 
+                  className="p-3 border rounded-lg shadow-2xs space-y-1"
+                  style={{
+                    backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                    borderColor: 'var(--skin-border, #E2E8F0)'
+                  }}
+                >
+                  <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                    <span className="flex items-center gap-1.5">
+                      <BarChart3 className="w-3.5 h-3.5 text-indigo-500" /> EST. COST
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-indigo-500/10 text-indigo-600 font-extrabold">USD</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-black" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                    ${summary.estimatedCostUsd.toFixed(4)}
+                  </div>
+                  <div className="text-[10px] flex items-center justify-between" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                    <span>Gemini 2.5 Flash</span>
+                    <span className="text-emerald-600">Free Tier/Zero Charge</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Toolbar & Transparency Notice */}
+              <div 
+                className="p-2.5 border rounded-lg flex items-center justify-between gap-3 text-[11px]"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E2E8F0)'
+                }}
+              >
+                <div className="flex items-center gap-2 text-xs truncate">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+                  <span className="font-bold truncate" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                    Neural Synthesis Telemetry Active
+                  </span>
+                  <span className="hidden sm:inline" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                    — Real-time token quantification & generation latency logging
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={clearMetrics}
+                    className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase transition-colors hover:bg-rose-500/10 text-rose-600 border border-rose-200"
+                    title="Reset Session Telemetry"
+                  >
+                    Clear History
+                  </button>
+                </div>
+              </div>
+
+              {/* Chronological Table of AI Calls */}
+              <div 
+                className="border rounded-lg overflow-hidden shadow-2xs"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E2E8F0)'
+                }}
+              >
+                <div 
+                  className="px-3 py-2 border-b flex items-center justify-between text-[11px] font-bold"
+                  style={{
+                    backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+                    borderColor: 'var(--skin-border, #E2E8F0)',
+                    color: 'var(--skin-text-primary, #0F172A)'
+                  }}
+                >
+                  <span>RECENT AI INVOCATIONS ({recentCalls.length})</span>
+                  <span className="text-[10px] font-normal" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                    Showing latest {recentCalls.length} executions
+                  </span>
+                </div>
+
+                {recentCalls.length === 0 ? (
+                  <div className="p-8 text-center space-y-2">
+                    <Zap className="w-8 h-8 mx-auto text-amber-400 opacity-60 animate-bounce" />
+                    <div className="text-xs font-bold" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                      No AI calls logged yet this session
+                    </div>
+                    <div className="text-[11px] max-w-sm mx-auto" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                      Trigger a speech generation, script dramatization, or multi-speaker dialogue turn in the studio to observe real-time latency and token quantification.
+                    </div>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {recentCalls.map((call) => (
+                      <div 
+                        key={call.id}
+                        className="p-2.5 sm:px-3 sm:py-2 flex items-center justify-between gap-2 sm:gap-4 hover:bg-slate-50/50 transition-colors text-[11px]"
+                      >
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                          <span 
+                            className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                              call.status === 'success' ? 'bg-emerald-500' : 'bg-rose-500'
+                            }`} 
+                          />
+                          <div className="min-w-0">
+                            <div className="font-bold truncate" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                              {call.operation}
+                            </div>
+                            <div className="text-[10px] flex items-center gap-2" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                              <span>{call.model}</span>
+                              <span>•</span>
+                              <span>{new Date(call.timestamp).toLocaleTimeString()}</span>
+                              {call.errorMessage && (
+                                <span className="text-rose-500 truncate">({call.errorMessage})</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 text-right">
+                          <div className="space-y-0.5">
+                            <div className="font-bold flex items-center justify-end gap-1">
+                              <span 
+                                className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold ${
+                                  call.latencyMs < 1000 
+                                    ? 'bg-emerald-100 text-emerald-700' 
+                                    : call.latencyMs < 3000 
+                                    ? 'bg-amber-100 text-amber-700' 
+                                    : 'bg-rose-100 text-rose-700'
+                                }`}
+                              >
+                                {call.latencyMs}ms
+                              </span>
+                            </div>
+                            <div className="text-[10px]" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                              Latency
+                            </div>
+                          </div>
+
+                          <div className="space-y-0.5 min-w-[70px]">
+                            <div className="font-bold" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                              {call.totalTokens.toLocaleString()} <span className="text-[10px] font-normal">tok</span>
+                            </div>
+                            <div className="text-[10px]" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                              ${call.estimatedCostUsd.toFixed(4)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

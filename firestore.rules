@@ -1,0 +1,97 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email != null && request.auth.token.email == 'connectedtorajib@gmail.com')
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation helper for AudioProject
+    function isValidAudioProject(data) {
+      return data.keys().hasAll(['id', 'title', 'userId', 'lines']) &&
+             data.id is string && isValidId(data.id) &&
+             data.title is string && data.title.size() <= 256 &&
+             data.userId == request.auth.uid &&
+             data.lines is list && data.lines.size() <= 200 &&
+             (!('summary' in data) || (data.summary is string && data.summary.size() <= 4000)) &&
+             (!('format' in data) || (data.format is string && data.format.size() <= 100)) &&
+             (!('style' in data) || (data.style is string && data.style.size() <= 100)) &&
+             (!('speakerCount' in data) || (data.speakerCount is number)) &&
+             (!('speakers' in data) || (data.speakers is list && data.speakers.size() <= 20));
+    }
+
+    // Validation helper for Monologue
+    function isValidMonologue(data) {
+      return data.keys().hasAll(['id', 'title', 'voice', 'text', 'userId']) &&
+             data.id is string && isValidId(data.id) &&
+             data.title is string && data.title.size() <= 256 &&
+             data.voice is string && data.voice.size() <= 100 &&
+             data.text is string && data.text.size() <= 50000 &&
+             data.userId == request.auth.uid &&
+             (!('styleId' in data) || (data.styleId is string && data.styleId.size() <= 100));
+    }
+
+    // Admins collection for role checking
+    match /admins/{adminId} {
+      allow read: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
+      allow write: if false;
+    }
+
+    // User data trees
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+
+      // Audio Projects subcollection
+      match /projects/{projectId} {
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow create: if (isOwner(userId) || isAdmin()) && isValidId(projectId) && isValidAudioProject(incoming());
+        allow update: if (isOwner(userId) || isAdmin()) && isValidId(projectId) && isValidAudioProject(incoming()) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Monologues subcollection
+      match /monologues/{monologueId} {
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow create: if (isOwner(userId) || isAdmin()) && isValidId(monologueId) && isValidMonologue(incoming());
+        allow update: if (isOwner(userId) || isAdmin()) && isValidId(monologueId) && isValidMonologue(incoming()) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Daily usage records (authoritative client read, admin/server write)
+      match /usage/{date} {
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow write: if isAdmin();
+      }
+    }
+  }
+}

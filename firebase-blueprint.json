@@ -1,0 +1,159 @@
+{
+  "entities": {
+    "AudioProject": {
+      "title": "AudioProject",
+      "description": "Multi-speaker drama and podcast dialogue project stored per user",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "description": "Unique identifier of the project"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Title of the audio drama or podcast"
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "Short logline or premise summary"
+        },
+        "format": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Audio production format"
+        },
+        "style": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Creative narrative tone instruction"
+        },
+        "speakerCount": {
+          "type": "number",
+          "description": "Total speakers in this project"
+        },
+        "speakers": {
+          "type": "array",
+          "description": "Cast speaker configurations"
+        },
+        "lines": {
+          "type": "array",
+          "description": "Ordered script dialogue turns"
+        },
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "UID of the creator"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["id", "title", "userId", "lines"]
+    },
+    "Monologue": {
+      "title": "Monologue",
+      "description": "Single-speaker audio speech script",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "description": "Unique monologue ID"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Monologue title"
+        },
+        "styleId": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Selected vocal style persona ID"
+        },
+        "voice": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Neural voice model name"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 50000,
+          "description": "Speech text content"
+        },
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "UID of the creator"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["id", "title", "voice", "text", "userId"]
+    },
+    "DailyUsage": {
+      "title": "DailyUsage",
+      "description": "Daily generation quota tracking ledger",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Date formatted YYYY-MM-DD"
+        },
+        "generationCount": {
+          "type": "number",
+          "description": "Count of neural generations performed today"
+        },
+        "totalChars": {
+          "type": "number",
+          "description": "Total characters synthesized today"
+        },
+        "plan": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Active tier of the user"
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp of record"
+        }
+      },
+      "required": ["date", "generationCount"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/projects/{projectId}": {
+      "schema": "AudioProject",
+      "description": "User multi-speaker audio projects"
+    },
+    "/users/{userId}/monologues/{monologueId}": {
+      "schema": "Monologue",
+      "description": "User single-speaker monologue scripts"
+    },
+    "/users/{userId}/usage/{date}": {
+      "schema": "DailyUsage",
+      "description": "User daily generation quota usage"
+    }
+  }
+}

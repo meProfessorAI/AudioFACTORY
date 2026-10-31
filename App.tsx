@@ -22,6 +22,7 @@ import { AccountDeletionPage } from './src/website/pages/AccountDeletionPage';
 import { StudioApp } from './src/studio/StudioApp';
 import { ProfileDashboard } from './src/pages/ProfileDashboard';
 import { AdminPanel } from './src/pages/AdminPanel';
+import { FirebaseProvider } from './src/services/firebaseContext';
 import { useAds } from './src/monetization/useAds';
 
 const AdIntegrator: React.FC = () => {
@@ -31,8 +32,9 @@ const AdIntegrator: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <AdIntegrator />
+    <FirebaseProvider>
+      <BrowserRouter>
+        <AdIntegrator />
       <Routes>
         {/* ================= ADMIN & PROFILE ================= */}
         <Route path="/admin" element={<AdminPanel />} />
@@ -154,7 +156,8 @@ export const App: React.FC = () => {
         {/* ================= CATCH-ALL REDIRECT ================= */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </FirebaseProvider>
   );
 };
 

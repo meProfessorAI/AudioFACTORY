@@ -6,6 +6,7 @@
 */
 import { apiGet, apiPost } from '../src/lib/apiClient';
 import { useEntitlementStore } from '../src/store/useEntitlementStore';
+import { measureApiCall } from '../src/hooks/useApiMetrics';
 
 export function decodeBase64ToBytes(base64: string): Uint8Array {
   const binaryString = atob(base64);
@@ -133,11 +134,14 @@ export const generateSpeech = async (
   styleInstruction?: string
 ): Promise<GeneratedAudio> => {
   try {
-    const data = await apiPost('/ai/tts-gemini', {
-      text,
-      voiceName,
-      styleInstruction,
-    });
+    const payload = { text, voiceName, styleInstruction };
+    const data = await measureApiCall(
+      'Neural Speech Synthesis',
+      '/ai/tts-gemini',
+      payload,
+      () => apiPost('/ai/tts-gemini', payload),
+      { model: 'gemini-2.5-flash', provider: 'gemini' }
+    );
 
     useEntitlementStore.getState().decrementQuota();
 
@@ -187,7 +191,13 @@ export const generateScript = async (params: {
   lines: { id: string; speaker: string; text: string; scene: string; emotion: string; status: 'idle' }[];
 }> => {
   try {
-    const data = await apiPost('/ai/generate-script', params);
+    const data = await measureApiCall(
+      'Script Generation',
+      '/ai/generate-script',
+      params,
+      () => apiPost('/ai/generate-script', params),
+      { model: 'gemini-2.5-flash', provider: 'gemini' }
+    );
     useEntitlementStore.getState().decrementQuota();
     return data;
   } catch (error: any) {
@@ -205,7 +215,14 @@ export const analyzeScriptContent = async (rawContent: string): Promise<{
   lines: { id: string; speaker: string; text: string; scene: string; emotion: string; status: 'idle' }[];
 }> => {
   try {
-    const data = await apiPost('/ai/analyze-script', { rawContent });
+    const payload = { rawContent };
+    const data = await measureApiCall(
+      'Script Casting & Analysis',
+      '/ai/analyze-script',
+      payload,
+      () => apiPost('/ai/analyze-script', payload),
+      { model: 'gemini-2.5-flash', provider: 'gemini' }
+    );
     useEntitlementStore.getState().decrementQuota();
     return data;
   } catch (error: any) {
@@ -218,7 +235,14 @@ export const analyzeScriptContent = async (rawContent: string): Promise<{
 
 export const dramatizeText = async (text: string, styleInstruction?: string): Promise<string> => {
   try {
-    const data = await apiPost('/ai/dramatize', { text, styleInstruction });
+    const payload = { text, styleInstruction };
+    const data = await measureApiCall(
+      'Text Dramatization',
+      '/ai/dramatize',
+      payload,
+      () => apiPost('/ai/dramatize', payload),
+      { model: 'gemini-2.5-flash', provider: 'gemini' }
+    );
     useEntitlementStore.getState().decrementQuota();
     return data.dramatizedText;
   } catch (error: any) {
@@ -236,7 +260,13 @@ export const generateDialogue = async (params: {
   lines: { id: string; speaker: string; text: string; audioBase64: string; contentType: string; sampleRate?: number }[];
 }> => {
   try {
-    const data = await apiPost('/ai/generate-dialogue', params);
+    const data = await measureApiCall(
+      'Multi-Speaker Dialogue Synthesis',
+      '/ai/generate-dialogue',
+      params,
+      () => apiPost('/ai/generate-dialogue', params),
+      { model: 'gemini-2.5-flash', provider: 'gemini' }
+    );
     useEntitlementStore.getState().decrementQuota();
     return data;
   } catch (error: any) {
