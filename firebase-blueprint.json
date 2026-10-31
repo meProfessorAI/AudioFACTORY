@@ -140,6 +140,111 @@
         }
       },
       "required": ["date", "generationCount"]
+    },
+    "EarlyBirdApplication": {
+      "title": "EarlyBirdApplication",
+      "description": "AudioFACTORY Early Birds v2.0.0 founding tester application record",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Applicant display name"
+        },
+        "email": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 254,
+          "description": "Google Play account email address"
+        },
+        "normalizedEmail": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 254,
+          "description": "Canonical normalized Google Play email address"
+        },
+        "interests": {
+          "type": "array",
+          "description": "Selected interest areas (up to 6)"
+        },
+        "androidVersion": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "Applicant Android OS version"
+        },
+        "programme": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Programme name (AudioFACTORY Early Birds)"
+        },
+        "appVersion": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Target release version (2.0.0)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["applied", "withdrawn"],
+          "maxLength": 32,
+          "description": "Application lifecycle status"
+        },
+        "selectionStatus": {
+          "type": "string",
+          "enum": ["pending", "selected", "waitlisted", "declined"],
+          "maxLength": 32,
+          "description": "Tester selection status"
+        },
+        "testingInvitationSent": {
+          "type": "boolean",
+          "description": "Whether official Google Play testing invitation was sent"
+        },
+        "testingCompleted": {
+          "type": "boolean",
+          "description": "Whether participant completed testing wave"
+        },
+        "testingFeedbackReceived": {
+          "type": "boolean",
+          "description": "Whether participant submitted structured feedback"
+        },
+        "consent": {
+          "type": "object",
+          "description": "Explicit programme communication and optional marketing consent"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Acquisition source identifier"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Firestore server timestamp of application creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Firestore server timestamp of last update"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "normalizedEmail",
+        "interests",
+        "androidVersion",
+        "programme",
+        "appVersion",
+        "status",
+        "selectionStatus",
+        "testingInvitationSent",
+        "testingCompleted",
+        "testingFeedbackReceived",
+        "consent",
+        "source",
+        "createdAt",
+        "updatedAt"
+      ]
     }
   },
   "firestore": {
@@ -154,6 +259,10 @@
     "/users/{userId}/usage/{date}": {
       "schema": "DailyUsage",
       "description": "User daily generation quota usage"
+    },
+    "/early_birds/{applicantId}": {
+      "schema": "EarlyBirdApplication",
+      "description": "AudioFACTORY Early Birds v2.0.0 founding tester applications indexed by server-side HMAC-SHA256 digest"
     }
   }
 }

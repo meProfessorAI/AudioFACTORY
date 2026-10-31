@@ -30,11 +30,21 @@ import {
   handleSimulatePurchase,
 } from './controllers/billingController';
 import { handleAdminLogin } from './controllers/adminController';
+import {
+  handleSubmitEarlyBird,
+  handleGetEarlyBirdsAdmin,
+  handleUpdateEarlyBirdAdmin,
+} from './controllers/earlyBirdsController';
 
 export const apiRouter = Router();
 
-// Admin Route
+// Early Birds v2.0.0 Public Lead Capture (Rate-limited, server-validated, HMAC deduplicated)
+apiRouter.post('/early-birds/submit', handleSubmitEarlyBird);
+
+// Admin Routes (Protected by verifyAuth + Admin Role Verification)
 apiRouter.post('/admin/login', handleAdminLogin);
+apiRouter.get('/admin/early-birds', verifyAuth, handleGetEarlyBirdsAdmin);
+apiRouter.patch('/admin/early-birds/:id', verifyAuth, handleUpdateEarlyBirdAdmin);
 
 // Health check (Public)
 apiRouter.get('/health', (_req, res) => {

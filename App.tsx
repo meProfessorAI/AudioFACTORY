@@ -19,6 +19,7 @@ import { PrivacyPage } from './src/website/pages/PrivacyPage';
 import { TermsPage } from './src/website/pages/TermsPage';
 import { RefundPolicyPage } from './src/website/pages/RefundPolicyPage';
 import { AccountDeletionPage } from './src/website/pages/AccountDeletionPage';
+import { EarlyBirdsPage } from './src/pages/EarlyBirdsPage';
 import { StudioApp } from './src/studio/StudioApp';
 import { ProfileDashboard } from './src/pages/ProfileDashboard';
 import { AdminPanel } from './src/pages/AdminPanel';
@@ -35,127 +36,132 @@ export const App: React.FC = () => {
     <FirebaseProvider>
       <BrowserRouter>
         <AdIntegrator />
-      <Routes>
-        {/* ================= ADMIN & PROFILE ================= */}
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/profile" element={<ProfileDashboard />} />
+        <Routes>
+          {/* ================= EARLY BIRDS v2.0.0 SINGLE-SCREEN EXPERIENCE ================= */}
+          <Route path="/" element={<EarlyBirdsPage />} />
+          <Route path="/early-birds" element={<EarlyBirdsPage />} />
+          <Route path="/testers" element={<EarlyBirdsPage />} />
 
-        {/* ================= MARKETING WEBSITE ROUTES ================= */}
-        <Route 
-          path="/" 
-          element={
-            <MarketingLayout>
-              <HomePage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/features" 
-          element={
-            <MarketingLayout>
-              <FeaturesPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/pricing" 
-          element={
-            <MarketingLayout>
-              <PricingPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/how-it-works" 
-          element={
-            <MarketingLayout>
-              <HowItWorksPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/voices" 
-          element={
-            <MarketingLayout>
-              <VoicesPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/use-cases" 
-          element={
-            <MarketingLayout>
-              <UseCasesPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/faq" 
-          element={
-            <MarketingLayout>
-              <FaqPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/about" 
-          element={
-            <MarketingLayout>
-              <AboutPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/contact" 
-          element={
-            <MarketingLayout>
-              <ContactPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/privacy" 
-          element={
-            <MarketingLayout>
-              <PrivacyPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/terms" 
-          element={
-            <MarketingLayout>
-              <TermsPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/refund-policy" 
-          element={
-            <MarketingLayout>
-              <RefundPolicyPage />
-            </MarketingLayout>
-          } 
-        />
-        <Route 
-          path="/account-deletion" 
-          element={
-            <MarketingLayout>
-              <AccountDeletionPage />
-            </MarketingLayout>
-          } 
-        />
+          {/* ================= ADMIN & PROFILE ================= */}
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/profile" element={<ProfileDashboard />} />
 
-        {/* ================= APPLICATION STUDIO ROUTES ================= */}
-        <Route path="/app" element={<StudioApp />} />
-        <Route path="/app/studio" element={<StudioApp />} />
-        <Route path="/app/projects" element={<StudioApp />} />
-        <Route path="/app/account" element={<StudioApp />} />
-        <Route path="/app/billing" element={<StudioApp />} />
+          {/* ================= MARKETING WEBSITE ROUTES ================= */}
+          <Route
+            path="/home"
+            element={
+              <MarketingLayout>
+                <HomePage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/features"
+            element={
+              <MarketingLayout>
+                <FeaturesPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/pricing"
+            element={
+              <MarketingLayout>
+                <PricingPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/how-it-works"
+            element={
+              <MarketingLayout>
+                <HowItWorksPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/voices"
+            element={
+              <MarketingLayout>
+                <VoicesPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/use-cases"
+            element={
+              <MarketingLayout>
+                <UseCasesPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/faq"
+            element={
+              <MarketingLayout>
+                <FaqPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <MarketingLayout>
+                <AboutPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <MarketingLayout>
+                <ContactPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <MarketingLayout>
+                <PrivacyPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/terms"
+            element={
+              <MarketingLayout>
+                <TermsPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/refund-policy"
+            element={
+              <MarketingLayout>
+                <RefundPolicyPage />
+              </MarketingLayout>
+            }
+          />
+          <Route
+            path="/account-deletion"
+            element={
+              <MarketingLayout>
+                <AccountDeletionPage />
+              </MarketingLayout>
+            }
+          />
 
-        {/* ================= CATCH-ALL REDIRECT ================= */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* ================= APPLICATION STUDIO ROUTES ================= */}
+          <Route path="/app" element={<StudioApp />} />
+          <Route path="/app/studio" element={<StudioApp />} />
+          <Route path="/app/projects" element={<StudioApp />} />
+          <Route path="/app/account" element={<StudioApp />} />
+          <Route path="/app/billing" element={<StudioApp />} />
+
+          {/* ================= CATCH-ALL REDIRECT ================= */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </BrowserRouter>
     </FirebaseProvider>
   );

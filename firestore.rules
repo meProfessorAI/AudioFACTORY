@@ -20,12 +20,16 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        (request.auth.token.email != null && request.auth.token.email == 'connectedtorajib@gmail.com')
+        (request.auth.token.email != null && request.auth.token.email_verified == true && request.auth.token.email == 'connectedtorajib@gmail.com')
       );
     }
 
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidHmacId(id) {
+      return id is string && id.size() == 64 && id.matches('^[a-f0-9]{64}$');
     }
 
     function isValidTimestampString(ts) {
@@ -83,10 +87,91 @@ service cloud.firestore {
              !('planId' in data) && !('entitlement' in data) && !('quota' in data);
     }
 
+    // Validation helper for Early Birds Consent object
+    function isValidEarlyBirdConsent(consent) {
+      return consent is map &&
+             consent.keys().hasAll(['programmeCommunication', 'marketingUpdates', 'policyVersion']) &&
+             consent.keys().hasOnly(['programmeCommunication', 'marketingUpdates', 'policyVersion']) &&
+             consent.programmeCommunication == true &&
+             consent.marketingUpdates is bool &&
+             consent.policyVersion == '1.0';
+    }
+
+    // Validation helper for Early Birds Application (Create-Only with Server Timestamp)
+    function isValidEarlyBirdApplication(data) {
+      return data.keys().hasAll([
+               'name',
+               'email',
+               'normalizedEmail',
+               'interests',
+               'androidVersion',
+               'programme',
+               'appVersion',
+               'status',
+               'selectionStatus',
+               'testingInvitationSent',
+               'testingCompleted',
+               'testingFeedbackReceived',
+               'consent',
+               'source',
+               'createdAt',
+               'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'name',
+               'email',
+               'normalizedEmail',
+               'interests',
+               'androidVersion',
+               'programme',
+               'appVersion',
+               'status',
+               'selectionStatus',
+               'testingInvitationSent',
+               'testingCompleted',
+               'testingFeedbackReceived',
+               'consent',
+               'source',
+               'createdAt',
+               'updatedAt'
+             ]) &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.email is string && data.email.size() >= 5 && data.email.size() <= 254 && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$') &&
+             data.normalizedEmail is string && data.normalizedEmail.size() >= 5 && data.normalizedEmail.size() <= 254 &&
+             data.interests is list && data.interests.size() <= 6 &&
+             (data.interests.size() == 0 || (data.interests[0] is string && data.interests[0].size() <= 60)) &&
+             data.androidVersion is string && data.androidVersion.size() >= 1 && data.androidVersion.size() <= 40 &&
+             data.programme == 'AudioFACTORY Early Birds' &&
+             data.appVersion == '2.0.0' &&
+             data.status == 'applied' &&
+             data.selectionStatus == 'pending' &&
+             data.testingInvitationSent == false &&
+             data.testingCompleted == false &&
+             data.testingFeedbackReceived == false &&
+             isValidEarlyBirdConsent(data.consent) &&
+             data.source == 'early_birds_landing_page' &&
+             data.createdAt == request.time &&
+             data.updatedAt == request.time &&
+             !('confirmEmail' in data) &&
+             !('password' in data);
+    }
+
     // Admins collection for role checking
     match /admins/{adminId} {
       allow read: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
       allow write: if false;
+    }
+
+    // Early Birds v2.0.0 Founding Tester Applications
+    // - No public listing/enumeration allowed (allow list: if isAdmin())
+    // - Server-salted HMAC-SHA256 document ID prevents unauthorized lookup and guarantees uniqueness
+    // - Create-only for new applications with strict schema and server timestamps; never overwrites existing records
+    match /early_birds/{applicantId} {
+      allow get: if isAdmin() || isValidHmacId(applicantId);
+      allow list: if isAdmin();
+      allow create: if isValidHmacId(applicantId) && isValidEarlyBirdApplication(incoming());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // User data trees
