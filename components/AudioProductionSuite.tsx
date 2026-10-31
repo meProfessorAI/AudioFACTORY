@@ -109,7 +109,7 @@ export const AudioProductionSuite: React.FC<AudioProductionSuiteProps> = ({
   }
 
   return (
-    <div className="h-full overflow-y-auto custom-scrollbar p-3 sm:p-5 md:p-6 space-y-4 bg-[#F7F7F4] dark:bg-[#0D1117] dark:text-[#E6EDF3]">
+    <div className="h-full overflow-y-auto custom-scrollbar p-3 sm:p-5 md:p-6 pb-24 sm:pb-12 space-y-4 bg-[#F7F7F4] dark:bg-[#0D1117] dark:text-[#E6EDF3]">
       
       {/* Live Collaboration & Studio Status Bar */}
       <LivePresenceBar />

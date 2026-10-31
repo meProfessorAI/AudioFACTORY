@@ -31,7 +31,7 @@ import { TerminalMonologueView } from '../../components/terminal/TerminalMonolog
 import { TerminalDiagnosticDrawer } from '../../components/terminal/TerminalDiagnosticDrawer';
 import { StudioShell } from './unified/StudioShell';
 import { StudioHeader } from './unified/StudioHeader';
-import { ToolRail } from './unified/ToolRail';
+import { ToolRail, MobileBottomNav } from './unified/ToolRail';
 import { CreativeCanvas } from './unified/CreativeCanvas';
 import { VoiceInspector } from './unified/VoiceInspector';
 import { AudioTransport } from './unified/AudioTransport';
@@ -604,23 +604,36 @@ export const StudioApp: React.FC = () => {
           ) : undefined
         }
         transport={
-          <AudioTransport 
-            isPlaying={isPlaying}
-            onPlay={() => {
-              if (generatedAudio) playGeneratedAudio(generatedAudio.buffer);
-              else handleGenerateSpeech();
+          activeMode === 'intro' ? (
+            <AudioTransport 
+              isPlaying={isPlaying}
+              onPlay={() => {
+                if (generatedAudio) playGeneratedAudio(generatedAudio.buffer);
+                else handleGenerateSpeech();
+              }}
+              onPause={stopPlayback}
+              onStop={stopPlayback}
+              onSeek={handleSeek}
+              currentTime={(audioProgress / 100) * audioDuration}
+              duration={audioDuration}
+              hasAudio={!!generatedAudio}
+              isGenerating={isGenerating}
+              onGenerate={() => handleGenerateSpeech()}
+              onDownloadWav={handleDownload}
+              onOpenMobileInspector={() => setIsMobilePersonaDrawerOpen(true)}
+              waveformBuffer={generatedAudio?.buffer || null}
+            />
+          ) : undefined
+        }
+        mobileNav={
+          <MobileBottomNav 
+            activeMode={activeMode}
+            onSelectMode={(mode) => {
+              stopPlayback();
+              setActiveMode(mode);
             }}
-            onPause={stopPlayback}
-            onStop={stopPlayback}
-            onSeek={handleSeek}
-            currentTime={(audioProgress / 100) * audioDuration}
-            duration={audioDuration}
-            hasAudio={!!generatedAudio}
-            isGenerating={isGenerating}
-            onGenerate={() => handleGenerateSpeech()}
-            onDownloadWav={handleDownload}
-            onOpenMobileInspector={() => setIsMobilePersonaDrawerOpen(true)}
-            waveformBuffer={generatedAudio?.buffer || null}
+            onOpenCloning={() => setIsCloningOpen(true)}
+            onOpenProjects={() => setIsCloudModalOpen(true)}
           />
         }
       />

@@ -103,70 +103,78 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
     setCommandInput('');
   };
 
+  if (!isDrawerOpen) return null;
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col transition-all duration-300 pointer-events-auto select-none">
-      
-      {/* Retractable Header Bar / Persistent Ticker Ribbon */}
+    <div className="fixed inset-0 z-50 flex flex-col justify-end pointer-events-auto select-none animate-in fade-in duration-200">
+      {/* Backdrop */}
       <div 
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs"
         onClick={toggleDrawer}
-        className="h-9 px-3 sm:px-4 border-t backdrop-blur-md flex items-center justify-between cursor-pointer select-none transition-colors shadow-lg"
+        aria-hidden="true"
+      />
+
+      {/* Slide-in Diagnostics Console Window */}
+      <div 
+        className="relative z-10 w-full max-h-[85vh] flex flex-col border-t shadow-2xl animate-in slide-in-from-bottom duration-200"
         style={{
           backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
           borderColor: 'var(--skin-border, #E2E8F0)',
           color: 'var(--skin-text-primary, #0F172A)'
         }}
       >
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span 
-              className="w-2 h-2 rounded-full animate-ping"
-              style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }} 
-            />
-            <TerminalIcon 
-              className="w-3.5 h-3.5" 
-              style={{ color: 'var(--skin-accent, #0284C7)' }}
-            />
-            <span className="text-[11px] font-mono font-bold tracking-wider hidden xs:inline" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
-              STUDIO // DIAGNOSTICS
-            </span>
-          </div>
-
-          <div className="h-3 w-[1px] hidden sm:block flex-shrink-0" style={{ backgroundColor: 'var(--skin-border, #E2E8F0)' }} />
-
-          {/* Scrolling Ticker Text */}
-          <div className="flex items-center gap-2 sm:gap-3 text-[10px] font-mono truncate" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
-            <span className="font-bold flex-shrink-0" style={{ color: '#16A34A' }}>● READY</span>
-            <span className="hidden md:inline flex-shrink-0">24kHz PCM</span>
-            <span className="hidden sm:inline flex-shrink-0" style={{ color: 'var(--skin-accent, #0284C7)' }}>
-              {activeSkin.dayShort}: {activeSkin.themeName}
-            </span>
-            <span className="truncate" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
-              {logs[logs.length - 1]?.message || 'Awaiting command input...'}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[10px] font-mono hidden lg:inline" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
-            [CLICK TO {isDrawerOpen ? 'COLLAPSE' : 'EXPAND'}]
-          </span>
-          <div 
-            className="w-5 h-5 rounded flex items-center justify-center transition-colors border"
-            style={{
-              backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
-              borderColor: 'var(--skin-border, #E2E8F0)',
-              color: 'var(--skin-text-secondary, #475569)'
-            }}
-          >
-            {isDrawerOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
-          </div>
-        </div>
-      </div>
-
-      {/* Expanded Console Window */}
-      {isDrawerOpen && (
+        {/* Header Bar */}
         <div 
-          className="h-72 sm:h-80 border-t flex flex-col shadow-2xl overflow-hidden backdrop-blur-lg"
+          className="h-10 px-4 border-b flex items-center justify-between select-none transition-colors"
+          style={{
+            backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+            borderColor: 'var(--skin-border, #E2E8F0)'
+          }}
+        >
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span 
+                className="w-2 h-2 rounded-full animate-ping"
+                style={{ backgroundColor: 'var(--skin-accent, #0284C7)' }} 
+              />
+              <TerminalIcon 
+                className="w-4 h-4" 
+                style={{ color: 'var(--skin-accent, #0284C7)' }}
+              />
+              <span className="text-xs font-mono font-bold tracking-wider" style={{ color: 'var(--skin-text-primary, #0F172A)' }}>
+                STUDIO // DIAGNOSTICS & TELEMETRY
+              </span>
+            </div>
+
+            <div className="h-3 w-[1px] hidden sm:block flex-shrink-0" style={{ backgroundColor: 'var(--skin-border, #E2E8F0)' }} />
+
+            {/* Scrolling Ticker Text */}
+            <div className="flex items-center gap-2 sm:gap-3 text-[10px] font-mono truncate" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
+              <span className="font-bold flex-shrink-0" style={{ color: '#16A34A' }}>● READY</span>
+              <span className="hidden md:inline flex-shrink-0">24kHz PCM</span>
+              <span className="hidden sm:inline flex-shrink-0" style={{ color: 'var(--skin-accent, #0284C7)' }}>
+                {activeSkin.dayShort}: {activeSkin.themeName}
+              </span>
+              <span className="truncate hidden lg:inline" style={{ color: 'var(--skin-text-muted, #64748B)' }}>
+                {logs[logs.length - 1]?.message || 'Awaiting command input...'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={toggleDrawer}
+              className="p-1 rounded-md hover:bg-black/10 transition-colors text-xs font-mono font-bold flex items-center gap-1 cursor-pointer"
+              title="Close Diagnostics"
+            >
+              <span>✕ Close</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Console Content Window */}
+        <div 
+          className="h-72 sm:h-80 flex flex-col overflow-hidden"
           style={{
             backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
             borderColor: 'var(--skin-border, #E2E8F0)'
@@ -442,8 +450,7 @@ export const TerminalDiagnosticDrawer: React.FC<TerminalDiagnosticDrawerProps> =
           )}
 
         </div>
-      )}
-
+      </div>
     </div>
   );
 };

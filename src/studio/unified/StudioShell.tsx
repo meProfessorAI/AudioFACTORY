@@ -5,7 +5,8 @@ interface StudioShellProps {
   navigation: ReactNode;
   canvas: ReactNode;
   inspector?: ReactNode;
-  transport: ReactNode;
+  transport?: ReactNode;
+  mobileNav?: ReactNode;
   isInspectorOpen?: boolean;
 }
 
@@ -19,6 +20,7 @@ export const StudioShell: React.FC<StudioShellProps> = ({
   canvas,
   inspector,
   transport,
+  mobileNav,
   isInspectorOpen = true
 }) => {
   return (
@@ -26,28 +28,36 @@ export const StudioShell: React.FC<StudioShellProps> = ({
       {/* 56px Header */}
       {header}
 
-      {/* Main Workspace Grid (64px Rail | Flexible Canvas | 288px Inspector) */}
-      <div 
-        className="af-workspace"
-        style={{
-          gridTemplateColumns: isInspectorOpen 
-            ? '64px minmax(0, 1fr) 288px' 
-            : '64px minmax(0, 1fr) 0px'
-        }}
-      >
-        {navigation}
-        <main className="min-w-0 overflow-y-auto flex-1 flex flex-col h-full bg-[var(--af-canvas)]">
+      {/* Main Workspace (Rail | Flexible Canvas | Desktop Inspector) */}
+      <div className="af-workspace">
+        {/* Desktop Vertical Icon Rail */}
+        <aside className="af-rail-container">
+          {navigation}
+        </aside>
+
+        {/* Central Dominant Canvas */}
+        <main className="af-canvas-container">
           {canvas}
         </main>
+
+        {/* Desktop Inspector */}
         {inspector && isInspectorOpen && (
-          <aside className="af-inspector">
+          <aside className="af-inspector-container">
             {inspector}
           </aside>
         )}
       </div>
 
-      {/* Authoritative Sticky Audio Transport */}
-      {transport}
+      {/* Authoritative Bottom Production Dock */}
+      {(transport || mobileNav) && (
+        <footer className="af-bottom-dock">
+          {/* Audio Transport (when active) */}
+          {transport}
+
+          {/* Mobile Bottom Navigation (screens < 768px) */}
+          {mobileNav}
+        </footer>
+      )}
     </div>
   );
 };

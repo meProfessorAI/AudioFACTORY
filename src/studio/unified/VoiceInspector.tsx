@@ -61,7 +61,7 @@ export const VoiceInspector: React.FC<VoiceInspectorProps> = ({
   ];
 
   return (
-    <aside className="af-inspector custom-scrollbar select-none">
+    <div className="w-full h-full flex flex-col gap-4 overflow-y-auto custom-scrollbar select-none p-4">
       {/* Inspector Section Header */}
       <div 
         className="pb-3 border-b flex items-center justify-between"
@@ -275,6 +275,6 @@ export const VoiceInspector: React.FC<VoiceInspectorProps> = ({
           />
         </button>
       </div>
-    </aside>
+    </div>
   );
 };

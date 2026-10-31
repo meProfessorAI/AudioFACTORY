@@ -174,7 +174,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
         {onToggleInspector && (
           <button
             onClick={onToggleInspector}
-            className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+            className={`hidden md:inline-flex p-2 rounded-xl border transition-colors cursor-pointer ${
               isInspectorOpen ? 'shadow-xs' : ''
             }`}
             style={{

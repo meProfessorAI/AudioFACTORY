@@ -144,12 +144,14 @@ body {
 
 /* AudioFACTORY Unified Studio Responsive Layout */
 .af-shell {
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--af-canvas);
   color: var(--af-text);
   overflow: hidden;
+  position: relative;
 }
 
 .af-header {
@@ -164,53 +166,79 @@ body {
 }
 
 .af-workspace {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 288px;
+  display: flex;
   min-height: 0;
-  flex: 1;
+  flex: 1 1 0%;
   position: relative;
   overflow: hidden;
+  width: 100%;
+}
+
+.af-rail-container {
+  width: 64px;
+  flex: 0 0 64px;
+  height: 100%;
+  background: var(--af-surface);
+  border-right: 1px solid var(--af-border);
+  z-index: 20;
 }
 
 .af-rail {
-  background: var(--af-surface);
-  border-right: 1px solid var(--af-border);
+  width: 100%;
+  height: 100%;
   padding: 12px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  z-index: 20;
+  overflow-y: auto;
+}
+
+.af-canvas-container {
+  flex: 1 1 0%;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  position: relative;
 }
 
 .af-canvas {
   min-width: 0;
-  overflow-y: auto;
-  padding: 24px;
+  flex: 1 1 auto;
+  padding: 20px;
   background: var(--af-canvas);
   display: flex;
   flex-direction: column;
 }
 
-.af-inspector {
-  min-width: 0;
-  overflow-y: auto;
+.af-inspector-container {
+  width: 288px;
+  flex: 0 0 288px;
+  height: 100%;
   background: var(--af-surface);
   border-left: 1px solid var(--af-border);
-  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  z-index: 20;
+  overflow-y: auto;
+}
+
+.af-bottom-dock {
+  flex: 0 0 auto;
+  z-index: 30;
+  background: var(--af-surface);
+  border-top: 1px solid var(--af-border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .af-transport {
-  position: sticky;
-  bottom: 0;
-  z-index: 40;
-  background: var(--af-surface);
-  border-top: 1px solid var(--af-border);
   padding: 10px 16px;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+  background: var(--af-surface);
+  width: 100%;
 }
 
 .af-button {
@@ -261,15 +289,9 @@ body {
 }
 
 @media (max-width: 1023px) {
-  .af-workspace {
-    grid-template-columns: 64px minmax(0, 1fr);
-  }
-  .af-inspector {
-    position: fixed;
-    z-index: 50;
-    inset: 56px 0 0 auto;
-    width: min(340px, 90vw);
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  .af-inspector-container {
+    width: 260px;
+    flex: 0 0 260px;
   }
 }
 
@@ -279,35 +301,17 @@ body {
     flex-basis: 56px;
     padding: 0 12px;
   }
-  .af-workspace {
-    display: block;
-    padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px));
-    height: calc(100dvh - 56px);
+  .af-rail-container {
+    display: none;
   }
-  .af-rail {
+  .af-inspector-container {
     display: none;
   }
   .af-canvas {
-    padding: 14px;
-    height: 100%;
-  }
-  .af-inspector {
-    inset: auto 0 calc(76px + env(safe-area-inset-bottom, 0px));
-    width: 100%;
-    max-height: min(80dvh, 720px);
-    border: 1px solid var(--af-border);
-    border-radius: 20px 20px 0 0;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+    padding: 12px;
   }
   .af-transport {
-    position: fixed;
-    inset: auto 0 0;
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
-  }
-  .af-generate-bar .af-button {
-    width: 100%;
-    min-height: 48px;
+    padding: 8px 12px;
   }
   .af-bottom-nav {
     display: flex;
@@ -315,6 +319,7 @@ body {
     align-items: center;
     min-height: 48px;
     padding-top: 4px;
+    padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--af-border);
     background: var(--af-surface);
   }

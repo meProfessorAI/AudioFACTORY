@@ -1186,7 +1186,7 @@ export const MultiSpeakerStudio: React.FC<MultiSpeakerStudioProps> = ({
           </div>
 
           {/* SCRIPT CARDS SCROLLABLE CONTAINER */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 space-y-3 custom-scrollbar">
             {/* MOBILE ONLY VIEW FOR CAST TAB */}
             {mobileTab === 'cast' && (
               <div className="md:hidden space-y-3 pb-6">

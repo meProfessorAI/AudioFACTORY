@@ -69,16 +69,16 @@ export const CreativeCanvas: React.FC<CreativeCanvasProps> = ({
   };
 
   return (
-    <div className="af-canvas select-none custom-scrollbar h-full">
+    <div className="af-canvas select-none custom-scrollbar min-h-full flex flex-col gap-3">
       {/* Collaboration Live Presence */}
-      <div className="mb-3">
+      <div className="flex-shrink-0">
         <LivePresenceBar />
       </div>
 
       {/* Audio/Synthesis Error Banner */}
       {audioError && (
         <div 
-          className="mb-4 p-3.5 rounded-2xl border flex items-center justify-between gap-3 text-xs"
+          className="p-3.5 rounded-2xl border flex items-center justify-between gap-3 text-xs flex-shrink-0"
           style={{
             backgroundColor: 'rgba(239, 68, 68, 0.08)',
             borderColor: 'rgba(239, 68, 68, 0.25)',
@@ -100,7 +100,7 @@ export const CreativeCanvas: React.FC<CreativeCanvasProps> = ({
 
       {/* Central Script Editor Container */}
       <div 
-        className="flex-1 rounded-2xl border shadow-sm flex flex-col overflow-hidden"
+        className="flex-1 min-h-[380px] rounded-2xl border shadow-sm flex flex-col overflow-hidden"
         style={{
           backgroundColor: 'var(--af-surface, #FFFFFF)',
           borderColor: 'var(--af-border, #E8D5C2)'
@@ -172,19 +172,19 @@ export const CreativeCanvas: React.FC<CreativeCanvasProps> = ({
         </div>
 
         {/* Script Text Area */}
-        <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-[280px]">
+        <div className="p-4 sm:p-6 flex-1 min-h-0 flex flex-col justify-between">
           <textarea
             ref={textareaRef}
             value={text}
             onChange={(e) => onTextChange(e.target.value)}
             placeholder="Write your narration, dialogue, or script here. Use drama cues below to insert acoustic pauses and performance directions..."
-            className="w-full flex-1 min-h-[220px] text-sm sm:text-base leading-relaxed border-0 outline-none resize-none bg-transparent custom-scrollbar"
+            className="w-full flex-1 min-h-[160px] text-sm sm:text-base leading-relaxed border-0 outline-none resize-none bg-transparent custom-scrollbar mb-3"
             style={{ color: 'var(--af-text, #431407)' }}
           />
 
           {/* Drama Acoustic Cues Toolbar */}
           <div 
-            className="pt-3 border-t flex flex-wrap items-center justify-between gap-2 text-xs"
+            className="pt-3 border-t flex flex-wrap items-center justify-between gap-2 text-xs flex-shrink-0"
             style={{ borderColor: 'var(--af-border, #E8D5C2)' }}
           >
             <div className="flex items-center gap-1.5 flex-wrap">

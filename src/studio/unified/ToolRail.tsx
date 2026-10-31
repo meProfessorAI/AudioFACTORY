@@ -57,9 +57,7 @@ export const ToolRail: React.FC<ToolRailProps> = ({
   ];
 
   return (
-    <>
-      {/* Desktop 64px Vertical Icon Rail */}
-      <nav className="af-rail justify-between select-none" aria-label="Studio tools">
+    <nav className="af-rail justify-between select-none" aria-label="Studio tools">
         <div className="flex flex-col items-center gap-2 w-full">
           {tools.map((tool) => {
             const Icon = tool.icon;
@@ -154,47 +152,78 @@ export const ToolRail: React.FC<ToolRailProps> = ({
           </div>
         )}
       </nav>
+  );
+};
 
-      {/* Mobile Bottom Navigation Bar (Appears on screens < 768px) */}
-      <div className="af-bottom-nav select-none">
-        {tools.map((tool) => {
-          const Icon = tool.icon;
-          return (
-            <button
-              key={tool.id}
-              onClick={tool.onClick}
-              className="flex-1 py-1 flex flex-col items-center justify-center min-h-[48px] cursor-pointer transition-colors"
-              style={{
-                color: tool.isActive ? 'var(--af-accent, #C2410C)' : 'var(--af-text-muted, #9A5B32)'
-              }}
-              aria-label={tool.label}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] font-bold mt-1">{tool.label}</span>
-            </button>
-          );
-        })}
+export const MobileBottomNav: React.FC<ToolRailProps> = ({
+  activeMode,
+  onSelectMode,
+  onOpenCloning,
+  onOpenProjects
+}) => {
+  const tools = [
+    {
+      id: 'intro' as const,
+      label: 'Monologue',
+      icon: Radio,
+      onClick: () => onSelectMode('intro'),
+      isActive: activeMode === 'intro'
+    },
+    {
+      id: 'multispeaker' as const,
+      label: 'Dialogue',
+      icon: Layers,
+      onClick: () => onSelectMode('multispeaker'),
+      isActive: activeMode === 'multispeaker'
+    },
+    {
+      id: 'suite' as const,
+      label: 'Mixer',
+      icon: Music,
+      onClick: () => onSelectMode('suite'),
+      isActive: activeMode === 'suite'
+    }
+  ];
 
-        <button
-          onClick={onOpenCloning}
-          className="flex-1 py-1 flex flex-col items-center justify-center min-h-[48px] cursor-pointer transition-colors"
-          style={{ color: 'var(--af-text-muted, #9A5B32)' }}
-          aria-label="Clone Voice"
-        >
-          <Mic className="w-5 h-5" />
-          <span className="text-[10px] font-bold mt-1">Clone</span>
-        </button>
+  return (
+    <nav className="af-bottom-nav select-none" aria-label="Mobile Navigation">
+      {tools.map((tool) => {
+        const Icon = tool.icon;
+        return (
+          <button
+            key={tool.id}
+            onClick={tool.onClick}
+            className="flex-1 py-1.5 flex flex-col items-center justify-center min-h-[44px] cursor-pointer transition-colors active:scale-95"
+            style={{
+              color: tool.isActive ? 'var(--af-accent, #C2410C)' : 'var(--af-text-muted, #9A5B32)'
+            }}
+            aria-label={tool.label}
+          >
+            <Icon className="w-4 h-4" />
+            <span className="text-[10px] font-bold mt-0.5">{tool.label}</span>
+          </button>
+        );
+      })}
 
-        <button
-          onClick={onOpenProjects}
-          className="flex-1 py-1 flex flex-col items-center justify-center min-h-[48px] cursor-pointer transition-colors"
-          style={{ color: 'var(--af-text-muted, #9A5B32)' }}
-          aria-label="Projects"
-        >
-          <FolderOpen className="w-5 h-5" />
-          <span className="text-[10px] font-bold mt-1">Vault</span>
-        </button>
-      </div>
-    </>
+      <button
+        onClick={onOpenCloning}
+        className="flex-1 py-1.5 flex flex-col items-center justify-center min-h-[44px] cursor-pointer transition-colors active:scale-95"
+        style={{ color: 'var(--af-text-muted, #9A5B32)' }}
+        aria-label="Clone Voice"
+      >
+        <Mic className="w-4 h-4" />
+        <span className="text-[10px] font-bold mt-0.5">Clone</span>
+      </button>
+
+      <button
+        onClick={onOpenProjects}
+        className="flex-1 py-1.5 flex flex-col items-center justify-center min-h-[44px] cursor-pointer transition-colors active:scale-95"
+        style={{ color: 'var(--af-text-muted, #9A5B32)' }}
+        aria-label="Projects Vault"
+      >
+        <FolderOpen className="w-4 h-4" />
+        <span className="text-[10px] font-bold mt-0.5">Vault</span>
+      </button>
+    </nav>
   );
 };
