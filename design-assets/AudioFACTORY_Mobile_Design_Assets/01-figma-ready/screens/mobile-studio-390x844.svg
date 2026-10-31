@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+<defs><linearGradient id="wave" x1="0" x2="1"><stop stop-color="#E6A85C"/><stop offset="1" stop-color="#A77A4A"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#000" flood-opacity=".22"/></filter></defs>
+<rect width="390" height="844" rx="34" fill="#111315"/>
+<rect x="0" y="0" width="390" height="56" fill="#191D20"/>
+<circle cx="25" cy="28" r="13" fill="#E6A85C"/><path d="M18 31V23l7 5 7-8v11" stroke="#171513" stroke-width="2" fill="none"/>
+<text x="47" y="25" fill="#F4F1EA" font-size="13" font-family="Inter,Arial" font-weight="700" letter-spacing=".8">AUDIOFACTORY</text><text x="47" y="39" fill="#7D8585" font-size="9" font-family="Inter,Arial">STUDIO / UNTITLED</text>
+<circle cx="351" cy="28" r="15" fill="#292F34"/><path d="M345 28h12M351 22v12" stroke="#B2B7B5" stroke-width="1.4"/>
+<text x="18" y="83" fill="#7D8585" font-size="9" font-family="Inter,Arial" letter-spacing="1.4">CREATE / MONOLOGUE</text>
+<text x="18" y="111" fill="#F4F1EA" font-size="23" font-family="Inter,Arial" font-weight="650">Make something</text><text x="18" y="137" fill="#F4F1EA" font-size="23" font-family="Inter,Arial" font-weight="650">worth hearing.</text>
+<rect x="16" y="157" width="358" height="334" rx="16" fill="#191D20" stroke="#343B40"/>
+<text x="32" y="184" fill="#F4F1EA" font-size="12" font-family="Inter,Arial" font-weight="600">SCRIPT</text><rect x="311" y="169" width="47" height="22" rx="11" fill="#292F34"/><text x="334" y="184" fill="#B2B7B5" text-anchor="middle" font-size="9" font-family="Inter,Arial">AI EDIT</text>
+<path d="M32 201h326" stroke="#343B40"/>
+<text x="32" y="230" fill="#B2B7B5" font-size="13" font-family="Inter,Arial">Every great idea begins with a voice.</text>
+<text x="32" y="254" fill="#B2B7B5" font-size="13" font-family="Inter,Arial">Shape the words, choose your sound,</text>
+<text x="32" y="278" fill="#B2B7B5" font-size="13" font-family="Inter,Arial">and bring the story to life.</text>
+<text x="32" y="302" fill="#7D8585" font-size="12" font-family="Inter,Arial">Your next line starts here...</text>
+<rect x="32" y="438" width="326" height="1" fill="#343B40"/><text x="32" y="463" fill="#7D8585" font-size="10" font-family="Inter,Arial">42 WORDS</text><text x="358" y="463" fill="#7D8585" text-anchor="end" font-size="10" font-family="Inter,Arial">~00:18</text>
+<text x="18" y="520" fill="#7D8585" font-size="9" font-family="Inter,Arial" letter-spacing="1.2">VOICE & DELIVERY</text>
+<rect x="16" y="535" width="358" height="76" rx="14" fill="#191D20" stroke="#343B40"/>
+<circle cx="52" cy="573" r="20" fill="#343B40"/><path d="M45 576v-7m5 12v-17m5 13v-9" stroke="#E6A85C" stroke-width="2" stroke-linecap="round"/>
+<text x="83" y="565" fill="#F4F1EA" font-size="12" font-family="Inter,Arial" font-weight="600">Warm Narrator</text><text x="83" y="584" fill="#7D8585" font-size="10" font-family="Inter,Arial">English (US) · Calm / expressive</text><path d="m341 569 6 6 6-6" stroke="#B2B7B5" stroke-width="1.5" fill="none"/>
+<text x="18" y="642" fill="#7D8585" font-size="9" font-family="Inter,Arial" letter-spacing="1.2">OUTPUT PREVIEW</text>
+<rect x="16" y="656" width="358" height="82" rx="14" fill="#191D20" stroke="#343B40"/>
+<circle cx="52" cy="697" r="20" fill="#E6A85C"/><path d="m48 688 12 9-12 9z" fill="#171513"/>
+<g fill="url(#wave)"><rect x="91" y="690" width="3" height="14" rx="1.5"/><rect x="99" y="682" width="3" height="30" rx="1.5"/><rect x="107" y="687" width="3" height="20" rx="1.5"/><rect x="115" y="676" width="3" height="42" rx="1.5"/><rect x="123" y="686" width="3" height="22" rx="1.5"/><rect x="131" y="680" width="3" height="34" rx="1.5"/><rect x="139" y="691" width="3" height="12" rx="1.5"/><rect x="147" y="678" width="3" height="38" rx="1.5"/><rect x="155" y="685" width="3" height="24" rx="1.5"/><rect x="163" y="681" width="3" height="32" rx="1.5"/><rect x="171" y="690" width="3" height="14" rx="1.5"/><rect x="179" y="675" width="3" height="44" rx="1.5"/><rect x="187" y="684" width="3" height="26" rx="1.5"/><rect x="195" y="688" width="3" height="18" rx="1.5"/><rect x="203" y="680" width="3" height="34" rx="1.5"/><rect x="211" y="686" width="3" height="22" rx="1.5"/><rect x="219" y="678" width="3" height="38" rx="1.5"/><rect x="227" y="690" width="3" height="14" rx="1.5"/><rect x="235" y="683" width="3" height="28" rx="1.5"/><rect x="243" y="688" width="3" height="18" rx="1.5"/></g>
+<text x="275" y="691" fill="#B2B7B5" font-size="9" font-family="Inter,Arial">00:18</text><text x="275" y="707" fill="#7D8585" font-size="9" font-family="Inter,Arial">00:42</text>
+<rect x="0" y="755" width="390" height="89" fill="#191D20" stroke="#343B40"/>
+<rect x="16" y="768" width="358" height="48" rx="14" fill="#E6A85C" filter="url(#shadow)"/><path d="m160 785 10 7-10 7z" fill="#171513"/><text x="196" y="798" fill="#171513" text-anchor="middle" font-size="13" font-family="Inter,Arial" font-weight="700">GENERATE AUDIO</text>
+<text x="60" y="835" fill="#7D8585" font-size="9" font-family="Inter,Arial">STUDIO</text><text x="155" y="835" fill="#7D8585" font-size="9" font-family="Inter,Arial">PROJECTS</text><text x="253" y="835" fill="#7D8585" font-size="9" font-family="Inter,Arial">VOICES</text><text x="341" y="835" fill="#7D8585" font-size="9" font-family="Inter,Arial">MORE</text>
+</svg>

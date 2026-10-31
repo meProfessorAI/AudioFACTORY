@@ -171,27 +171,40 @@ export const AccountDrawer: React.FC<AccountDrawerProps> = ({
 
       {/* Slide-over panel */}
       <div 
-        className={`relative w-full max-w-xl h-full shadow-2xl flex flex-col z-10 overflow-hidden animate-in slide-in-from-right duration-200 border-l ${
-          isTerminalMode 
-            ? 'bg-[#0D1117] border-[#30363D] text-[#E6EDF3] font-mono' 
-            : 'bg-white border-zinc-200 text-zinc-900 font-sans'
-        }`}
+        className="relative w-full max-w-xl h-full shadow-2xl flex flex-col z-10 overflow-hidden animate-in slide-in-from-right duration-200 border-l font-sans"
+        style={{
+          backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+          borderColor: 'var(--skin-border, #E8D5C2)',
+          color: 'var(--skin-text-primary, #431407)',
+          boxShadow: 'var(--skin-shadow, -10px 0 25px rgba(0,0,0,0.1))'
+        }}
       >
         {/* Header */}
-        <div className={`p-4 sm:p-5 border-b flex items-center justify-between flex-shrink-0 ${
-          isTerminalMode ? 'bg-[#161B22] border-[#30363D]' : 'bg-zinc-50 border-zinc-200'
-        }`}>
+        <div 
+          className="p-4 sm:p-5 border-b flex items-center justify-between flex-shrink-0"
+          style={{
+            backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+            borderColor: 'var(--skin-border, #E8D5C2)'
+          }}
+        >
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-xs ${
-              isTerminalMode ? 'bg-[#21262D] text-[#8AB4F8] border border-[#30363D]' : 'bg-zinc-900 text-white'
-            }`}>
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-xs"
+              style={{
+                backgroundColor: 'var(--skin-accent, #C2410C)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
+            >
               {user?.displayName ? user.displayName.slice(0, 2).toUpperCase() : <User className="w-5 h-5" />}
             </div>
             <div>
               <h2 id="account-drawer-title" className="text-base sm:text-lg font-bold tracking-tight">
                 {user?.displayName || (isGuest ? 'Guest Creator' : 'AudioFACTORY Account')}
               </h2>
-              <p className={`text-xs ${isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'}`}>
+              <p 
+                className="text-xs"
+                style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+              >
                 {user?.email || 'Anonymous Session (Local Storage)'}
               </p>
             </div>
@@ -199,9 +212,12 @@ export const AccountDrawer: React.FC<AccountDrawerProps> = ({
 
           <button
             onClick={onClose}
-            className={`p-2 rounded-lg transition-colors ${
-              isTerminalMode ? 'hover:bg-[#21262D] text-[#8B949E] hover:text-white' : 'hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800'
-            }`}
+            className="p-2 rounded-xl border transition-colors hover:opacity-80 cursor-pointer"
+            style={{
+              borderColor: 'var(--skin-border, #E8D5C2)',
+              backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+              color: 'var(--skin-text-secondary, #7C2D12)'
+            }}
             aria-label="Close account drawer"
           >
             <X className="w-5 h-5" />
@@ -209,56 +225,60 @@ export const AccountDrawer: React.FC<AccountDrawerProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className={`flex items-center gap-1 px-4 pt-2 border-b overflow-x-auto custom-scrollbar flex-shrink-0 ${
-          isTerminalMode ? 'border-[#30363D] bg-[#161B22]/60' : 'border-zinc-200 bg-zinc-100/60'
-        }`}>
+        <div 
+          className="flex items-center gap-1 px-4 pt-2 border-b overflow-x-auto custom-scrollbar flex-shrink-0"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            borderColor: 'var(--skin-border, #E8D5C2)'
+          }}
+        >
           <button
             onClick={() => setActiveSection('overview')}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
-              activeSection === 'overview'
-                ? isTerminalMode ? 'border-amber-400 text-amber-400' : 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer"
+            style={{
+              borderColor: activeSection === 'overview' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeSection === 'overview' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             Overview & Usage
           </button>
           <button
             onClick={() => setActiveSection('subscription')}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
-              activeSection === 'subscription'
-                ? isTerminalMode ? 'border-amber-400 text-amber-400' : 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer"
+            style={{
+              borderColor: activeSection === 'subscription' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeSection === 'subscription' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             Subscription & Plan
           </button>
           <button
             onClick={() => setActiveSection('purchases')}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
-              activeSection === 'purchases'
-                ? isTerminalMode ? 'border-amber-400 text-amber-400' : 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer"
+            style={{
+              borderColor: activeSection === 'purchases' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeSection === 'purchases' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             Purchase History
           </button>
           <button
             onClick={() => setActiveSection('settings')}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
-              activeSection === 'settings'
-                ? isTerminalMode ? 'border-amber-400 text-amber-400' : 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer"
+            style={{
+              borderColor: activeSection === 'settings' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeSection === 'settings' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             Settings
           </button>
           <button
             onClick={() => setActiveSection('legal')}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
-              activeSection === 'legal'
-                ? isTerminalMode ? 'border-amber-400 text-amber-400' : 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer"
+            style={{
+              borderColor: activeSection === 'legal' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeSection === 'legal' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             Privacy & Terms
           </button>

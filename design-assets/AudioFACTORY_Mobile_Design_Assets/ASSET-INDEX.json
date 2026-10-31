@@ -1,0 +1,40 @@
+{
+  "screens": [
+    "01-figma-ready/screens/mobile-studio-390x844.svg",
+    "01-figma-ready/screens/mobile-multispeaker-390x844.svg",
+    "01-figma-ready/screens/mobile-audio-mixer-390x844.svg",
+    "01-figma-ready/screens/desktop-studio-1440x900.svg",
+    "01-figma-ready/components/component-library-board.svg"
+  ],
+  "icons": [
+    "03-svg-assets/icons/studio.svg",
+    "03-svg-assets/icons/projects.svg",
+    "03-svg-assets/icons/voices.svg",
+    "03-svg-assets/icons/assets.svg",
+    "03-svg-assets/icons/settings.svg",
+    "03-svg-assets/icons/play.svg",
+    "03-svg-assets/icons/pause.svg",
+    "03-svg-assets/icons/stop.svg",
+    "03-svg-assets/icons/download.svg",
+    "03-svg-assets/icons/mic.svg",
+    "03-svg-assets/icons/music.svg",
+    "03-svg-assets/icons/waveform.svg",
+    "03-svg-assets/icons/plus.svg",
+    "03-svg-assets/icons/chevron.svg",
+    "03-svg-assets/icons/more.svg",
+    "03-svg-assets/icons/close.svg",
+    "03-svg-assets/icons/sliders.svg",
+    "03-svg-assets/icons/sparkles.svg",
+    "03-svg-assets/icons/headphones.svg"
+  ],
+  "tokens": [
+    "02-design-tokens/design-tokens.json",
+    "02-design-tokens/tailwind-theme.css",
+    "02-design-tokens/tokens.ts"
+  ],
+  "handoff": [
+    "04-developer-handoff/react/StudioShell.tsx",
+    "04-developer-handoff/react/GenerateActionBar.tsx",
+    "04-developer-handoff/css/studio-layout.css"
+  ]
+}

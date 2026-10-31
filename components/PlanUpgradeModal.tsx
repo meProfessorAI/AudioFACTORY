@@ -137,72 +137,99 @@ export const PlanUpgradeModal: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="plan-modal-title"
     >
       <div 
-        className={`w-full max-w-4xl max-h-[94vh] overflow-y-auto rounded-2xl border shadow-2xl flex flex-col ${
-          isTerminal 
-            ? 'bg-[#0D1117] border-[#30363D] text-[#C9D1D9] font-mono' 
-            : 'bg-white border-zinc-300 text-zinc-900 font-sans'
-        }`}
+        className="w-full max-w-4xl max-h-[94vh] overflow-y-auto rounded-2xl border shadow-2xl flex flex-col font-sans"
+        style={{
+          backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+          borderColor: 'var(--skin-border, #E8D5C2)',
+          color: 'var(--skin-text-primary, #431407)',
+          boxShadow: 'var(--skin-shadow, 0 10px 25px rgba(0,0,0,0.1))'
+        }}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between p-5 border-b ${isTerminal ? 'border-[#30363D] bg-[#161B22]' : 'border-zinc-200 bg-zinc-50'}`}>
+        <div 
+          className="flex items-center justify-between p-5 border-b"
+          style={{
+            backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+            borderColor: 'var(--skin-border, #E8D5C2)'
+          }}
+        >
           <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl ${isTerminal ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-amber-100 text-amber-800'}`}>
+            <div 
+              className="p-2.5 rounded-xl shadow-xs"
+              style={{
+                backgroundColor: 'var(--skin-accent, #C2410C)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
+            >
               <Crown className="w-6 h-6" />
             </div>
             <div>
               <h2 id="plan-modal-title" className="text-lg sm:text-xl font-bold tracking-tight">
                 AudioFACTORY Billing & Google Play Plans
               </h2>
-              <p className={`text-xs ${isTerminal ? 'text-[#8B949E]' : 'text-zinc-500'}`}>
+              <p 
+                className="text-xs"
+                style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+              >
                 Authoritative backend entitlement resolver & cross-platform monetization suite
               </p>
             </div>
           </div>
           <button
             onClick={() => setUpgradeModalOpen(false)}
-            className={`p-2 rounded-lg transition-colors ${
-              isTerminal ? 'hover:bg-[#21262D] text-[#8B949E] hover:text-white' : 'hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800'
-            }`}
+            className="p-2 rounded-xl border transition-colors hover:opacity-80 cursor-pointer"
+            style={{
+              borderColor: 'var(--skin-border, #E8D5C2)',
+              backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+              color: 'var(--skin-text-secondary, #7C2D12)'
+            }}
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Navigation Tabs */}
-        <div className={`flex items-center gap-2 px-6 pt-3 border-b ${isTerminal ? 'border-[#30363D] bg-[#161B22]/50' : 'border-zinc-200 bg-zinc-100/50'}`}>
+        <div 
+          className="flex items-center gap-2 px-6 pt-3 border-b"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            borderColor: 'var(--skin-border, #E8D5C2)'
+          }}
+        >
           <button
             onClick={() => setActiveTab('plans')}
-            className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all ${
-              activeTab === 'plans'
-                ? isTerminal ? 'border-amber-400 text-amber-400' : 'border-amber-600 text-amber-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold border-b-2 transition-all cursor-pointer"
+            style={{
+              borderColor: activeTab === 'plans' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeTab === 'plans' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             Choose Plan
           </button>
           <button
             onClick={() => setActiveTab('subscription')}
-            className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all ${
-              activeTab === 'subscription'
-                ? isTerminal ? 'border-amber-400 text-amber-400' : 'border-amber-600 text-amber-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold border-b-2 transition-all cursor-pointer"
+            style={{
+              borderColor: activeTab === 'subscription' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeTab === 'subscription' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             Subscription Details & Status
           </button>
           <button
             onClick={() => setActiveTab('developer')}
-            className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all ${
-              activeTab === 'developer'
-                ? isTerminal ? 'border-amber-400 text-amber-400' : 'border-amber-600 text-amber-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold border-b-2 transition-all cursor-pointer"
+            style={{
+              borderColor: activeTab === 'developer' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeTab === 'developer' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             Google Play Verifier
           </button>

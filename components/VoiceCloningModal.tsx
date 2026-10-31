@@ -105,34 +105,46 @@ export const VoiceCloningModal: React.FC<VoiceCloningModalProps> = ({ isOpen, on
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
-      <div className={`w-full max-w-lg flex flex-col max-h-[90vh] rounded-xl shadow-2xl overflow-hidden border transition-all ${
-        isTerminalMode 
-          ? 'bg-[#161B22] border-[#30363D] text-[#E6EDF3]' 
-          : 'bg-white border-zinc-200 text-zinc-900'
-      }`}>
-        
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div 
+        className="w-full max-w-lg flex flex-col max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden border transition-all"
+        style={{
+          backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+          borderColor: 'var(--skin-border, #E8D5C2)',
+          color: 'var(--skin-text-primary, #431407)',
+          boxShadow: 'var(--skin-shadow, 0 10px 25px rgba(0,0,0,0.1))'
+        }}
+      >
         {/* Header */}
-        <div className={`p-4 sm:p-5 border-b flex justify-between items-center flex-shrink-0 ${
-          isTerminalMode 
-            ? 'bg-[#0D1117] border-[#30363D]' 
-            : 'bg-zinc-50 border-zinc-200'
-        }`}>
+        <div 
+          className="p-4 sm:p-5 border-b flex justify-between items-center flex-shrink-0"
+          style={{
+            backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+            borderColor: 'var(--skin-border, #E8D5C2)'
+          }}
+        >
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-xs ${
-              isTerminalMode 
-                ? 'bg-[#161B22] border border-[#EA4335]/40 text-[#EA4335]' 
-                : 'bg-rose-600 text-white'
-            }`}>
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs"
+              style={{
+                backgroundColor: 'var(--skin-accent, #C2410C)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
+            >
               <Mic className="w-5 h-5" />
             </div>
             <div>
-              <h2 className={`text-base sm:text-lg font-bold ${
-                isTerminalMode ? 'font-mono text-[#E6EDF3]' : 'text-zinc-900'
-              }`}>
-                {isTerminalMode ? 'VOICE_CLONING_STUDIO' : 'Instant Voice Cloning Studio'}
+              <h2 className="text-base sm:text-lg font-bold tracking-tight">
+                Instant Voice Cloning Studio
               </h2>
-              <p className={`text-xs font-mono ${isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'}`}>
+              <p 
+                className="text-xs"
+                style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+              >
                 Capture your voice timbre to synthesize lines in Multi-Speaker
               </p>
             </div>
@@ -140,82 +152,93 @@ export const VoiceCloningModal: React.FC<VoiceCloningModalProps> = ({ isOpen, on
           
           <button 
             onClick={onClose}
-            className={`w-9 h-9 flex items-center justify-center rounded-lg border transition-colors ${
-              isTerminalMode 
-                ? 'border-[#30363D] bg-[#21262D] hover:bg-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]' 
-                : 'border-zinc-200 bg-white hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
-            }`}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border transition-colors hover:opacity-80"
+            style={{
+              borderColor: 'var(--skin-border, #E8D5C2)',
+              backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+              color: 'var(--skin-text-secondary, #7C2D12)'
+            }}
+            aria-label="Close modal"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className={`p-5 sm:p-6 overflow-y-auto flex flex-col gap-4 custom-scrollbar ${
-          isTerminalMode ? 'bg-[#0D1117]' : 'bg-white'
-        }`}>
+        <div 
+          className="p-5 sm:p-6 overflow-y-auto flex flex-col gap-4 custom-scrollbar"
+          style={{ backgroundColor: 'var(--skin-bg-card, #FFFFFF)' }}
+        >
           {error && (
-            <div className={`p-3 rounded-lg border font-mono text-xs flex items-center gap-2 ${
-              isTerminalMode 
-                ? 'bg-[#EA4335]/15 border-[#EA4335]/40 text-[#EA4335]' 
-                : 'bg-rose-50 border-rose-200 text-rose-800'
-            }`}>
-              <AlertCircle className="w-4 h-4 text-[#EA4335] flex-shrink-0" />
+            <div 
+              className="p-3 rounded-xl border text-xs flex items-center gap-2 bg-rose-50 border-rose-200 text-rose-800"
+            >
+              <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           <div>
-            <label className={`block text-xs font-mono font-bold uppercase tracking-wider mb-1.5 ${
-              isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-700'
-            }`}>
+            <label 
+              className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+              style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
+            >
               Voice Name *
             </label>
             <input 
               type="text" 
               value={name} 
               onChange={e => setName(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 ${
-                isTerminalMode 
-                  ? 'bg-[#161B22] border-[#30363D] text-[#E6EDF3] placeholder:text-[#8B949E] focus:ring-[#4285F4] focus:border-[#4285F4]' 
-                  : 'bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:ring-zinc-900 focus:bg-white'
-              }`}
+              className="w-full px-3.5 py-2.5 border rounded-xl text-sm transition-all focus:outline-none"
+              style={{
+                backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+                borderColor: 'var(--skin-border, #E8D5C2)',
+                color: 'var(--skin-text-primary, #431407)'
+              }}
               placeholder="e.g. Marcus Studio Voice, Alex Narrator"
             />
           </div>
 
           <div>
-            <label className={`block text-xs font-mono font-bold uppercase tracking-wider mb-1.5 ${
-              isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-700'
-            }`}>
+            <label 
+              className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+              style={{ color: 'var(--skin-text-secondary, #7C2D12)' }}
+            >
               Voice Timbre & Description
             </label>
             <input 
               type="text" 
               value={description} 
               onChange={e => setDescription(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 ${
-                isTerminalMode 
-                  ? 'bg-[#161B22] border-[#30363D] text-[#E6EDF3] placeholder:text-[#8B949E] focus:ring-[#4285F4] focus:border-[#4285F4]' 
-                  : 'bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:ring-zinc-900 focus:bg-white'
-              }`}
+              className="w-full px-3.5 py-2.5 border rounded-xl text-sm transition-all focus:outline-none"
+              style={{
+                backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+                borderColor: 'var(--skin-border, #E8D5C2)',
+                color: 'var(--skin-text-primary, #431407)'
+              }}
               placeholder="e.g. Warm acoustic resonance, deep broadcast tone, clear pace"
             />
           </div>
 
           {/* Audio Sample Recording Box */}
-          <div className={`border rounded-xl p-4 sm:p-5 flex flex-col items-center justify-center gap-3 ${
-            isTerminalMode 
-              ? 'border-[#30363D] bg-[#161B22]' 
-              : 'border-zinc-200 bg-zinc-50'
-          }`}>
+          <div 
+            className="border rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-3"
+            style={{
+              backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+              borderColor: 'var(--skin-border, #E8D5C2)'
+            }}
+          >
             <div className="text-center">
-              <span className={`text-xs font-mono font-bold uppercase tracking-wider block ${
-                isTerminalMode ? 'text-[#E6EDF3]' : 'text-zinc-800'
-              }`}>
+              <span 
+                className="text-xs font-bold uppercase tracking-wider block"
+                style={{ color: 'var(--skin-text-primary, #431407)' }}
+              >
                 Voice Audio Sample
               </span>
-              <p className={`text-xs mt-0.5 ${isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'}`}>
+              <p 
+                className="text-xs mt-0.5"
+                style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+              >
                 Record 15–30 seconds of spoken speech or upload a clear WAV/MP3.
               </p>
             </div>
@@ -225,25 +248,32 @@ export const VoiceCloningModal: React.FC<VoiceCloningModalProps> = ({ isOpen, on
               {!isRecording ? (
                 <button 
                   onClick={startRecording}
-                  className="flex items-center gap-2 bg-[#EA4335] hover:bg-[#D93025] text-white px-4 py-2 rounded-lg font-mono text-xs font-bold uppercase tracking-wider border border-[#EA4335] shadow-xs transition-transform active:scale-95"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-xs transition-transform active:scale-95 cursor-pointer"
+                  style={{
+                    backgroundColor: 'var(--skin-accent, #C2410C)',
+                    color: 'var(--skin-accent-text, #FFFFFF)'
+                  }}
                 >
                   <Mic className="w-4 h-4" /> Start Studio Mic
                 </button>
               ) : (
                 <button 
                   onClick={stopRecording}
-                  className="flex items-center gap-2 bg-black hover:bg-zinc-900 text-white px-4 py-2 rounded-lg font-mono text-xs font-bold uppercase tracking-wider border border-[#EA4335] animate-pulse shadow-xs"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider animate-pulse shadow-xs cursor-pointer bg-red-600 text-white"
                 >
-                  <Square className="w-4 h-4 fill-current text-[#EA4335]" /> Stop ({recordingSeconds}s)
+                  <Square className="w-4 h-4 fill-current text-white" /> Stop ({recordingSeconds}s)
                 </button>
               )}
 
-              <label className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-xs font-bold uppercase tracking-wider border shadow-2xs cursor-pointer transition-colors ${
-                isTerminalMode 
-                  ? 'bg-[#21262D] hover:bg-[#30363D] border-[#30363D] text-[#E6EDF3]' 
-                  : 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-800'
-              }`}>
-                <Upload className="w-4 h-4 text-[#4285F4]" /> Upload File
+              <label 
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider border shadow-2xs cursor-pointer transition-colors"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E8D5C2)',
+                  color: 'var(--skin-text-primary, #431407)'
+                }}
+              >
+                <Upload className="w-4 h-4" style={{ color: 'var(--skin-accent, #C2410C)' }} /> Upload File
                 <input 
                   type="file" 
                   accept="audio/*" 
@@ -255,15 +285,12 @@ export const VoiceCloningModal: React.FC<VoiceCloningModalProps> = ({ isOpen, on
 
             {/* Live Audio Sample Preview Player */}
             {audioUrl && (
-              <div className={`w-full mt-2 pt-3 border-t flex flex-col items-center gap-2 ${
-                isTerminalMode ? 'border-[#30363D]' : 'border-zinc-200'
-              }`}>
-                <div className={`flex items-center gap-2 text-xs font-mono px-2.5 py-1 rounded border ${
-                  isTerminalMode 
-                    ? 'bg-[#34A853]/15 text-[#34A853] border-[#34A853]/40' 
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                }`}>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#34A853]" />
+              <div 
+                className="w-full mt-2 pt-3 border-t flex flex-col items-center gap-2"
+                style={{ borderColor: 'var(--skin-border, #E8D5C2)' }}
+              >
+                <div className="flex items-center gap-2 text-xs font-medium px-2.5 py-1 rounded-lg border bg-emerald-50 text-emerald-800 border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Audio sample ready for cloning</span>
                 </div>
                 <audio controls src={audioUrl} className="w-full h-8 max-w-sm" />
@@ -272,24 +299,30 @@ export const VoiceCloningModal: React.FC<VoiceCloningModalProps> = ({ isOpen, on
           </div>
 
           {/* Footer Actions */}
-          <div className={`flex items-center justify-end gap-2 pt-3 border-t ${
-            isTerminalMode ? 'border-[#30363D]' : 'border-zinc-100'
-          }`}>
+          <div 
+            className="flex items-center justify-end gap-2 pt-3 border-t"
+            style={{ borderColor: 'var(--skin-border, #E8D5C2)' }}
+          >
             <button
               onClick={onClose}
               disabled={isSubmitting}
-              className={`px-4 py-2 rounded-lg border font-mono text-xs font-bold uppercase transition-colors ${
-                isTerminalMode 
-                  ? 'border-[#30363D] bg-[#21262D] hover:bg-[#30363D] text-[#E6EDF3]' 
-                  : 'border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700'
-              }`}
+              className="px-4 py-2.5 rounded-xl border text-xs font-bold uppercase transition-colors cursor-pointer"
+              style={{
+                borderColor: 'var(--skin-border, #E8D5C2)',
+                backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                color: 'var(--skin-text-secondary, #7C2D12)'
+              }}
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || !name.trim() || !audioBlob}
-              className="px-5 py-2 rounded-lg bg-[#EA4335] hover:bg-[#D93025] disabled:opacity-50 text-white font-mono text-xs font-bold uppercase tracking-wider border border-[#EA4335] shadow-xs flex items-center gap-2 transition-all"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-xs flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              style={{
+                backgroundColor: 'var(--skin-accent, #C2410C)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
             >
               {isSubmitting ? (
                 <>
@@ -304,9 +337,7 @@ export const VoiceCloningModal: React.FC<VoiceCloningModalProps> = ({ isOpen, on
               )}
             </button>
           </div>
-
         </div>
-
       </div>
     </div>
   );

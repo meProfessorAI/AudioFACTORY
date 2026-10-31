@@ -1,0 +1,30 @@
+/* Unified responsive studio layout */
+.af-shell { min-height:100dvh; display:flex; flex-direction:column; background:var(--af-canvas); color:var(--af-text); }
+.af-header { height:56px; flex:0 0 56px; display:flex; align-items:center; border-bottom:1px solid var(--af-border); background:var(--af-surface); padding:0 16px; }
+.af-workspace { display:grid; grid-template-columns:64px minmax(0,1fr) 288px; min-height:0; flex:1; }
+.af-rail { background:var(--af-surface); border-right:1px solid var(--af-border); padding:12px 8px; }
+.af-canvas { min-width:0; overflow:auto; padding:24px; }
+.af-inspector { min-width:0; overflow:auto; background:var(--af-surface); border-left:1px solid var(--af-border); padding:16px; }
+.af-transport { position:sticky; bottom:0; z-index:20; background:var(--af-surface); border-top:1px solid var(--af-border); padding:12px 16px; }
+.af-button { min-height:44px; border:0; border-radius:12px; padding:0 16px; display:inline-flex; align-items:center; justify-content:center; gap:10px; font-weight:650; }
+.af-button-primary { background:var(--af-accent); color:var(--af-accent-text); }
+.af-button-primary:disabled { opacity:.45; cursor:not-allowed; }
+.af-generate-bar { display:flex; justify-content:flex-end; }
+.af-bottom-nav { display:none; }
+@media (max-width:1023px) {
+  .af-workspace { grid-template-columns:64px minmax(0,1fr); }
+  .af-inspector { position:fixed; z-index:50; inset:56px 0 0 auto; width:min(360px,92vw); box-shadow:0 20px 60px #0008; }
+}
+@media (max-width:767px) {
+  .af-header { height:56px; flex-basis:56px; padding:0 14px; }
+  .af-workspace { display:block; padding-bottom:calc(132px + env(safe-area-inset-bottom)); }
+  .af-rail { display:none; }
+  .af-canvas { padding:16px; }
+  .af-inspector { inset:auto 0 calc(76px + env(safe-area-inset-bottom)); width:100%; max-height:min(78dvh,720px); border:1px solid var(--af-border); border-radius:20px 20px 0 0; padding:20px 16px calc(20px + env(safe-area-inset-bottom)); }
+  .af-transport { position:fixed; inset:auto 0 0; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); }
+  .af-generate-bar .af-button { width:100%; min-height:48px; }
+  .af-bottom-nav { display:flex; justify-content:space-around; min-height:44px; padding-top:6px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; }
+}

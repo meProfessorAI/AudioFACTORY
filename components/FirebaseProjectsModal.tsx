@@ -77,46 +77,60 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
-      <div className={`w-full max-w-2xl max-h-[88vh] flex flex-col rounded-xl shadow-2xl overflow-hidden border transition-all ${
-        isTerminalMode 
-          ? 'bg-[#161B22] border-[#30363D] text-[#E6EDF3]' 
-          : 'bg-white border-zinc-200 text-zinc-900'
-      }`}>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div 
+        className="w-full max-w-2xl max-h-[88vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border transition-all"
+        style={{
+          backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+          borderColor: 'var(--skin-border, #E8D5C2)',
+          color: 'var(--skin-text-primary, #431407)',
+          boxShadow: 'var(--skin-shadow, 0 10px 25px rgba(0,0,0,0.1))'
+        }}
+      >
         
         {/* Header */}
-        <div className={`p-4 sm:p-5 border-b flex items-center justify-between flex-shrink-0 ${
-          isTerminalMode 
-            ? 'bg-[#0D1117] border-[#30363D]' 
-            : 'bg-zinc-50 border-zinc-200'
-        }`}>
+        <div 
+          className="p-4 sm:p-5 border-b flex items-center justify-between flex-shrink-0"
+          style={{
+            backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+            borderColor: 'var(--skin-border, #E8D5C2)'
+          }}
+        >
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-xs ${
-              isTerminalMode 
-                ? 'bg-[#161B22] border border-[#4285F4]/40 text-[#4285F4]' 
-                : 'bg-sky-600 text-white'
-            }`}>
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs"
+              style={{
+                backgroundColor: 'var(--skin-accent, #C2410C)',
+                color: 'var(--skin-accent-text, #FFFFFF)'
+              }}
+            >
               <Cloud className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className={`text-base sm:text-lg font-bold ${
-                  isTerminalMode ? 'font-mono text-[#E6EDF3]' : 'text-zinc-900'
-                }`}>
-                  {isTerminalMode ? 'STUDIO_PROJECTS_VAULT' : 'Projects & Script Vault'}
+                <h2 className="text-base sm:text-lg font-bold tracking-tight">
+                  Projects & Script Vault
                 </h2>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded-full border ${
-                  isOnline 
-                    ? isTerminalMode 
-                      ? 'bg-[#34A853]/15 text-[#34A853] border-[#34A853]/40'
-                      : 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                    : 'bg-rose-50 text-rose-800 border-rose-200'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-[#34A853]' : 'bg-rose-500'}`} />
+                <span 
+                  className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border"
+                  style={{
+                    backgroundColor: isOnline ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                    color: isOnline ? '#15803d' : '#b91c1c',
+                    borderColor: 'var(--skin-border, #E8D5C2)'
+                  }}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
                   {isOnline ? 'Library Live' : 'Offline'}
                 </span>
               </div>
-              <p className={`text-xs font-mono ${isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'}`}>
+              <p 
+                className="text-xs"
+                style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+              >
                 Persistent studio storage & scene manager
               </p>
             </div>
@@ -124,43 +138,51 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
 
           <button
             onClick={onClose}
-            className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-colors ${
-              isTerminalMode 
-                ? 'border-[#30363D] bg-[#21262D] hover:bg-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]' 
-                : 'border-zinc-200 bg-white hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
-            }`}
+            className="w-9 h-9 rounded-xl border flex items-center justify-center transition-colors hover:opacity-80 cursor-pointer"
+            style={{
+              borderColor: 'var(--skin-border, #E8D5C2)',
+              backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+              color: 'var(--skin-text-secondary, #7C2D12)'
+            }}
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* User Account / Auth Bar */}
-        <div className={`px-4 sm:px-6 py-2.5 border-b flex flex-wrap items-center justify-between gap-3 text-xs font-mono ${
-          isTerminalMode 
-            ? 'bg-[#0D1117]/80 border-[#30363D] text-[#8B949E]' 
-            : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-        }`}>
+        <div 
+          className="px-4 sm:px-6 py-2.5 border-b flex flex-wrap items-center justify-between gap-3 text-xs"
+          style={{
+            backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+            borderColor: 'var(--skin-border, #E8D5C2)',
+            color: 'var(--skin-text-secondary, #7C2D12)'
+          }}
+        >
           <div className="flex items-center gap-2">
-            <UserIcon className="w-3.5 h-3.5 text-[#4285F4]" />
+            <UserIcon className="w-3.5 h-3.5" style={{ color: 'var(--skin-accent, #C2410C)' }} />
             {authLoading ? (
-              <span className="text-[#8B949E] animate-pulse">Loading user profile...</span>
+              <span className="animate-pulse">Loading user profile...</span>
             ) : user ? (
               <div className="flex items-center gap-1.5">
-                <span className={`font-bold ${isTerminalMode ? 'text-[#E6EDF3]' : 'text-zinc-900'}`}>
+                <span className="font-bold" style={{ color: 'var(--skin-text-primary, #431407)' }}>
                   {user.displayName || user.email || (user.isAnonymous ? 'Guest Creator' : 'Authenticated User')}
                 </span>
                 {user.isAnonymous && (
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded border ${
-                    isTerminalMode 
-                      ? 'bg-[#FBBC04]/20 text-[#FBBC04] border-[#FBBC04]/30'
-                      : 'bg-amber-100 text-amber-900 border-amber-200'
-                  }`}>
+                  <span 
+                    className="text-[10px] px-1.5 py-0.2 rounded border"
+                    style={{
+                      backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                      color: 'var(--skin-accent, #C2410C)',
+                      borderColor: 'var(--skin-border, #E8D5C2)'
+                    }}
+                  >
                     Anonymous
                   </span>
                 )}
               </div>
             ) : (
-              <span className={isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-600'}>
+              <span style={{ color: 'var(--skin-text-muted, #9A5B32)' }}>
                 Not signed in (Local state only)
               </span>
             )}
@@ -170,13 +192,14 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
             {user && !user.isAnonymous ? (
               <button
                 onClick={logout}
-                className={`px-2.5 py-1 rounded border flex items-center gap-1 font-mono text-[11px] font-bold transition-colors ${
-                  isTerminalMode 
-                    ? 'bg-[#21262D] hover:bg-[#30363D] border-[#30363D] text-[#E6EDF3]' 
-                    : 'bg-white hover:bg-zinc-200 border-zinc-300 text-zinc-800'
-                }`}
+                className="px-2.5 py-1 rounded-lg border flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer"
+                style={{
+                  backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                  borderColor: 'var(--skin-border, #E8D5C2)',
+                  color: 'var(--skin-text-primary, #431407)'
+                }}
               >
-                <LogOut className="w-3 h-3 text-[#EA4335]" />
+                <LogOut className="w-3 h-3 text-red-600" />
                 Sign Out
               </button>
             ) : (
@@ -184,11 +207,12 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
                 {user?.isAnonymous && (
                   <button
                     onClick={logout}
-                    className={`px-2.5 py-1 rounded border flex items-center gap-1 font-mono text-[11px] font-bold transition-colors ${
-                      isTerminalMode 
-                        ? 'bg-[#21262D] hover:bg-[#30363D] border-[#30363D] text-[#E6EDF3]' 
-                        : 'bg-white hover:bg-zinc-200 border-zinc-300 text-zinc-800'
-                    }`}
+                    className="px-2.5 py-1 rounded-lg border flex items-center gap-1 text-[11px] font-bold transition-colors cursor-pointer"
+                    style={{
+                      backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                      borderColor: 'var(--skin-border, #E8D5C2)',
+                      color: 'var(--skin-text-primary, #431407)'
+                    }}
                     title="Reset guest session to start fresh"
                   >
                     Reset Guest
@@ -196,13 +220,14 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
                 )}
                 <button
                   onClick={loginGoogle}
-                  className={`px-2.5 py-1 rounded border flex items-center gap-1 font-mono text-[11px] font-bold shadow-xs transition-colors ${
-                    isTerminalMode 
-                      ? 'bg-[#FBBC04] hover:bg-[#F29900] border-[#FBBC04] text-black font-bold' 
-                      : 'bg-amber-400 hover:bg-amber-300 border-amber-500 text-zinc-950'
-                  }`}
+                  className="px-2.5 py-1 rounded-lg border flex items-center gap-1 text-[11px] font-bold shadow-xs transition-colors cursor-pointer"
+                  style={{
+                    backgroundColor: 'var(--skin-accent, #C2410C)',
+                    borderColor: 'var(--skin-accent, #C2410C)',
+                    color: 'var(--skin-accent-text, #FFFFFF)'
+                  }}
                 >
-                  <LogIn className="w-3 h-3 text-zinc-950" />
+                  <LogIn className="w-3 h-3" />
                   Sign In with Google
                 </button>
               </div>
@@ -211,37 +236,31 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
         </div>
 
         {/* Tab Selection */}
-        <div className={`flex border-b px-4 sm:px-6 pt-3 gap-2 ${
-          isTerminalMode 
-            ? 'bg-[#0D1117] border-[#30363D]' 
-            : 'bg-white border-zinc-200'
-        }`}>
+        <div 
+          className="flex border-b px-4 sm:px-6 pt-3 gap-2"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            borderColor: 'var(--skin-border, #E8D5C2)'
+          }}
+        >
           <button
             onClick={() => setActiveTab('scenes')}
-            className={`pb-2.5 px-3 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all ${
-              activeTab === 'scenes'
-                ? isTerminalMode 
-                  ? 'border-[#EA4335] text-[#EA4335]' 
-                  : 'border-rose-600 text-rose-600'
-                : isTerminalMode 
-                  ? 'border-transparent text-[#8B949E] hover:text-[#E6EDF3]' 
-                  : 'border-transparent text-zinc-500 hover:text-zinc-900'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all cursor-pointer"
+            style={{
+              borderColor: activeTab === 'scenes' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeTab === 'scenes' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             <Layers className="w-3.5 h-3.5" />
             Multi-Speaker Scenes ({savedProjects.length})
           </button>
           <button
             onClick={() => setActiveTab('monologues')}
-            className={`pb-2.5 px-3 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all ${
-              activeTab === 'monologues'
-                ? isTerminalMode 
-                  ? 'border-[#FBBC04] text-[#FBBC04]' 
-                  : 'border-amber-500 text-amber-600'
-                : isTerminalMode 
-                  ? 'border-transparent text-[#8B949E] hover:text-[#E6EDF3]' 
-                  : 'border-transparent text-zinc-500 hover:text-zinc-900'
-            }`}
+            className="pb-2.5 px-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all cursor-pointer"
+            style={{
+              borderColor: activeTab === 'monologues' ? 'var(--skin-accent, #C2410C)' : 'transparent',
+              color: activeTab === 'monologues' ? 'var(--skin-accent, #C2410C)' : 'var(--skin-text-muted, #9A5B32)'
+            }}
           >
             <Radio className="w-3.5 h-3.5" />
             Intro & Monologues ({savedMonologues.length})
@@ -249,31 +268,40 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className={`p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar ${
-          isTerminalMode ? 'bg-[#090D12]' : 'bg-zinc-50/50'
-        }`}>
+        <div 
+          className="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar"
+          style={{ backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)' }}
+        >
           {activeTab === 'scenes' ? (
             <div className="space-y-2.5">
               {savedProjects.length === 0 ? (
-                <div className={`text-center py-12 border-2 border-dashed rounded-xl p-6 ${
-                  isTerminalMode 
-                    ? 'border-[#30363D] bg-[#0D1117]' 
-                    : 'border-zinc-200 bg-white'
-                }`}>
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
-                    isTerminalMode ? 'bg-[#EA4335]/20 text-[#EA4335]' : 'bg-rose-50 text-rose-600'
-                  }`}>
+                <div 
+                  className="text-center py-12 border-2 border-dashed rounded-2xl p-6"
+                  style={{
+                    borderColor: 'var(--skin-border, #E8D5C2)',
+                    backgroundColor: 'var(--skin-bg-card, #FFFFFF)'
+                  }}
+                >
+                  <div 
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
+                    style={{
+                      backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                      color: 'var(--skin-accent, #C2410C)'
+                    }}
+                  >
                     <Layers className="w-6 h-6" />
                   </div>
-                  <h3 className={`font-mono font-bold text-sm uppercase tracking-wide ${
-                    isTerminalMode ? 'text-[#E6EDF3]' : 'text-zinc-800'
-                  }`}>
+                  <h3 
+                    className="font-bold text-sm uppercase tracking-wide"
+                    style={{ color: 'var(--skin-text-primary, #431407)' }}
+                  >
                     No Saved Multi-Speaker Scenes Yet
                   </h3>
-                  <p className={`text-xs font-mono mt-1 max-w-sm mx-auto ${
-                    isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'
-                  }`}>
-                    Generate or edit a multi-speaker script in the Multi-Speaker Studio, then click "Save to Firebase" to store it permanently in the cloud.
+                  <p 
+                    className="text-xs mt-1 max-w-sm mx-auto"
+                    style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+                  >
+                    Generate or edit a multi-speaker script in the Multi-Speaker Studio, then click "Save to Cloud" to store it permanently.
                   </p>
                 </div>
               ) : (
@@ -281,31 +309,33 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
                   <div
                     key={proj.id}
                     onClick={() => { onLoadProject(proj); onClose(); }}
-                    className={`p-3.5 rounded-xl flex items-center justify-between cursor-pointer transition-all border group ${
-                      isTerminalMode 
-                        ? 'bg-[#161B22] hover:bg-[#21262D] border-[#30363D] hover:border-[#EA4335]' 
-                        : 'bg-white hover:bg-zinc-50 border-zinc-200 hover:border-zinc-300 shadow-2xs'
-                    }`}
+                    className="p-3.5 rounded-xl flex items-center justify-between cursor-pointer transition-all border group"
+                    style={{
+                      backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                      borderColor: 'var(--skin-border, #E8D5C2)'
+                    }}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-mono font-bold text-xs ${
-                        isTerminalMode 
-                          ? 'bg-[#EA4335]/20 text-[#EA4335] border border-[#EA4335]/40' 
-                          : 'bg-rose-50 text-rose-600 border border-rose-100'
-                      }`}>
+                      <div 
+                        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-xs"
+                        style={{
+                          backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                          color: 'var(--skin-accent, #C2410C)'
+                        }}
+                      >
                         {proj.lines?.length || 0}L
                       </div>
                       <div className="min-w-0">
-                        <div className={`font-bold text-sm truncate transition-colors ${
-                          isTerminalMode 
-                            ? 'text-[#E6EDF3] group-hover:text-[#EA4335]' 
-                            : 'text-zinc-900 group-hover:text-rose-600'
-                        }`}>
+                        <div 
+                          className="font-bold text-sm truncate transition-colors"
+                          style={{ color: 'var(--skin-text-primary, #431407)' }}
+                        >
                           {proj.title}
                         </div>
-                        <div className={`flex items-center gap-2 text-[11px] font-mono mt-0.5 ${
-                          isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'
-                        }`}>
+                        <div 
+                          className="flex items-center gap-2 text-[11px] mt-0.5"
+                          style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+                        >
                           <span>{proj.speakers?.length || 0} actors</span>
                           <span>•</span>
                           <span>{proj.updatedAt ? new Date(proj.updatedAt).toLocaleDateString() : 'Recent'}</span>
@@ -317,22 +347,19 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
                       <button
                         onClick={(e) => handleDeleteProject(proj.id, e)}
                         disabled={deletingId === proj.id}
-                        className={`p-1.5 rounded transition-colors ${
-                          isTerminalMode 
-                            ? 'text-[#8B949E] hover:text-[#EA4335] hover:bg-[#EA4335]/10' 
-                            : 'text-zinc-400 hover:text-rose-600 hover:bg-rose-50'
-                        }`}
+                        className="p-1.5 rounded-lg transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+                        style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
                         title="Delete project"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => { onLoadProject(proj); onClose(); }}
-                        className={`px-3 py-1.5 rounded-lg font-mono text-xs font-bold uppercase tracking-wider transition-colors shadow-2xs ${
-                          isTerminalMode 
-                            ? 'bg-[#4285F4] group-hover:bg-[#EA4335] text-white' 
-                            : 'bg-zinc-900 group-hover:bg-rose-600 text-white'
-                        }`}
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-2xs cursor-pointer"
+                        style={{
+                          backgroundColor: 'var(--skin-accent, #C2410C)',
+                          color: 'var(--skin-accent-text, #FFFFFF)'
+                        }}
                       >
                         Load
                       </button>
@@ -344,25 +371,33 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
           ) : (
             <div className="space-y-2.5">
               {savedMonologues.length === 0 ? (
-                <div className={`text-center py-12 border-2 border-dashed rounded-xl p-6 ${
-                  isTerminalMode 
-                    ? 'border-[#30363D] bg-[#0D1117]' 
-                    : 'border-zinc-200 bg-white'
-                }`}>
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
-                    isTerminalMode ? 'bg-[#FBBC04]/20 text-[#FBBC04]' : 'bg-amber-50 text-amber-600'
-                  }`}>
+                <div 
+                  className="text-center py-12 border-2 border-dashed rounded-2xl p-6"
+                  style={{
+                    borderColor: 'var(--skin-border, #E8D5C2)',
+                    backgroundColor: 'var(--skin-bg-card, #FFFFFF)'
+                  }}
+                >
+                  <div 
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
+                    style={{
+                      backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                      color: 'var(--skin-accent, #C2410C)'
+                    }}
+                  >
                     <Radio className="w-6 h-6" />
                   </div>
-                  <h3 className={`font-mono font-bold text-sm uppercase tracking-wide ${
-                    isTerminalMode ? 'text-[#E6EDF3]' : 'text-zinc-800'
-                  }`}>
+                  <h3 
+                    className="font-bold text-sm uppercase tracking-wide"
+                    style={{ color: 'var(--skin-text-primary, #431407)' }}
+                  >
                     No Saved Monologues Yet
                   </h3>
-                  <p className={`text-xs font-mono mt-1 max-w-sm mx-auto ${
-                    isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'
-                  }`}>
-                    Compose a monologue or meeting introduction, then click "Save" in the top action bar to store it in the cloud.
+                  <p 
+                    className="text-xs mt-1 max-w-sm mx-auto"
+                    style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+                  >
+                    Compose a monologue or meeting introduction, then click "Save" to store it in the cloud.
                   </p>
                 </div>
               ) : (
@@ -370,31 +405,33 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
                   <div
                     key={mono.id}
                     onClick={() => { onLoadMonologue(mono); onClose(); }}
-                    className={`p-3.5 rounded-xl flex items-center justify-between cursor-pointer transition-all border group ${
-                      isTerminalMode 
-                        ? 'bg-[#161B22] hover:bg-[#21262D] border-[#30363D] hover:border-[#FBBC04]' 
-                        : 'bg-white hover:bg-zinc-50 border-zinc-200 hover:border-zinc-300 shadow-2xs'
-                    }`}
+                    className="p-3.5 rounded-xl flex items-center justify-between cursor-pointer transition-all border group"
+                    style={{
+                      backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+                      borderColor: 'var(--skin-border, #E8D5C2)'
+                    }}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-mono font-bold text-xs ${
-                        isTerminalMode 
-                          ? 'bg-[#FBBC04]/20 text-[#FBBC04] border border-[#FBBC04]/40' 
-                          : 'bg-amber-50 text-amber-700 border border-amber-100'
-                      }`}>
+                      <div 
+                        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-sm"
+                        style={{
+                          backgroundColor: 'var(--skin-accent-muted, #FFEDD5)',
+                          color: 'var(--skin-accent, #C2410C)'
+                        }}
+                      >
                         🎙️
                       </div>
                       <div className="min-w-0">
-                        <div className={`font-bold text-sm truncate transition-colors ${
-                          isTerminalMode 
-                            ? 'text-[#E6EDF3] group-hover:text-[#FBBC04]' 
-                            : 'text-zinc-900 group-hover:text-amber-600'
-                        }`}>
+                        <div 
+                          className="font-bold text-sm truncate transition-colors"
+                          style={{ color: 'var(--skin-text-primary, #431407)' }}
+                        >
                           {mono.title}
                         </div>
-                        <div className={`flex items-center gap-2 text-[11px] font-mono mt-0.5 ${
-                          isTerminalMode ? 'text-[#8B949E]' : 'text-zinc-500'
-                        }`}>
+                        <div 
+                          className="flex items-center gap-2 text-[11px] mt-0.5"
+                          style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
+                        >
                           <span>{mono.voice}</span>
                           <span>•</span>
                           <span>{mono.text?.length || 0} chars</span>
@@ -406,22 +443,19 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
                       <button
                         onClick={(e) => handleDeleteMonologue(mono.id, e)}
                         disabled={deletingId === mono.id}
-                        className={`p-1.5 rounded transition-colors ${
-                          isTerminalMode 
-                            ? 'text-[#8B949E] hover:text-[#EA4335] hover:bg-[#EA4335]/10' 
-                            : 'text-zinc-400 hover:text-rose-600 hover:bg-rose-50'
-                        }`}
+                        className="p-1.5 rounded-lg transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+                        style={{ color: 'var(--skin-text-muted, #9A5B32)' }}
                         title="Delete monologue"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => { onLoadMonologue(mono); onClose(); }}
-                        className={`px-3 py-1.5 rounded-lg font-mono text-xs font-bold uppercase tracking-wider transition-colors shadow-2xs ${
-                          isTerminalMode 
-                            ? 'bg-[#4285F4] group-hover:bg-[#FBBC04] text-white group-hover:text-black' 
-                            : 'bg-zinc-900 group-hover:bg-amber-500 text-white'
-                        }`}
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-2xs cursor-pointer"
+                        style={{
+                          backgroundColor: 'var(--skin-accent, #C2410C)',
+                          color: 'var(--skin-accent-text, #FFFFFF)'
+                        }}
                       >
                         Load
                       </button>
@@ -434,22 +468,26 @@ export const FirebaseProjectsModal: React.FC<FirebaseProjectsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className={`p-3.5 sm:px-6 border-t flex items-center justify-between text-xs font-mono flex-shrink-0 ${
-          isTerminalMode 
-            ? 'bg-[#0D1117] border-[#30363D] text-[#8B949E]' 
-            : 'bg-white border-zinc-200 text-zinc-500'
-        }`}>
+        <div 
+          className="p-3.5 sm:px-6 border-t flex items-center justify-between text-xs flex-shrink-0"
+          style={{
+            backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+            borderColor: 'var(--skin-border, #E8D5C2)',
+            color: 'var(--skin-text-muted, #9A5B32)'
+          }}
+        >
           <div className="flex items-center gap-1.5 truncate">
-            <Database className="w-3.5 h-3.5 text-[#4285F4]" />
-            <span className="truncate">Project: ai-studio-socialnot-845fd311</span>
+            <Database className="w-3.5 h-3.5" style={{ color: 'var(--skin-accent, #C2410C)' }} />
+            <span className="truncate">Project: ai-studio-audiofactory</span>
           </div>
           <button
             onClick={onClose}
-            className={`px-4 py-1.5 rounded-lg border font-bold uppercase transition-colors ${
-              isTerminalMode 
-                ? 'border-[#30363D] bg-[#21262D] hover:bg-[#30363D] text-[#E6EDF3]' 
-                : 'border-zinc-200 hover:bg-zinc-100 text-zinc-800'
-            }`}
+            className="px-4 py-1.5 rounded-xl border font-bold uppercase transition-colors cursor-pointer"
+            style={{
+              borderColor: 'var(--skin-border, #E8D5C2)',
+              backgroundColor: 'var(--skin-bg-subtle, #F6EDE2)',
+              color: 'var(--skin-text-primary, #431407)'
+            }}
           >
             Close
           </button>
