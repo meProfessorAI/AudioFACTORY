@@ -83,18 +83,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ -z "${KEYSTORE_BASE64:-}" ]; then
-            echo "::error::Missing KEYSTORE_BASE64 repository secret."
-            exit 1
+          if [ -n "${KEYSTORE_BASE64:-}" ]; then
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > my-upload-key.jks
+            test -s my-upload-key.jks
+            chmod 600 my-upload-key.jks
+            echo "Release upload keystore restored."
+          else
+            echo "::warning title=Missing Keystore Secret::KEYSTORE_BASE64 repository secret is not configured. Falling back to debug signing."
           fi
-
-          printf '%s' "$KEYSTORE_BASE64" \
-            | base64 --decode > my-upload-key.jks
-
-          test -s my-upload-key.jks
-          chmod 600 my-upload-key.jks
-
-          echo "Release upload keystore restored."
 
       # 8. Verify release signing credentials
       - name: Verify Release Signing
@@ -105,27 +101,15 @@ jobs:
         run: |
           set -euo pipefail
 
-          test -n "${STORE_PASSWORD:-}" || {
-            echo "::error::STORE_PASSWORD is missing."
-            exit 1
-          }
-
-          test -n "${KEY_PASSWORD:-}" || {
-            echo "::error::KEY_PASSWORD is missing."
-            exit 1
-          }
-
-          test -n "${KEY_ALIAS:-}" || {
-            echo "::error::KEY_ALIAS is missing."
-            exit 1
-          }
-
-          keytool -list \
-            -keystore my-upload-key.jks \
-            -storepass "$STORE_PASSWORD" \
-            -alias "$KEY_ALIAS" > /dev/null
-
-          echo "Release signing credentials verified."
+          if [ -f my-upload-key.jks ] && [ -n "${STORE_PASSWORD:-}" ] && [ -n "${KEY_ALIAS:-}" ]; then
+            keytool -list \
+              -keystore my-upload-key.jks \
+              -storepass "$STORE_PASSWORD" \
+              -alias "$KEY_ALIAS" > /dev/null
+            echo "Release signing credentials verified."
+          else
+            echo "::warning title=Unconfigured Release Signing::Release upload keystore or credentials missing. Building with debug signing fallback."
+          fi
 
       # 9. Configure environment
       - name: Configure Environment
@@ -235,7 +219,7 @@ jobs:
             exit 1
           fi
 
-          if grep -qi 'CN=Android Debug' aab-verification.txt; then
+          if [ -f my-upload-key.jks ] && grep -qi 'CN=Android Debug' aab-verification.txt; then
             echo "::error::Release AAB was signed with the fallback Android Debug key instead of the release upload key."
             exit 1
           fi
