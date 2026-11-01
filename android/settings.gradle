@@ -1,4 +1,2 @@
 include ':app'
 rootProject.name = 'AudioFACTORY'
-
-apply from: 'capacitor.settings.gradle'
