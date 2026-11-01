@@ -150,7 +150,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // 3. Real-time subscription to user projects, monologues, and usage records
   useEffect(() => {
-    if (!user) {
+    if (!user || !user.uid) {
       setSavedProjects([]);
       setSavedMonologues([]);
       setLiveUsage(null);
@@ -159,15 +159,15 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const unsubProjects = subscribeToUserProjects((projects) => {
       setSavedProjects(projects);
-    });
+    }, user.uid);
 
     const unsubMonologues = subscribeToUserMonologues((monologues) => {
       setSavedMonologues(monologues);
-    });
+    }, user.uid);
 
     const unsubUsage = subscribeToDailyUsage((usage) => {
       setLiveUsage(usage);
-    });
+    }, user.uid);
 
     return () => {
       unsubProjects();

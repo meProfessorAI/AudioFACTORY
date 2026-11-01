@@ -148,5 +148,55 @@
     "source": "early_birds_landing_page",
     "createdAt": "2026-11-01T08:59:48.323Z",
     "updatedAt": "2026-11-01T08:59:48.323Z"
+  },
+  "early_birds/e83d11309a072079d5cac433f5edb322d6f3aa7223b208799b6670e421ff1248": {
+    "name": "Elena Vance",
+    "email": "earlybird.verify.1793538702300@gmail.com",
+    "normalizedEmail": "earlybirdverify1793538702300@gmail.com",
+    "interests": [
+      "Audio creation",
+      "Testing and feedback"
+    ],
+    "androidVersion": "Android 15",
+    "programme": "AudioFACTORY Early Birds",
+    "appVersion": "2.0.0",
+    "status": "applied",
+    "selectionStatus": "pending",
+    "testingInvitationSent": false,
+    "testingCompleted": false,
+    "testingFeedbackReceived": false,
+    "consent": {
+      "programmeCommunication": true,
+      "marketingUpdates": false,
+      "policyVersion": "1.0"
+    },
+    "source": "early_birds_landing_page",
+    "createdAt": "2026-11-01T13:11:42.687Z",
+    "updatedAt": "2026-11-01T13:11:42.687Z"
+  },
+  "early_birds/77481f4c2d3c8426cb3eafdb37cf9e979512a9bed21098de5918f8c72de0f153": {
+    "name": "Elena Vance",
+    "email": "earlybird.verify.1793538752060@gmail.com",
+    "normalizedEmail": "earlybirdverify1793538752060@gmail.com",
+    "interests": [
+      "Audio creation",
+      "Testing and feedback"
+    ],
+    "androidVersion": "Android 15",
+    "programme": "AudioFACTORY Early Birds",
+    "appVersion": "2.0.0",
+    "status": "applied",
+    "selectionStatus": "pending",
+    "testingInvitationSent": false,
+    "testingCompleted": false,
+    "testingFeedbackReceived": false,
+    "consent": {
+      "programmeCommunication": true,
+      "marketingUpdates": false,
+      "policyVersion": "1.0"
+    },
+    "source": "early_birds_landing_page",
+    "createdAt": "2026-11-01T13:12:32.425Z",
+    "updatedAt": "2026-11-01T13:12:32.425Z"
   }
 }

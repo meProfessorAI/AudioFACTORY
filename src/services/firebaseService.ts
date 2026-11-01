@@ -722,14 +722,22 @@ export async function saveAudioProject(projectData: ProjectInput): Promise<strin
 /**
  * Subscribe to the current user's audio projects in real-time
  */
-export function subscribeToUserProjects(callback: (projects: SavedAudioProject[]) => void): () => void {
-  const user = auth.currentUser;
-  if (!user) {
+export function subscribeToUserProjects(
+  callback: (projects: SavedAudioProject[]) => void,
+  targetUserId?: string
+): () => void {
+  const userId = targetUserId || auth.currentUser?.uid;
+  if (!userId) {
     callback([]);
     return () => {};
   }
 
-  const collPath = `users/${user.uid}/projects`;
+  if (auth.currentUser && auth.currentUser.uid !== userId) {
+    callback([]);
+    return () => {};
+  }
+
+  const collPath = `users/${userId}/projects`;
   const q = query(collection(db, collPath), orderBy('updatedAt', 'desc'));
 
   return onSnapshot(
@@ -741,8 +749,9 @@ export function subscribeToUserProjects(callback: (projects: SavedAudioProject[]
       });
       callback(items);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, collPath);
+    (error: any) => {
+      console.warn(`[Firestore] Real-time projects listener notice for ${collPath}:`, error?.message || error);
+      callback([]);
     }
   );
 }
@@ -795,14 +804,22 @@ export async function saveMonologue(monologueData: MonologueInput): Promise<stri
 /**
  * Subscribe to saved monologues
  */
-export function subscribeToUserMonologues(callback: (monologues: SavedMonologue[]) => void): () => void {
-  const user = auth.currentUser;
-  if (!user) {
+export function subscribeToUserMonologues(
+  callback: (monologues: SavedMonologue[]) => void,
+  targetUserId?: string
+): () => void {
+  const userId = targetUserId || auth.currentUser?.uid;
+  if (!userId) {
     callback([]);
     return () => {};
   }
 
-  const collPath = `users/${user.uid}/monologues`;
+  if (auth.currentUser && auth.currentUser.uid !== userId) {
+    callback([]);
+    return () => {};
+  }
+
+  const collPath = `users/${userId}/monologues`;
   const q = query(collection(db, collPath), orderBy('updatedAt', 'desc'));
 
   return onSnapshot(
@@ -814,8 +831,9 @@ export function subscribeToUserMonologues(callback: (monologues: SavedMonologue[
       });
       callback(items);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, collPath);
+    (error: any) => {
+      console.warn(`[Firestore] Real-time monologues listener notice for ${collPath}:`, error?.message || error);
+      callback([]);
     }
   );
 }
@@ -838,15 +856,23 @@ export async function deleteMonologue(monologueId: string): Promise<void> {
 /**
  * Real-time listener for today's user usage record (read-only for clients)
  */
-export function subscribeToDailyUsage(callback: (usage: UsageRecord | null) => void): () => void {
-  const user = auth.currentUser;
-  if (!user) {
+export function subscribeToDailyUsage(
+  callback: (usage: UsageRecord | null) => void,
+  targetUserId?: string
+): () => void {
+  const userId = targetUserId || auth.currentUser?.uid;
+  if (!userId) {
+    callback(null);
+    return () => {};
+  }
+
+  if (auth.currentUser && auth.currentUser.uid !== userId) {
     callback(null);
     return () => {};
   }
 
   const today = new Date().toISOString().split('T')[0];
-  const docRef = doc(db, `users/${user.uid}/usage/${today}`);
+  const docRef = doc(db, `users/${userId}/usage/${today}`);
 
   return onSnapshot(
     docRef,
@@ -857,8 +883,9 @@ export function subscribeToDailyUsage(callback: (usage: UsageRecord | null) => v
         callback(null);
       }
     },
-    (error) => {
-      console.warn('Usage snapshot warning:', error);
+    (error: any) => {
+      console.warn(`[Firestore] Daily usage listener notice for users/${userId}/usage/${today}:`, error?.message || error);
+      callback(null);
     }
   );
 }
