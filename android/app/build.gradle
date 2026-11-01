@@ -6,6 +6,19 @@ def keystorePassword = System.getenv("AUDIOFACTORY_KEYSTORE_PASSWORD") ?: System
 def keyAlias = System.getenv("AUDIOFACTORY_KEY_ALIAS") ?: System.getenv("KEY_ALIAS") ?: System.getenv("ANDROID_KEY_ALIAS") ?: project.findProperty("KEY_ALIAS")
 def keyPassword = System.getenv("AUDIOFACTORY_KEY_PASSWORD") ?: System.getenv("KEY_PASSWORD") ?: System.getenv("ANDROID_KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD")
 
+def isReleaseSigningConfigured = {
+    return keystorePath &&
+           !keystorePath.toString().trim().isEmpty() &&
+           file(keystorePath).exists() &&
+           file(keystorePath).isFile() &&
+           keystorePassword &&
+           !keystorePassword.toString().trim().isEmpty() &&
+           keyAlias &&
+           !keyAlias.toString().trim().isEmpty() &&
+           keyPassword &&
+           !keyPassword.toString().trim().isEmpty()
+}
+
 android {
     namespace "com.audiofactory.app"
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -25,7 +38,7 @@ android {
 
     signingConfigs {
         release {
-            if (keystorePath && file(keystorePath).exists()) {
+            if (isReleaseSigningConfigured()) {
                 storeFile file(keystorePath)
                 storePassword keystorePassword
                 keyAlias keyAlias
@@ -51,7 +64,7 @@ android {
             debuggable false
             versionNameSuffix "-internal"
             matchingFallbacks = ['release', 'debug']
-            if (keystorePath && file(keystorePath).exists()) {
+            if (isReleaseSigningConfigured()) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug
@@ -61,7 +74,7 @@ android {
             debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (keystorePath && file(keystorePath).exists()) {
+            if (isReleaseSigningConfigured()) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug
