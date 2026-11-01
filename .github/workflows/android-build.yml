@@ -1,0 +1,179 @@
+name: AudioFACTORY Android Build and Test Validation
+
+'on':
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: audiofactory-android-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Android Build and Test
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Configure Java 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # 3. Install Android SDK & NDK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-36.1 build-tools;36.0.0 ndk;28.2.13676358'
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: false
+
+      # 4. Configure Gradle
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x ./gradlew
+
+      # 5. Restore debug signing key
+      - name: Restore Debug Keystore
+        run: |
+          set -euo pipefail
+
+          if [ -f debug.keystore.base64 ]; then
+            base64 --decode debug.keystore.base64 > debug.keystore
+          elif [ ! -f debug.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+          test -s debug.keystore
+          echo "Debug keystore ready."
+
+      # 6. Restore release upload keystore
+      - name: Restore Release Upload Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${KEYSTORE_BASE64:-}" ]; then
+            echo "::warning::Missing KEYSTORE_BASE64 repository secret. Falling back to debug signing."
+            exit 0
+          fi
+
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > my-upload-key.jks
+          test -s my-upload-key.jks
+          chmod 600 my-upload-key.jks
+          echo "Release upload keystore restored."
+
+      # 7. Verify build environment
+      - name: Verify Build Environment
+        run: |
+          set -euo pipefail
+          echo "Java version:"
+          java -version
+          echo "Android SDK:"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME/platforms/android-36.1"
+          test -x "$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          echo "Gradle version:"
+          ./gradlew --version
+
+      # 8. Validate Gradle configuration
+      - name: Validate Gradle Configuration
+        run: ./gradlew tasks --stacktrace
+
+      # 9. Run unit tests
+      - name: Run Unit and Robolectric Tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      # 10. Build debug APK, release APK, and release AAB
+      - name: Build Debug APK, Release APK, and Release AAB
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          mkdir -p ci-reports
+          ./gradlew --no-daemon \
+            assembleDebug \
+            assembleRelease \
+            :app:bundleRelease \
+            --info \
+            --stacktrace 2>&1 | tee ci-reports/bundleRelease-info.log
+
+      # 11. Diagnostic step on failure to debug HasConvention and compileSdkVersion errors
+      - name: 🔍 Diagnostic Logging on Build Failure
+        if: failure()
+        run: |
+          echo "======================================================="
+          echo "🔍 DIAGNOSTIC LOG: Listing contents of android/app"
+          echo "======================================================="
+          ls -la android/app 2>/dev/null || ls -la app 2>/dev/null || true
+
+          echo "======================================================="
+          echo "🔍 DIAGNOSTIC LOG: Content of android/app/build.gradle"
+          echo "======================================================="
+          cat android/app/build.gradle 2>/dev/null || cat app/build.gradle 2>/dev/null || true
+
+          echo "======================================================="
+          echo "🔍 DIAGNOSTIC LOG: Content of android/build.gradle"
+          echo "======================================================="
+          cat android/build.gradle 2>/dev/null || cat build.gradle 2>/dev/null || true
+
+          echo "======================================================="
+          echo "🔍 DIAGNOSTIC LOG: Content of android/settings.gradle"
+          echo "======================================================="
+          cat android/settings.gradle 2>/dev/null || cat settings.gradle 2>/dev/null || true
+
+      # 12. Upload Android Build Artifacts
+      - name: Upload Android Build Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioFACTORY-Android-Builds
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # 13. Cleanup sensitive files
+      - name: Cleanup Sensitive Files
+        if: always()
+        run: |
+          rm -f my-upload-key.jks
+          rm -f aab-verification.txt

@@ -180,6 +180,30 @@ jobs:
             --info \
             --stacktrace 2>&1 | tee ci-reports/bundleRelease-info.log
 
+      # Diagnostic logging step on build failure
+      - name: 🔍 Diagnostic Logging on Build Failure
+        if: failure()
+        run: |
+          echo "======================================================="
+          echo "🔍 DIAGNOSTIC LOG: Listing contents of android/app"
+          echo "======================================================="
+          ls -la android/app 2>/dev/null || ls -la app 2>/dev/null || true
+
+          echo "======================================================="
+          echo "🔍 DIAGNOSTIC LOG: Content of android/app/build.gradle"
+          echo "======================================================="
+          cat android/app/build.gradle 2>/dev/null || cat app/build.gradle 2>/dev/null || true
+
+          echo "======================================================="
+          echo "🔍 DIAGNOSTIC LOG: Content of android/build.gradle"
+          echo "======================================================="
+          cat android/build.gradle 2>/dev/null || cat build.gradle 2>/dev/null || true
+
+          echo "======================================================="
+          echo "🔍 DIAGNOSTIC LOG: Content of android/settings.gradle"
+          echo "======================================================="
+          cat android/settings.gradle 2>/dev/null || cat settings.gradle 2>/dev/null || true
+
       # 14. Verify APK and AAB signatures, versionCode=8, versionName=3.0.0, R8 mapping, and native symbols
       - name: Verify Build Signatures, AAB Metadata, and Native Symbol Diagnostics
         run: |
