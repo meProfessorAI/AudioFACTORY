@@ -37,6 +37,7 @@ import { createServer as createViteServer } from 'vite';
 });
 
 import { apiRouter } from './backend/routes';
+import { firebaseAuthProxyMiddleware } from './backend/firebaseAuthProxy';
 
 async function startServer() {
   const app = express();
@@ -47,7 +48,11 @@ async function startServer() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // Request logger for diagnostic tracing
+  // Same-origin Firebase Authentication helper reverse proxy (/__/auth/** & /__/firebase/**)
+  app.use('/__/auth', firebaseAuthProxyMiddleware);
+  app.use('/__/firebase', firebaseAuthProxyMiddleware);
+
+  // Request logger for diagnostic tracing (redacting auth query tokens)
   app.use((req, _res, next) => {
     if (req.path.startsWith('/api')) {
       console.log(`[API ${req.method}] ${req.path}`);

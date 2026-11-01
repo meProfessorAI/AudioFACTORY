@@ -8,6 +8,10 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     cleartext: false,
     allowNavigation: [
+      'https://audiofactory.vercel.app',
+      'https://audiofactory-eia.firebaseapp.com',
+      'https://*.firebaseapp.com',
+      'https://accounts.google.com',
       'https://ais-pre-4lk7vsyto7ebm4s37qyp36-245532296245.asia-southeast1.run.app',
       'https://*.run.app',
       'https://*.googleapis.com',

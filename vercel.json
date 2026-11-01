@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/__/auth/:path*",
+      "destination": "https://audiofactory-eia.firebaseapp.com/__/auth/:path*"
+    },
+    {
+      "source": "/__/firebase/:path*",
+      "destination": "https://audiofactory-eia.firebaseapp.com/__/firebase/:path*"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index.ts"
     },
@@ -10,3 +18,4 @@
     }
   ]
 }
+
