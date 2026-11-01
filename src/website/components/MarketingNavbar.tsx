@@ -46,6 +46,7 @@ export const MarketingNavbar: React.FC = () => {
     { name: 'Use Cases', path: '/use-cases' },
     { name: 'Pricing', path: '/pricing' },
     { name: 'FAQ', path: '/faq' },
+    { name: 'Early Birds 🕊️', path: '/early-birds' },
   ];
 
   return (

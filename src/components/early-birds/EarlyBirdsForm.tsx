@@ -12,9 +12,9 @@ import {
   isValidEmailFormat,
   doEmailsMatch,
   validateEarlyBirdClientForm,
-} from '../utils/validation';
-import { submitEarlyBirdApplication, EarlyBirdSubmissionResult } from '../firebase/submissionClient';
-import { trackEarlyBirdsEvent } from '../utils/earlyBirdsAnalytics';
+} from '../../utils/validation';
+import { submitEarlyBirdApplication, EarlyBirdSubmissionResult } from '../../firebase/submissionClient';
+import { trackEarlyBirdsEvent } from '../../utils/earlyBirdsAnalytics';
 
 interface EarlyBirdsFormProps {
   nameInputRef: RefObject<HTMLInputElement>;

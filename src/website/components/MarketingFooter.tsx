@@ -91,6 +91,11 @@ export const MarketingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/early-birds" className="hover:underline transition-colors font-semibold" style={{ color: 'var(--skin-text-secondary, #475569)' }}>
+                  Early Birds 🕊️ Programme
+                </Link>
+              </li>
+              <li>
                 <Link to="/app" className="inline-flex items-center gap-1 font-bold hover:underline" style={{ color: 'var(--skin-accent, #0284C7)' }}>
                   <span>Launch Studio</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />

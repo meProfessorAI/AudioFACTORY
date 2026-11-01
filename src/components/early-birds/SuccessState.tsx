@@ -6,7 +6,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Sparkles, MailCheck, ShieldCheck } from 'lucide-react';
-import { EarlyBirdSubmissionResult } from '../firebase/submissionClient';
+import { EarlyBirdSubmissionResult } from '../../firebase/submissionClient';
 
 interface SuccessStateProps {
   result: EarlyBirdSubmissionResult;

@@ -37,16 +37,15 @@ export const App: React.FC = () => {
       <BrowserRouter>
         <AdIntegrator />
         <Routes>
-          {/* ================= EARLY BIRDS v2.0.0 SINGLE-SCREEN EXPERIENCE ================= */}
-          <Route path="/" element={<EarlyBirdsPage />} />
-          <Route path="/early-birds" element={<EarlyBirdsPage />} />
-          <Route path="/testers" element={<EarlyBirdsPage />} />
-
-          {/* ================= ADMIN & PROFILE ================= */}
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/profile" element={<ProfileDashboard />} />
-
-          {/* ================= MARKETING WEBSITE ROUTES ================= */}
+          {/* ================= AUDIOFACTORY MAIN LANDING PAGE (PRIMARY HOMEPAGE) ================= */}
+          <Route
+            path="/"
+            element={
+              <MarketingLayout>
+                <HomePage />
+              </MarketingLayout>
+            }
+          />
           <Route
             path="/home"
             element={
@@ -55,6 +54,16 @@ export const App: React.FC = () => {
               </MarketingLayout>
             }
           />
+
+          {/* ================= EARLY BIRDS v2.0.0 CAMPAIGN PAGE ================= */}
+          <Route path="/early-birds" element={<EarlyBirdsPage />} />
+          <Route path="/testers" element={<EarlyBirdsPage />} />
+
+          {/* ================= ADMIN & PROFILE ================= */}
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/profile" element={<ProfileDashboard />} />
+
+          {/* ================= MARKETING WEBSITE ROUTES ================= */}
           <Route
             path="/features"
             element={

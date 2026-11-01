@@ -6,10 +6,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
-import { EarlyBirdsHero } from '../components/EarlyBirdsHero';
-import { EarlyBirdsForm } from '../components/EarlyBirdsForm';
-import { SuccessState } from '../components/SuccessState';
-import { EarlyBirdsPrivacyModal } from '../components/EarlyBirdsPrivacyModal';
+import { EarlyBirdsHero } from '../components/early-birds/EarlyBirdsHero';
+import { EarlyBirdsForm } from '../components/early-birds/EarlyBirdsForm';
+import { SuccessState } from '../components/early-birds/SuccessState';
+import { EarlyBirdsPrivacyModal } from '../components/early-birds/EarlyBirdsPrivacyModal';
+import { SeoHead } from '../website/components/SeoHead';
 import { EarlyBirdSubmissionResult } from '../firebase/submissionClient';
 import { initEarlyBirdsAppCheck } from '../firebase/config';
 import { trackEarlyBirdsEvent } from '../utils/earlyBirdsAnalytics';
@@ -39,6 +40,11 @@ export const EarlyBirdsPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen lg:h-screen w-full max-w-[100vw] overflow-x-hidden lg:overflow-y-auto bg-[#04050C] text-slate-100 font-['Plus_Jakarta_Sans',sans-serif] flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-100">
+      <SeoHead
+        title="AudioFACTORY Early Birds — Founding Tester Programme"
+        description="Get early access to AudioFACTORY and help shape the future of the platform."
+        canonicalPath="/early-birds"
+      />
       {/* Ambient Animated Background Gradients */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden="true">
         <motion.div
@@ -114,10 +120,10 @@ export const EarlyBirdsPage: React.FC = () => {
             Web Studio
           </Link>
           <Link
-            to="/home"
+            to="/"
             className="hover:text-white transition-colors whitespace-nowrap shrink-0"
           >
-            Overview
+            Main Website
           </Link>
         </nav>
 
