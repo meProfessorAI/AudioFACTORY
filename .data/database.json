@@ -73,5 +73,30 @@
     "source": "early_birds_landing_page",
     "createdAt": "2026-11-01T05:43:44.545Z",
     "updatedAt": "2026-11-01T05:43:44.545Z"
+  },
+  "early_birds/59cab5c1cfc5a709cba0cd04a371c93074cf7088bd228e3ee49bfe01745a81b4": {
+    "name": "Elena Vance",
+    "email": "earlybird.verify.1793512280843@gmail.com",
+    "normalizedEmail": "earlybirdverify1793512280843@gmail.com",
+    "interests": [
+      "Audio creation",
+      "Testing and feedback"
+    ],
+    "androidVersion": "Android 15",
+    "programme": "AudioFACTORY Early Birds",
+    "appVersion": "2.0.0",
+    "status": "applied",
+    "selectionStatus": "pending",
+    "testingInvitationSent": false,
+    "testingCompleted": false,
+    "testingFeedbackReceived": false,
+    "consent": {
+      "programmeCommunication": true,
+      "marketingUpdates": false,
+      "policyVersion": "1.0"
+    },
+    "source": "early_birds_landing_page",
+    "createdAt": "2026-11-01T05:51:21.859Z",
+    "updatedAt": "2026-11-01T05:51:21.859Z"
   }
 }

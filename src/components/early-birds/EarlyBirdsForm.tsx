@@ -2,6 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * AudioFACTORY Early Birds — Compact Embedded Application Form
+ * Synchronized with AudioFACTORY 7-Day Light Architectural Studio Theme & Skins
  */
 import React, { useState, useEffect, RefObject } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +16,7 @@ import {
 } from '../../utils/validation';
 import { submitEarlyBirdApplication, EarlyBirdSubmissionResult } from '../../firebase/submissionClient';
 import { trackEarlyBirdsEvent } from '../../utils/earlyBirdsAnalytics';
+import { useTerminal } from '../../../components/terminal/TerminalContext';
 
 interface EarlyBirdsFormProps {
   nameInputRef: RefObject<HTMLInputElement>;
@@ -31,6 +33,8 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
   onSuccess,
   onOpenPrivacy,
 }) => {
+  const { activeSkin } = useTerminal();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [confirmEmail, setConfirmEmail] = useState('');
@@ -138,28 +142,44 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
     }
   };
 
+  const { palette } = activeSkin;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
-      className={`relative rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 backdrop-blur-xl ${
-        isEmailFocused
-          ? 'bg-[#0B0F22]/90 border border-cyan-400/50 shadow-[0_0_40px_-10px_rgba(34,211,238,0.28)]'
-          : 'bg-[#090C1A]/85 border border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.6)]'
-      }`}
+      className="relative rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 border backdrop-blur-xl"
+      style={{
+        backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+        borderColor: isEmailFocused
+          ? 'var(--skin-border-focus, #0284C7)'
+          : 'var(--skin-border, #E2E8F0)',
+        boxShadow: isEmailFocused
+          ? `0 0 0 3px ${palette.ring}, ${palette.shadow}`
+          : 'var(--skin-shadow)',
+      }}
     >
       {/* Form Header */}
       <div className="flex items-center justify-between gap-2 mb-3.5">
         <div>
-          <h2 className="font-['Outfit',sans-serif] text-lg sm:text-xl font-bold text-white tracking-tight">
+          <h2
+            className="font-['Outfit',sans-serif] text-lg sm:text-xl font-extrabold tracking-tight"
+            style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+          >
             Your invitation starts here.
           </h2>
-          <p className="text-xs text-slate-400">
+          <p
+            className="text-xs"
+            style={{ color: 'var(--skin-text-secondary, #475569)' }}
+          >
             Don&apos;t wait for the launch. Be part of it.
           </p>
         </div>
-        <span className="text-[11px] font-mono text-cyan-300/90 tabular-nums shrink-0">
+        <span
+          className="text-[11px] font-mono font-bold tabular-nums shrink-0"
+          style={{ color: 'var(--skin-accent, #0284C7)' }}
+        >
           v2.0.0 WAVE 1
         </span>
       </div>
@@ -172,9 +192,9 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             role="alert"
-            className="mb-3 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-2 text-xs text-rose-200"
+            className="mb-3 p-2.5 rounded-xl bg-rose-50 border border-rose-300 flex items-start gap-2 text-xs text-rose-800"
           >
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
             <span>{serverError}</span>
           </motion.div>
         )}
@@ -195,14 +215,15 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
           />
         </div>
 
-        {/* Field 1: Name & Field 5: Android Version side-by-side on tablet/desktop for single-screen compactness */}
+        {/* Field 1: Name & Field 5: Android Version side-by-side on tablet/desktop */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
           <div className="sm:col-span-7">
             <label
               htmlFor="eb-name"
-              className="block text-[11px] font-medium text-slate-300 mb-1"
+              className="block text-[11px] font-semibold mb-1"
+              style={{ color: 'var(--skin-text-primary, #0F172A)' }}
             >
-              Your Name <span className="text-cyan-400">*</span>
+              Your Name <span style={{ color: 'var(--skin-accent, #0284C7)' }}>*</span>
             </label>
             <input
               ref={nameInputRef}
@@ -226,14 +247,17 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
                   setFieldErrors((prev) => ({ ...prev, name: '' }));
                 }
               }}
-              className={`w-full rounded-xl bg-[#050711]/90 px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 border transition-all focus:outline-none ${
-                fieldErrors.name
-                  ? 'border-rose-500/70 focus:border-rose-400'
-                  : 'border-white/[0.1] focus:border-cyan-400/80'
-              }`}
+              className="w-full rounded-xl px-3.5 py-2 text-xs sm:text-sm border transition-all focus:outline-none"
+              style={{
+                backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+                color: 'var(--skin-text-primary, #0F172A)',
+                borderColor: fieldErrors.name
+                  ? '#E11D48'
+                  : 'var(--skin-border, #CBD5E1)',
+              }}
             />
             {fieldErrors.name && (
-              <p className="mt-1 text-[11px] text-rose-400">{fieldErrors.name}</p>
+              <p className="mt-1 text-[11px] text-rose-600 font-medium">{fieldErrors.name}</p>
             )}
           </div>
 
@@ -241,9 +265,16 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
           <div className="sm:col-span-5">
             <label
               htmlFor="eb-android-version"
-              className="block text-[11px] font-medium text-slate-300 mb-1"
+              className="block text-[11px] font-semibold mb-1"
+              style={{ color: 'var(--skin-text-primary, #0F172A)' }}
             >
-              Android Version <span className="text-slate-500 font-normal">(Optional)</span>
+              Android Version{' '}
+              <span
+                className="font-normal"
+                style={{ color: 'var(--skin-text-muted, #64748B)' }}
+              >
+                (Optional)
+              </span>
             </label>
             <select
               id="eb-android-version"
@@ -253,10 +284,22 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
                 markFormStarted();
                 setAndroidVersion(e.target.value);
               }}
-              className="w-full rounded-xl bg-[#050711]/90 px-3 py-2 text-xs sm:text-sm text-white border border-white/[0.1] focus:border-cyan-400/80 focus:outline-none transition-colors cursor-pointer"
+              className="w-full rounded-xl px-3 py-2 text-xs sm:text-sm border focus:outline-none transition-colors cursor-pointer"
+              style={{
+                backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+                color: 'var(--skin-text-primary, #0F172A)',
+                borderColor: 'var(--skin-border, #CBD5E1)',
+              }}
             >
               {ANDROID_VERSION_OPTIONS.map((ver) => (
-                <option key={ver} value={ver} className="bg-[#090C1A] text-white">
+                <option
+                  key={ver}
+                  value={ver}
+                  style={{
+                    backgroundColor: palette.bgCard,
+                    color: palette.textPrimary,
+                  }}
+                >
                   {ver}
                 </option>
               ))}
@@ -271,9 +314,11 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
             <div>
               <label
                 htmlFor="eb-email"
-                className="block text-[11px] font-medium text-slate-300 mb-1"
+                className="block text-[11px] font-semibold mb-1"
+                style={{ color: 'var(--skin-text-primary, #0F172A)' }}
               >
-                Google Play Account Email <span className="text-cyan-400">*</span>
+                Google Play Account Email{' '}
+                <span style={{ color: 'var(--skin-accent, #0284C7)' }}>*</span>
               </label>
               <div className="relative">
                 <input
@@ -302,23 +347,27 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
                       setFieldErrors((prev) => ({ ...prev, email: '' }));
                     }
                   }}
-                  className={`w-full rounded-xl bg-[#050711]/90 pl-3.5 pr-8 py-2 text-xs sm:text-sm text-white placeholder-slate-500 border transition-all focus:outline-none ${
-                    fieldErrors.email
-                      ? 'border-rose-500/70 focus:border-rose-400'
+                  className="w-full rounded-xl pl-3.5 pr-8 py-2 text-xs sm:text-sm border transition-all focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+                    color: 'var(--skin-text-primary, #0F172A)',
+                    borderColor: fieldErrors.email
+                      ? '#E11D48'
                       : emailFormatValid
-                      ? 'border-cyan-400/60 focus:border-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]'
-                      : 'border-white/[0.1] focus:border-cyan-400/80'
-                  }`}
+                      ? 'var(--skin-accent, #0284C7)'
+                      : 'var(--skin-border, #CBD5E1)',
+                  }}
                 />
                 {emailFormatValid && (
                   <CheckCircle2
                     aria-label="Valid email format"
-                    className="w-4 h-4 text-cyan-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                    className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ color: 'var(--skin-accent, #0284C7)' }}
                   />
                 )}
               </div>
               {fieldErrors.email && (
-                <p className="mt-1 text-[11px] text-rose-400">{fieldErrors.email}</p>
+                <p className="mt-1 text-[11px] text-rose-600 font-medium">{fieldErrors.email}</p>
               )}
             </div>
 
@@ -326,9 +375,10 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
             <div>
               <label
                 htmlFor="eb-confirm-email"
-                className="block text-[11px] font-medium text-slate-300 mb-1"
+                className="block text-[11px] font-semibold mb-1"
+                style={{ color: 'var(--skin-text-primary, #0F172A)' }}
               >
-                Confirm Email <span className="text-cyan-400">*</span>
+                Confirm Email <span style={{ color: 'var(--skin-accent, #0284C7)' }}>*</span>
               </label>
               <div className="relative">
                 <input
@@ -357,24 +407,29 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
                       setFieldErrors((prev) => ({ ...prev, confirmEmail: '' }));
                     }
                   }}
-                  className={`w-full rounded-xl bg-[#050711]/90 pl-3.5 pr-8 py-2 text-xs sm:text-sm text-white placeholder-slate-500 border transition-all focus:outline-none ${
-                    fieldErrors.confirmEmail || (confirmEmail.length > 3 && !emailsMatchValid)
-                      ? 'border-rose-500/70 focus:border-rose-400'
-                      : emailsMatchValid
-                      ? 'border-cyan-400/60 focus:border-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]'
-                      : 'border-white/[0.1] focus:border-cyan-400/80'
-                  }`}
+                  className="w-full rounded-xl pl-3.5 pr-8 py-2 text-xs sm:text-sm border transition-all focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--skin-bg-subtle, #F1F5F9)',
+                    color: 'var(--skin-text-primary, #0F172A)',
+                    borderColor:
+                      fieldErrors.confirmEmail || (confirmEmail.length > 3 && !emailsMatchValid)
+                        ? '#E11D48'
+                        : emailsMatchValid
+                        ? 'var(--skin-accent, #0284C7)'
+                        : 'var(--skin-border, #CBD5E1)',
+                  }}
                 />
                 {emailsMatchValid && (
                   <CheckCircle2
                     aria-label="Emails match"
-                    className="w-4 h-4 text-emerald-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                    className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ color: 'var(--skin-accent, #0284C7)' }}
                   />
                 )}
               </div>
               {(fieldErrors.confirmEmail ||
                 (submitAttempted && confirmEmail && !emailsMatchValid)) && (
-                <p className="mt-1 text-[11px] text-rose-400">
+                <p className="mt-1 text-[11px] text-rose-600 font-medium">
                   {fieldErrors.confirmEmail || 'Email addresses do not match.'}
                 </p>
               )}
@@ -382,16 +437,28 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
           </div>
 
           {/* Mandatory Google Play Helper Copy */}
-          <p className="text-[11px] text-slate-400 leading-snug">
+          <p
+            className="text-[11px] leading-snug"
+            style={{ color: 'var(--skin-text-secondary, #475569)' }}
+          >
             Use the Google account you use on Google Play. We&apos;ll use it to coordinate your testing
             invitation.
           </p>
         </div>
 
-        {/* Field 4: What interests you? (Interactive multi-select filter buttons) */}
+        {/* Field 4: What interests you? (Interactive multi-select filter buttons reflecting Active Skin) */}
         <div>
-          <label className="block text-[11px] font-medium text-slate-300 mb-1.5">
-            What interests you? <span className="text-slate-500 font-normal">(Select any)</span>
+          <label
+            className="block text-[11px] font-semibold mb-1.5"
+            style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+          >
+            What interests you?{' '}
+            <span
+              className="font-normal"
+              style={{ color: 'var(--skin-text-muted, #64748B)' }}
+            >
+              (Select any)
+            </span>
           </label>
           <div className="flex flex-wrap gap-1.5" role="group" aria-label="Interests selection">
             {INTEREST_OPTIONS.map((option) => {
@@ -402,11 +469,18 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
                   type="button"
                   aria-pressed={selected}
                   onClick={() => toggleInterest(option.value)}
-                  className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
-                    selected
-                      ? 'bg-violet-600/30 border-cyan-400/70 text-white shadow-[0_0_12px_rgba(139,92,246,0.28)]'
-                      : 'bg-[#050711]/70 border-white/[0.08] text-slate-300 hover:border-white/20 hover:text-white'
-                  }`}
+                  className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 border"
+                  style={{
+                    backgroundColor: selected
+                      ? 'var(--skin-accent-muted, #E0F2FE)'
+                      : 'var(--skin-bg-subtle, #F1F5F9)',
+                    borderColor: selected
+                      ? 'var(--skin-accent, #0284C7)'
+                      : 'var(--skin-border, #CBD5E1)',
+                    color: selected
+                      ? 'var(--skin-accent, #0284C7)'
+                      : 'var(--skin-text-secondary, #475569)',
+                  }}
                 >
                   {option.label}
                 </button>
@@ -416,7 +490,10 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
         </div>
 
         {/* Consent Checkboxes (Separated Programme Communication vs Optional Marketing) */}
-        <div className="space-y-2 pt-1 border-t border-white/[0.08]">
+        <div
+          className="space-y-2 pt-2 border-t"
+          style={{ borderColor: 'var(--skin-border, #CBD5E1)' }}
+        >
           <label className="flex items-start gap-2.5 cursor-pointer group">
             <input
               type="checkbox"
@@ -429,15 +506,20 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
                   setFieldErrors((prev) => ({ ...prev, consent: '' }));
                 }
               }}
-              className="mt-0.5 w-4 h-4 rounded border-white/20 bg-[#050711] text-cyan-500 focus:ring-cyan-400 focus:ring-offset-0 cursor-pointer shrink-0"
+              className="mt-0.5 w-4 h-4 rounded cursor-pointer shrink-0"
+              style={{ accentColor: palette.accent }}
             />
-            <span className="text-[11px] text-slate-300 leading-snug group-hover:text-white transition-colors">
+            <span
+              className="text-[11px] leading-snug transition-colors"
+              style={{ color: 'var(--skin-text-secondary, #475569)' }}
+            >
               I agree that AudioFACTORY may use my application details to manage early access and
-              communicate about the testing programme. <span className="text-cyan-400">*</span>
+              communicate about the testing programme.{' '}
+              <span style={{ color: 'var(--skin-accent, #0284C7)' }}>*</span>
             </span>
           </label>
           {fieldErrors.consent && (
-            <p className="text-[11px] text-rose-400 pl-6">{fieldErrors.consent}</p>
+            <p className="text-[11px] text-rose-600 font-medium pl-6">{fieldErrors.consent}</p>
           )}
 
           <label className="flex items-start gap-2.5 cursor-pointer group">
@@ -448,28 +530,34 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
                 markFormStarted();
                 setMarketingUpdates(e.target.checked);
               }}
-              className="mt-0.5 w-4 h-4 rounded border-white/20 bg-[#050711] text-violet-500 focus:ring-violet-400 focus:ring-offset-0 cursor-pointer shrink-0"
+              className="mt-0.5 w-4 h-4 rounded cursor-pointer shrink-0"
+              style={{ accentColor: palette.accent }}
             />
-            <span className="text-[11px] text-slate-400 leading-snug group-hover:text-slate-200 transition-colors">
+            <span
+              className="text-[11px] leading-snug transition-colors"
+              style={{ color: 'var(--skin-text-muted, #64748B)' }}
+            >
               I&apos;d also like to receive future AudioFACTORY product announcements.
             </span>
           </label>
         </div>
 
-        {/* Primary CTA Button */}
+        {/* Primary CTA Button reflecting Active Skin */}
         <div className="pt-1">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full relative overflow-hidden rounded-xl py-3 px-5 font-['Outfit',sans-serif] text-xs sm:text-sm font-bold tracking-wide text-white shadow-[0_0_28px_rgba(124,58,237,0.45)] hover:shadow-[0_0_36px_rgba(34,211,238,0.55)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+            className="w-full relative overflow-hidden rounded-xl py-3 px-5 font-['Outfit',sans-serif] text-xs sm:text-sm font-bold tracking-wide shadow-md hover:opacity-92 active:scale-99 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
             style={{
-              background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 45%, #0891B2 100%)',
+              backgroundColor: 'var(--skin-accent, #0284C7)',
+              color: 'var(--skin-accent-text, #FFFFFF)',
+              boxShadow: palette.shadow,
             }}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-cyan-200" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   <span>SECURING YOUR APPLICATION...</span>
                 </>
               ) : (
@@ -479,15 +567,22 @@ export const EarlyBirdsForm: React.FC<EarlyBirdsFormProps> = ({
           </button>
 
           {/* Mandatory Sub-Button Caption & Privacy Notice Trigger */}
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+          <div
+            className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px]"
+            style={{ color: 'var(--skin-text-muted, #64748B)' }}
+          >
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <ShieldCheck
+                className="w-3.5 h-3.5 shrink-0"
+                style={{ color: 'var(--skin-accent, #0284C7)' }}
+              />
               <span>Free to apply. Selected testers receive an official Google Play invitation.</span>
             </span>
             <button
               type="button"
               onClick={onOpenPrivacy}
-              className="text-slate-300 hover:text-cyan-300 underline decoration-white/20 underline-offset-2 transition-colors cursor-pointer whitespace-nowrap"
+              className="font-semibold underline underline-offset-2 hover:opacity-80 transition-opacity cursor-pointer whitespace-nowrap"
+              style={{ color: 'var(--skin-accent, #0284C7)' }}
             >
               Privacy Notice
             </button>

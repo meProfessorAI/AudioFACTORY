@@ -2,6 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * AudioFACTORY — EARLY BIRDS 🕊️ Single-Screen Animated Early Access Landing Experience
+ * Synchronized with AudioFACTORY 7-Day Light Architectural Studio Theme & Skins
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
@@ -14,9 +15,12 @@ import { SeoHead } from '../website/components/SeoHead';
 import { EarlyBirdSubmissionResult } from '../firebase/submissionClient';
 import { initEarlyBirdsAppCheck } from '../firebase/config';
 import { trackEarlyBirdsEvent } from '../utils/earlyBirdsAnalytics';
+import { useTerminal } from '../../components/terminal/TerminalContext';
+import { DaySkinSelector } from '../../components/theme/DaySkinSelector';
 
 export const EarlyBirdsPage: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
+  const { activeSkin } = useTerminal();
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const [isFormFocused, setIsFormFocused] = useState(false);
@@ -39,18 +43,25 @@ export const EarlyBirdsPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen lg:h-screen w-full max-w-[100vw] overflow-x-hidden lg:overflow-y-auto bg-[#04050C] text-slate-100 font-['Plus_Jakarta_Sans',sans-serif] flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-100">
+    <div
+      className="relative min-h-screen lg:h-screen w-full max-w-[100vw] overflow-x-hidden lg:overflow-y-auto font-['Plus_Jakarta_Sans',sans-serif] flex flex-col justify-between transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--skin-bg-app, #FAF6EF)',
+        color: 'var(--skin-text-primary, #292524)',
+      }}
+    >
       <SeoHead
         title="AudioFACTORY Early Birds — Founding Tester Programme"
         description="Get early access to AudioFACTORY and help shape the future of the platform."
         canonicalPath="/early-birds"
       />
-      {/* Ambient Animated Background Gradients */}
+
+      {/* Ambient Animated Background Gradients reflecting Active Day Skin */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden="true">
         <motion.div
-          className="absolute -top-32 -left-32 w-[34rem] h-[34rem] rounded-full blur-[130px] opacity-35"
+          className="absolute -top-32 -left-32 w-[34rem] h-[34rem] rounded-full blur-[120px] opacity-25"
           style={{
-            background: 'radial-gradient(circle, #6D28D9 0%, rgba(109,40,217,0) 70%)',
+            background: `radial-gradient(circle, ${activeSkin.palette.accent} 0%, transparent 70%)`,
           }}
           animate={
             prefersReducedMotion
@@ -63,9 +74,9 @@ export const EarlyBirdsPage: React.FC = () => {
           transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute top-1/4 -right-32 w-[32rem] h-[32rem] rounded-full blur-[130px] opacity-25"
+          className="absolute top-1/4 -right-32 w-[32rem] h-[32rem] rounded-full blur-[120px] opacity-35"
           style={{
-            background: 'radial-gradient(circle, #06B6D4 0%, rgba(6,182,212,0) 70%)',
+            background: `radial-gradient(circle, ${activeSkin.palette.accentMuted} 0%, ${activeSkin.palette.bgSubtle} 55%, transparent 75%)`,
           }}
           animate={
             prefersReducedMotion
@@ -78,64 +89,106 @@ export const EarlyBirdsPage: React.FC = () => {
           transition={{ duration: 19, repeat: Infinity, ease: 'easeInOut' }}
         />
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.35]"
           style={{
-            backgroundImage:
-              'linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)',
+            backgroundImage: `linear-gradient(to right, ${activeSkin.palette.border} 1px, transparent 1px), linear-gradient(to bottom, ${activeSkin.palette.border} 1px, transparent 1px)`,
             backgroundSize: '48px 48px',
           }}
         />
       </div>
 
-      {/* Top Navigation Bar (Strict 3-Zone Contract) */}
-      <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-8 border-b border-white/[0.07]">
-        {/* Zone 1: Single-line Brand Wordmark */}
-        <Link
-          to="/"
-          className="font-['Outfit',sans-serif] text-lg sm:text-xl font-extrabold tracking-tight text-white whitespace-nowrap shrink-0"
-        >
-          Audio<span className="text-cyan-400">FACTORY</span>
-        </Link>
-
-        {/* Zone 2: Clean Single-Line Text Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-slate-300">
-          <button
-            type="button"
-            onClick={handleFocusForm}
-            className="hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            Early Birds v2.0.0
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsPrivacyOpen(true)}
-            className="hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            Privacy Notice
-          </button>
-          <Link
-            to="/app"
-            className="hover:text-white transition-colors whitespace-nowrap shrink-0"
-          >
-            Web Studio
+      {/* Top Navigation Bar (Synchronized with AudioFACTORY Brand & 7-Day Skin Switcher) */}
+      <header
+        className="relative z-20 w-full border-b backdrop-blur-md transition-colors duration-200"
+        style={{
+          backgroundColor: 'var(--skin-bg-card, #FFFFFF)',
+          borderColor: 'var(--skin-border, #E2E8F0)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+          {/* Zone 1: Brand Wordmark + Active Day Edition */}
+          <Link to="/" className="flex items-center gap-2.5 group focus:outline-none shrink-0">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shadow-xs border transition-transform duration-200 group-hover:scale-105"
+              style={{
+                backgroundColor: 'var(--skin-accent, #0284C7)',
+                borderColor: 'var(--skin-border-strong, #CBD5E1)',
+                color: 'var(--skin-accent-text, #FFFFFF)',
+              }}
+            >
+              <div className="flex items-center gap-0.5 h-3.5">
+                <span className="w-0.5 h-1.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+                <span className="w-0.5 h-3.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                <span className="w-0.5 h-2.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                <span className="w-0.5 h-3.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '75ms' }} />
+                <span className="w-0.5 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '220ms' }} />
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <span
+                className="font-['Outfit',sans-serif] text-lg font-extrabold tracking-tight flex items-center"
+                style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+              >
+                Audio<span style={{ color: 'var(--skin-accent, #0284C7)' }}>FACTORY</span>
+              </span>
+              <span
+                className="text-[9px] uppercase font-mono tracking-widest -mt-1 font-semibold"
+                style={{ color: 'var(--skin-text-muted, #64748B)' }}
+              >
+                {activeSkin.dayName} Edition · Early Birds
+              </span>
+            </div>
           </Link>
-          <Link
-            to="/"
-            className="hover:text-white transition-colors whitespace-nowrap shrink-0"
-          >
-            Main Website
-          </Link>
-        </nav>
 
-        {/* Zone 3: 1 Primary Action */}
-        <div className="flex items-center shrink-0">
-          <button
-            type="button"
-            onClick={handleFocusForm}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+          {/* Zone 2: Clean Single-Line Text Navigation Links */}
+          <nav
+            className="hidden md:flex items-center gap-5 text-xs font-semibold"
+            style={{ color: 'var(--skin-text-secondary, #475569)' }}
           >
-            COUNT ME IN →
-          </button>
+            <button
+              type="button"
+              onClick={handleFocusForm}
+              className="hover:opacity-80 transition-opacity whitespace-nowrap shrink-0 cursor-pointer font-bold"
+              style={{ color: 'var(--skin-accent, #0284C7)' }}
+            >
+              Early Birds v2.0.0
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPrivacyOpen(true)}
+              className="hover:opacity-80 transition-opacity whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              Privacy Notice
+            </button>
+            <Link
+              to="/app"
+              className="hover:opacity-80 transition-opacity whitespace-nowrap shrink-0"
+            >
+              Web Studio
+            </Link>
+            <Link
+              to="/"
+              className="hover:opacity-80 transition-opacity whitespace-nowrap shrink-0"
+            >
+              Main Website
+            </Link>
+          </nav>
+
+          {/* Zone 3: 7-Day Skin Switcher + Primary Action */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <DaySkinSelector compact />
+            <button
+              type="button"
+              onClick={handleFocusForm}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-opacity hover:opacity-90 whitespace-nowrap shrink-0 cursor-pointer shadow-xs"
+              style={{
+                backgroundColor: 'var(--skin-accent, #0284C7)',
+                color: 'var(--skin-accent-text, #FFFFFF)',
+              }}
+            >
+              COUNT ME IN →
+            </button>
+          </div>
         </div>
       </header>
 
@@ -176,36 +229,60 @@ export const EarlyBirdsPage: React.FC = () => {
         </div>
       </main>
 
-      {/* Quiet Single-Line Footer */}
-      <footer className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-slate-300 font-medium">AudioFACTORY Early Birds 🕊️</span>
-          <span aria-hidden="true">·</span>
-          <span className="font-mono tabular-nums">v2.0.0</span>
-          <span aria-hidden="true">·</span>
-          <span className="font-mono">com.audiofactory.app</span>
-        </div>
+      {/* Quiet Single-Line Footer reflecting Active Skin */}
+      <footer
+        className="relative z-20 w-full border-t transition-colors duration-200"
+        style={{
+          backgroundColor: 'var(--skin-bg-subtle, #F4ECE0)',
+          borderColor: 'var(--skin-border, #E6DAC7)',
+          color: 'var(--skin-text-muted, #64748B)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span
+              className="font-semibold"
+              style={{ color: 'var(--skin-text-primary, #0F172A)' }}
+            >
+              AudioFACTORY Early Birds 🕊️
+            </span>
+            <span aria-hidden="true">·</span>
+            <span className="font-mono tabular-nums">v2.0.0</span>
+            <span aria-hidden="true">·</span>
+            <span className="font-mono">com.audiofactory.app</span>
+            <span aria-hidden="true">·</span>
+            <span
+              className="font-mono font-semibold"
+              style={{ color: 'var(--skin-accent, #0284C7)' }}
+            >
+              {activeSkin.dayName} Edition ({activeSkin.themeName})
+            </span>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <button
-            type="button"
-            onClick={() => setIsPrivacyOpen(true)}
-            className="hover:text-slate-200 transition-colors cursor-pointer"
+          <div
+            className="flex flex-wrap items-center gap-x-4 gap-y-1 font-medium"
+            style={{ color: 'var(--skin-text-secondary, #475569)' }}
           >
-            Privacy &amp; Data Protection
-          </button>
-          <Link to="/terms" className="hover:text-slate-200 transition-colors">
-            Terms
-          </Link>
-          <Link to="/account-deletion" className="hover:text-slate-200 transition-colors">
-            Data Deletion
-          </Link>
-          <a
-            href="mailto:privacy@audiofactory.app"
-            className="hover:text-slate-200 transition-colors"
-          >
-            privacy@audiofactory.app
-          </a>
+            <button
+              type="button"
+              onClick={() => setIsPrivacyOpen(true)}
+              className="hover:underline transition-colors cursor-pointer"
+            >
+              Privacy &amp; Data Protection
+            </button>
+            <Link to="/terms" className="hover:underline transition-colors">
+              Terms
+            </Link>
+            <Link to="/account-deletion" className="hover:underline transition-colors">
+              Data Deletion
+            </Link>
+            <a
+              href="mailto:privacy@audiofactory.app"
+              className="hover:underline transition-colors"
+            >
+              privacy@audiofactory.app
+            </a>
+          </div>
         </div>
       </footer>
 
